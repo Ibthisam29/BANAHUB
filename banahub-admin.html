@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>BANAHub Admin — Operations Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07080e;--bg1:#0a0c16;--bg2:#0f1220;--bg3:#14172a;--bg4:#191d33;
+  --bdr:#1e2238;--bdr2:#252a44;--bdr3:#2e3452;
+  --gold:#c8973a;--gold2:#e0b354;--gold3:rgba(200,151,58,.13);--gold4:rgba(200,151,58,.05);
+  --teal:#1dc9a8;--teal2:rgba(29,201,168,.12);--teal3:rgba(29,201,168,.05);
+  --red:#e05555;--red2:rgba(224,85,85,.12);
+  --blue:#4d9ef8;--blue2:rgba(77,158,248,.12);
+  --amber:#e09840;--amber2:rgba(224,152,64,.12);
+  --violet:#9b6ef0;--violet2:rgba(155,110,240,.12);
+  --txt0:#dde6f8;--txt1:#7d8db0;--txt2:#474f6e;--txt3:#2a3050;
+  --fd:'Cormorant Garamond',Georgia,serif;
+  --fb:'Outfit',sans-serif;
+  --fm:'JetBrains Mono',monospace;
+}
+*{font-family:var(--fb)}
+html,body{height:100%;background:var(--bg);color:var(--txt0);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--bg1)}
+::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:2px}
+button{cursor:pointer}
+
+/* LAYOUT */
+.shell{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:240px;min-width:240px;background:var(--bg1);border-right:1px solid var(--bdr);display:flex;flex-direction:column;height:100vh}
+.sb-top{padding:18px 16px 14px;border-bottom:1px solid var(--bdr)}
+.lm{width:28px;height:28px;background:linear-gradient(135deg,var(--gold),#8a5e1a);border-radius:5px;display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-weight:600;font-size:13px;color:#180e00;flex-shrink:0}
+.ln{font-family:var(--fd);font-size:17px;font-weight:500;letter-spacing:.05em;color:var(--txt0)}
+.ln em{color:var(--gold2);font-style:italic}
+.admin-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:var(--gold3);border:1px solid rgba(200,151,58,.2);border-radius:20px;font-size:10px;font-weight:600;color:var(--gold2);letter-spacing:.06em;text-transform:uppercase;margin-top:8px}
+.sb-nav{flex:1;overflow-y:auto;padding:8px 8px}
+.ns{padding:11px 8px 4px;font-size:10px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.12em}
+.ni{display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:6px;font-size:13px;color:var(--txt1);cursor:pointer;transition:all .12s;margin-bottom:1px}
+.ni:hover{background:var(--bg3);color:var(--txt0)}
+.ni.on{background:var(--gold3);color:var(--gold2);border:1px solid rgba(200,151,58,.18)}
+.ni-ic{font-size:14px;width:20px;text-align:center;flex-shrink:0}
+.badge-count{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:600;padding:1px 6px;border-radius:10px;min-width:18px;text-align:center}
+.sb-bottom{padding:10px 10px;border-top:1px solid var(--bdr)}
+
+/* MAIN */
+.main{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+.topbar{height:52px;background:var(--bg1);border-bottom:1px solid var(--bdr);display:flex;align-items:center;padding:0 24px;gap:12px;position:sticky;top:0;z-index:50;flex-shrink:0}
+
+/* COMPONENTS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:7px 16px;border-radius:6px;font-size:13px;font-weight:500;transition:all .14s;border:1px solid transparent;cursor:pointer;white-space:nowrap}
+.btn-gold{background:var(--gold);color:#1a0e00;border-color:var(--gold)}
+.btn-gold:hover{background:var(--gold2)}
+.btn-teal{background:var(--teal);color:#03120e;border-color:var(--teal)}
+.btn-teal:hover{background:#22e4bc}
+.btn-outline{background:transparent;color:var(--txt0);border-color:var(--bdr2)}
+.btn-outline:hover{background:var(--bg3)}
+.btn-ghost{background:transparent;color:var(--txt1);border-color:transparent}
+.btn-ghost:hover{background:var(--bg3);color:var(--txt0)}
+.btn-danger{background:var(--red2);color:var(--red);border-color:rgba(224,85,85,.28)}
+.btn-sm{padding:5px 12px;font-size:12px}
+.btn-xs{padding:3px 8px;font-size:11px}
+.btn-lg{padding:10px 24px;font-size:14px}
+
+.card{background:var(--bg2);border:1px solid var(--bdr);border-radius:9px}
+.card-gold{background:var(--gold4);border:1px solid rgba(200,151,58,.18);border-radius:9px}
+.card-red{background:var(--red2);border:1px solid rgba(224,85,85,.22);border-radius:9px}
+.card-teal{background:var(--teal3);border:1px solid rgba(29,201,168,.16);border-radius:9px}
+
+.tag{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500;white-space:nowrap}
+.tt{background:var(--teal2);color:var(--teal);border:1px solid rgba(29,201,168,.2)}
+.tg{background:var(--gold3);color:var(--gold2);border:1px solid rgba(200,151,58,.2)}
+.tb{background:var(--blue2);color:var(--blue);border:1px solid rgba(77,158,248,.2)}
+.ta{background:var(--amber2);color:var(--amber);border:1px solid rgba(224,152,64,.2)}
+.tr{background:var(--red2);color:var(--red);border:1px solid rgba(224,85,85,.2)}
+.tv{background:var(--violet2);color:var(--violet);border:1px solid rgba(155,110,240,.2)}
+.tm{background:var(--bg3);color:var(--txt2);border:1px solid var(--bdr)}
+
+.input{background:var(--bg2);border:1px solid var(--bdr2);border-radius:6px;color:var(--txt0);padding:8px 12px;font-size:13px;width:100%;outline:none;transition:border-color .15s}
+.input:focus{border-color:var(--gold);box-shadow:0 0 0 2px rgba(200,151,58,.07)}
+.input::placeholder{color:var(--txt3)}
+.sel{background:var(--bg2);border:1px solid var(--bdr2);border-radius:6px;color:var(--txt0);padding:7px 12px;font-size:12px;outline:none;cursor:pointer}
+.lbl{display:block;font-size:10px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{text-align:left;padding:8px 12px;font-size:10px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--bdr);white-space:nowrap}
+.tbl td{padding:9px 12px;border-bottom:1px solid var(--bdr);font-size:13px;vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:rgba(255,255,255,.012)}
+.tbl th input[type=checkbox],.tbl td input[type=checkbox]{accent-color:var(--gold);width:14px;height:14px;cursor:pointer}
+
+/* STAT */
+.sc{background:var(--bg2);border:1px solid var(--bdr);border-radius:9px;padding:16px 18px}
+.sc-l{font-size:10px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:.09em;margin-bottom:5px}
+.sc-v{font-size:26px;font-weight:400;font-family:var(--fd);line-height:1.1}
+.sc-s{font-size:11px;color:var(--txt3);margin-top:3px}
+.kup{color:var(--teal)}.kdn{color:var(--red)}
+
+/* PROGRESS */
+.pb{height:3px;background:rgba(255,255,255,.04);border-radius:2px;overflow:hidden}
+.pf{height:100%;border-radius:2px}
+
+/* MISC */
+.dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;display:inline-block}
+.dt{background:var(--teal)}.dr{background:var(--red)}.da{background:var(--amber)}.db{background:var(--blue)}.dm{background:var(--txt3)}
+.div{border:none;border-top:1px solid var(--bdr)}
+.ndot{position:absolute;top:-2px;right:-2px;width:8px;height:8px;border-radius:50%;background:var(--red);border:2px solid var(--bg1)}
+.av{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:500;flex-shrink:0}
+.ph{font-family:var(--fd);font-size:20px;font-weight:500;letter-spacing:.01em}
+.ps{font-size:12px;color:var(--txt2);margin-top:1px}
+.sth{font-size:10px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:.1em}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px}
+.page-body{padding:22px 24px}
+.notice{border-radius:7px;padding:11px 14px;font-size:12px;line-height:1.65}
+.nb{background:var(--blue2);border:1px solid rgba(77,158,248,.2);color:var(--txt1)}
+.na{background:var(--amber2);border:1px solid rgba(224,152,64,.2);color:var(--txt1)}
+.nr{background:var(--red2);border:1px solid rgba(224,85,85,.2);color:var(--txt1)}
+.nt{background:var(--teal3);border:1px solid rgba(29,201,168,.16);color:var(--txt1)}
+
+@keyframes fu{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.fu{animation:fu .26s ease forwards}
+</style>
+</head>
+<body>
+<div class="shell" id="app"></div>
+
+<script>
+// ── DATA ──────────────────────────────────────────
+const USERS=[
+  {id:1,name:'Priya Nair',email:'priya@nexuspay.io',company:'NexusPay',role:'company',status:'active',tier:'advisory',fee:true,joined:'2024-11-12',sessions:8,country:'SG'},
+  {id:2,name:'Ahmad Farid',email:'ahmad@logichain.my',company:'LogiChain',role:'company',status:'active',tier:'pro',fee:true,joined:'2024-12-20',sessions:4,country:'MY'},
+  {id:3,name:'Marcus Tan',email:'marcus@horizonvc.sg',company:'Horizon Ventures',role:'partner',status:'active',tier:'partner',fee:true,joined:'2024-10-28',sessions:0,country:'SG'},
+  {id:4,name:'Sarah Wong',email:'sarah@apexcap.com',company:'Apex Capital',role:'partner',status:'active',tier:'partner',fee:true,joined:'2024-12-03',sessions:0,country:'MY'},
+  {id:5,name:'David Lim',email:'david@legalpro.sg',company:'LegalPro SG',role:'advisor',status:'active',tier:'expert',fee:true,joined:'2024-12-15',sessions:31,country:'SG'},
+  {id:6,name:'Siti Rahma',email:'siti@medvault.id',company:'MedVault',role:'company',status:'pending',tier:'program',fee:false,joined:'2025-01-09',sessions:0,country:'ID'},
+  {id:7,name:'Ana Cruz',email:'ana@growthlab.ph',company:'GrowthLab PH',role:'advisor',status:'pending',tier:'expert',fee:true,joined:'2025-01-07',sessions:0,country:'PH'},
+  {id:8,name:'Kevin Park',email:'kevin@nfa.sg',company:'NFA Capital',role:'partner',status:'suspended',tier:'partner',fee:true,joined:'2024-11-30',sessions:0,country:'SG'},
+  {id:9,name:'Tanawat K.',email:'tanawat@agrosense.th',company:'AgroSense',role:'company',status:'active',tier:'advisory',fee:true,joined:'2024-10-05',sessions:6,country:'TH'},
+  {id:10,name:'Maria Santos',email:'maria@edubridge.ph',company:'EduBridge',role:'company',status:'active',tier:'program',fee:true,joined:'2025-01-05',sessions:2,country:'PH'},
+];
+const PROGRAMS=[
+  {id:1,title:'GTM Accelerator Cohort',icon:'🚀',format:'8-Week',cat:'Cohort',enrolled:9,seats:12,status:'active',revenue:'S$25,200',advisor:'Ibthisam Hashim',start:'Jan 20'},
+  {id:2,title:'Market Entry: Southeast Asia',icon:'🌏',format:'3-Day',cat:'Masterclass',enrolled:20,seats:20,status:'waitlist',revenue:'S$19,600',advisor:'Sarah Chen',start:'Feb 3'},
+  {id:3,title:'Investor Readiness Workshop',icon:'📋',format:'1-Day',cat:'Workshop',enrolled:11,seats:16,status:'open',revenue:'S$5,280',advisor:'Aini Zulaikha',start:'Jan 28'},
+  {id:4,title:'Revenue Architecture',icon:'📈',format:'6-Week',cat:'Cohort',enrolled:5,seats:8,status:'open',revenue:'S$16,000',advisor:'Raj Menon',start:'Feb 10'},
+  {id:5,title:'B2B Sales Playbook',icon:'🎯',format:'2-Day',cat:'Workshop',enrolled:14,seats:18,status:'open',revenue:'S$9,520',advisor:'Ibthisam Hashim',start:'Jan 25'},
+];
+const SESSIONS=[
+  {id:1,client:'NexusPay',advisor:'Ibthisam Hashim',topic:'GTM Channel Strategy',date:'Jan 12',time:'3:00 PM',type:'Strategy',status:'upcoming'},
+  {id:2,client:'LogiChain',advisor:'Sarah Chen',topic:'Indonesia Market Entry',date:'Jan 12',time:'2:00 PM',type:'Market Entry',status:'upcoming'},
+  {id:3,client:'AgroSense',advisor:'Raj Menon',topic:'Revenue Architecture Q1',date:'Jan 15',time:'10:00 AM',type:'Revenue',status:'upcoming'},
+  {id:4,client:'MedVault',advisor:'Aini Zulaikha',topic:'Capital Readiness Prep',date:'Jan 8',time:'11:00 AM',type:'Capital Readiness',status:'completed'},
+  {id:5,client:'EduBridge',advisor:'Sarah Chen',topic:'Philippines Market Brief',date:'Jan 6',time:'2:00 PM',type:'Market Entry',status:'completed'},
+];
+const MATCHES=[
+  {id:1,company:'NexusPay',partner:'Horizon Ventures',type:'VC',stage:'Intro Sent',date:'Jan 8',advisor:'Aini Zulaikha',note:'Fintech B2B — awaiting response'},
+  {id:2,company:'LogiChain',partner:'Apex Capital Partners',type:'PE',stage:'Meeting Scheduled',date:'Jan 6',advisor:'Aini Zulaikha',note:'Logistics sector fit — meeting Jan 15'},
+  {id:3,company:'MedVault',partner:'Tanaka Family Office',type:'Family Office',stage:'Profile Shared',date:'Jan 3',advisor:'Aini Zulaikha',note:'HealthTech focus — awaiting review'},
+  {id:4,company:'AgroSense',partner:'Jungle Ventures',type:'VC',stage:'Declined',date:'Dec 28',advisor:'Aini Zulaikha',note:'Stage mismatch — referred to angel network'},
+  {id:5,company:'EduBridge',partner:'Nguyen Angel Network',type:'Angel',stage:'Intro Sent',date:'Jan 7',advisor:'Aini Zulaikha',note:'EdTech pre-seed focus match'},
+];
+const PAYMENTS=[
+  {id:1,user:'NexusPay',type:'Advisory Retainer',amount:2800,status:'succeeded',date:'Jan 1',method:'Card',ref:'INV-041'},
+  {id:2,user:'AgroSense',type:'Advisory Retainer',amount:2800,status:'succeeded',date:'Jan 1',method:'Card',ref:'INV-040'},
+  {id:3,user:'LogiChain',type:'Program Enrollment',amount:980,status:'succeeded',date:'Jan 2',method:'Card',ref:'INV-042'},
+  {id:4,user:'Ana Cruz',type:'Onboarding Assessment',amount:149,status:'succeeded',date:'Jan 7',method:'Card',ref:'INV-044'},
+  {id:5,user:'Siti Rahma',type:'Onboarding Assessment',amount:299,status:'failed',date:'Jan 9',method:'Card',ref:'INV-045'},
+  {id:6,user:'Marcus Tan',type:'Partner Access',amount:500,status:'succeeded',date:'Jan 1',method:'Invoice',ref:'INV-039'},
+  {id:7,user:'Maria Santos',type:'Program Enrollment',amount:680,status:'succeeded',date:'Jan 5',method:'Card',ref:'INV-043'},
+  {id:8,user:'Kevin Park',type:'Partner Access',amount:500,status:'past_due',date:'Dec 1',method:'Card',ref:'INV-035'},
+];
+const MRR_D=[24,28,31,35,38,43,47.2];
+const MTHS=['Jul','Aug','Sep','Oct','Nov','Dec','Jan'];
+
+let currentPage='overview';
+let selected=new Set();
+
+// ── HELPERS ──
+function stag(s){
+  const m={active:'tt',pending:'ta',suspended:'tr',succeeded:'tt',failed:'tr',past_due:'ta',upcoming:'tb',completed:'tm',open:'tt',waitlist:'ta','intro sent':'tb','meeting scheduled':'tt','profile shared':'ta',declined:'tr',company:'tt',partner:'tb',advisor:'ta',advisory:'tg',pro:'tt',program:'tm',expert:'tb',partner_tier:'tb'};
+  const display=s?.replace(/_/g,' ');
+  const cls=m[s?.toLowerCase()]||'tm';
+  return `<span class="tag ${cls}">${display}</span>`;
+}
+function sc(l,v,s='',accent=false,chDir=''){
+  const chStyle=chDir==='up'?' style="color:var(--teal)"':chDir==='dn'?' style="color:var(--red)"':'';
+  return `<div class="sc"><div class="sc-l">${l}</div><div class="sc-v"${accent?' style="color:var(--gold2)"':''}>${v}</div>${s?`<div class="sc-s"${chStyle}>${s}</div>`:''}</div>`;
+}
+function pb(pct,color='var(--teal)'){return `<div class="pb"><div class="pf" style="width:${Math.min(100,pct)}%;background:${color}"></div></div>`;}
+function tb(){return `<div class="topbar">
+  <div style="flex:1"><div class="ph">BANAHub Admin</div><div class="ps">Operations & Platform Management</div></div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <span class="tag tt" style="font-size:11px">● Systems operational</span>
+    <button class="btn btn-outline btn-sm">Export Report</button>
+  </div>
+  <div style="position:relative">
+    <div style="width:32px;height:32px;border-radius:50%;background:var(--bg3);border:1px solid var(--bdr2);display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer">🔔</div>
+    <div class="ndot"></div>
+  </div>
+</div>`;}
+
+// ── SIDEBAR ──
+function makeSidebar(){
+  const nav=[
+    {s:'Platform'},{k:'overview',i:'⊞',l:'Overview',cnt:USERS.filter(u=>u.status==='pending').length+PAYMENTS.filter(p=>p.status==='failed').length},
+    {s:'Members'},{k:'users',i:'👥',l:'Users',cnt:USERS.filter(u=>u.status==='pending').length},{k:'programs',i:'📚',l:'Programs & Cohorts'},{k:'sessions',i:'📅',l:'Sessions'},
+    {s:'Business'},{k:'matches',i:'🤝',l:'Capital Matching'},{k:'payments',i:'💳',l:'Payments',cnt:PAYMENTS.filter(p=>p.status==='failed').length},
+    {s:'Settings'},{k:'settings',i:'⚙️',l:'Platform Settings'},
+  ];
+  return `<div class="sidebar">
+    <div class="sb-top">
+      <div style="display:flex;align-items:center;gap:9px;margin-bottom:10px">
+        <div class="lm">B</div>
+        <div class="ln">BANA<em>Hub</em></div>
+      </div>
+      <div class="admin-badge">⚙ Admin Panel</div>
+    </div>
+    <div style="padding:10px 10px;border-bottom:1px solid var(--bdr)">
+      <div style="display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:7px;background:var(--bg3)">
+        <div class="av" style="width:30px;height:30px;font-size:11px;background:var(--gold3);border:1px solid rgba(200,151,58,.25);color:var(--gold2)">SA</div>
+        <div><div style="font-size:12px;font-weight:500">Super Admin</div><div style="font-size:11px;color:var(--txt2)">Ibthisam Hashim</div></div>
+      </div>
+    </div>
+    <div class="sb-nav">
+      ${nav.map(item=>item.s?`<div class="ns">${item.s}</div>`:`
+        <div class="ni${currentPage===item.k?' on':''}" onclick="goto('${item.k}')">
+          <span class="ni-ic">${item.i}</span>
+          <span>${item.l}</span>
+          ${item.cnt>0?`<span class="badge-count">${item.cnt}</span>`:''}
+        </div>`).join('')}
+      <div class="div" style="margin:10px 0 5px"></div>
+      <div class="ni" onclick="window.location.href='banahub-platform.html'"><span class="ni-ic">👤</span>Member View</div>
+      <div class="ni" onclick="window.location.href='banahub-website.html'"><span class="ni-ic">🌐</span>Public Website</div>
+    </div>
+    <div class="sb-bottom">
+      <div style="font-size:10px;color:var(--txt3);margin-bottom:5px">Platform v2.1 · Jan 2025</div>
+      <div style="font-size:11px;color:var(--txt2)">Bana Private Limited, Singapore</div>
+    </div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════════════
+// PAGES
+// ══════════════════════════════════════════════════
+
+function pageOverview(){
+  const mrrTotal=47200;const prevMrr=43000;
+  const pct=((mrrTotal-prevMrr)/prevMrr*100).toFixed(1);
+  const maxM=Math.max(...MRR_D);
+
+  return `${tb()}
+  <div class="page-body fu">
+    <!-- KPI ROW -->
+    <div class="g4" style="margin-bottom:16px">
+      ${sc('Monthly Revenue','S$47.2K',`↑ ${pct}% vs last month`,true,'up')}
+      ${sc('Active Members',USERS.filter(u=>u.status==='active').length,`${USERS.filter(u=>u.status==='pending').length} pending approval`)}
+      ${sc('Sessions This Month','38','↑ 7 vs last month',false,'up')}
+      ${sc('Capital Introductions',MATCHES.length,`${MATCHES.filter(m=>m.stage!=='Declined').length} active`)}
+    </div>
+
+    <!-- CHARTS ROW -->
+    <div class="g2" style="margin-bottom:16px">
+      <!-- MRR CHART -->
+      <div>
+        <div class="sth" style="margin-bottom:10px">Revenue Trend</div>
+        <div class="card" style="padding:18px">
+          <div style="font-family:var(--fd);font-size:26px;font-weight:400;margin-bottom:2px">S$47,200 <span style="font-size:14px;color:var(--teal)">↑ 9.8%</span></div>
+          <div style="font-size:11px;color:var(--txt2);margin-bottom:16px">vs S$43,000 last month</div>
+          <div style="display:flex;align-items:flex-end;gap:5px;height:80px;margin-bottom:6px">
+            ${MRR_D.map((v,i)=>{const h=Math.max(6,v/maxM*76);const last=i===MRR_D.length-1;
+              return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+                <div style="width:100%;max-width:32px;height:${h}px;background:${last?'var(--gold)':'var(--bg4)'};border-radius:2px 2px 0 0;opacity:${last?1:.65};position:relative" title="S$${(v*1000).toLocaleString()}"></div>
+              </div>`;}).join('')}
+          </div>
+          <div style="display:flex;justify-content:space-between">${MTHS.map(m=>`<span style="font-size:10px;color:var(--txt3);flex:1;text-align:center">${m}</span>`).join('')}</div>
+        </div>
+      </div>
+      <!-- REVENUE BREAKDOWN -->
+      <div>
+        <div class="sth" style="margin-bottom:10px">Revenue by Service</div>
+        <div class="card" style="padding:16px">
+          ${[['Advisory Retainers','S$28,800',61,'var(--gold)'],['Program Enrollments','S$12,400',26,'var(--teal)'],['Workshops / Masterclasses','S$4,200',9,'var(--violet)'],['Onboarding Assessments','S$1,800',4,'var(--amber)']].map(([l,v,p,c])=>`
+            <div style="margin-bottom:14px">
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px">
+                <span style="color:var(--txt1)">${l}</span>
+                <span style="font-weight:500">${v}</span>
+              </div>
+              ${pb(p,c)}
+              <div style="font-size:10px;color:var(--txt3);margin-top:2px">${p}% of revenue</div>
+            </div>`).join('')}
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTION QUEUES -->
+    <div class="g2" style="margin-bottom:16px">
+      <!-- PENDING APPROVALS -->
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div class="sth">Pending Approvals <span style="color:var(--amber);font-weight:400">(${USERS.filter(u=>u.status==='pending').length})</span></div>
+          <button class="btn btn-outline btn-xs" onclick="goto('users')">View All Users</button>
+        </div>
+        ${USERS.filter(u=>u.status==='pending').map(u=>`
+          <div class="card" style="padding:12px;margin-bottom:8px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+              <div style="display:flex;gap:9px;align-items:center">
+                <div class="av" style="width:28px;height:28px;font-size:10px;background:var(--bg3);border:1px solid var(--bdr2);color:${u.role==='company'?'var(--teal)':u.role==='partner'?'var(--blue)':'var(--amber)'}">${u.name.split(' ').map(w=>w[0]).join('').slice(0,2)}</div>
+                <div>
+                  <div style="font-size:13px;font-weight:500">${u.name}</div>
+                  <div style="font-size:11px;color:var(--txt2)">${u.company} · ${u.email}</div>
+                </div>
+              </div>
+              ${stag(u.role)}
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div style="display:flex;gap:6px">
+                <button class="btn btn-teal btn-xs" onclick="approveUser(${u.id})">Approve</button>
+                <button class="btn btn-danger btn-xs" onclick="rejectUser(${u.id})">Reject</button>
+              </div>
+              <span style="font-size:11px;color:${u.fee?'var(--teal)':'var(--red)'}">Fee: ${u.fee?'✓ Paid':'✕ Unpaid'}</span>
+            </div>
+          </div>`).join('')}
+      </div>
+
+      <!-- FAILED PAYMENTS + CAPITAL QUEUE -->
+      <div>
+        ${PAYMENTS.filter(p=>p.status==='failed'||p.status==='past_due').length>0?`
+          <div class="sth" style="margin-bottom:10px">Payment Failures <span style="color:var(--red);font-weight:400">(${PAYMENTS.filter(p=>p.status==='failed'||p.status==='past_due').length})</span></div>
+          ${PAYMENTS.filter(p=>p.status==='failed'||p.status==='past_due').map(p=>`
+            <div class="card-red" style="padding:12px;margin-bottom:8px">
+              <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+                <div style="font-size:13px;font-weight:500">${p.user}</div>
+                ${stag(p.status)}
+              </div>
+              <div style="font-size:12px;color:var(--txt1);margin-bottom:8px">${p.type} · ${p.date} · <span style="font-family:var(--fm)">S$${p.amount}</span></div>
+              <div style="display:flex;gap:6px">
+                <button class="btn btn-danger btn-xs" onclick="alert('Retry charge queued for ${p.ref}')">Retry Charge</button>
+                <button class="btn btn-ghost btn-xs">Send Email</button>
+              </div>
+            </div>`).join('')}
+        `:''}
+        <div class="sth" style="margin-bottom:10px;margin-top:${PAYMENTS.filter(p=>p.status==='failed').length?'16':'0'}px">Recent Capital Introductions</div>
+        ${MATCHES.slice(0,3).map(m=>`
+          <div class="card" style="padding:11px;margin-bottom:6px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+              <div style="font-size:13px;font-weight:500">${m.company} → ${m.partner}</div>
+              ${stag(m.stage)}
+            </div>
+            <div style="font-size:11px;color:var(--txt2)">${m.type} · ${m.date} · ${m.advisor}</div>
+          </div>`).join('')}
+      </div>
+    </div>
+
+    <!-- PLATFORM STATS -->
+    <div class="sth" style="margin-bottom:10px">Platform Health</div>
+    <div class="g4">
+      ${sc('Total Members',USERS.length,`${USERS.filter(u=>u.role==='company').length} companies, ${USERS.filter(u=>u.role==='partner').length} partners`)}
+      ${sc('Active Programs',PROGRAMS.filter(p=>p.status!=='waitlist').length,`${PROGRAMS.reduce((s,p)=>s+p.enrolled,0)} total enrolled`)}
+      ${sc('Sessions (Lifetime)','186','94% completion rate',false)}
+      ${sc('Avg Session Rating','4.8★','across all advisors',true)}
+    </div>
+  </div>`;
+}
+
+function pageUsers(){
+  let filter='all';let search='';
+  const render=()=>{
+    const list=USERS.filter(u=>{
+      const fMatch=filter==='all'||u.status===filter||u.role===filter;
+      const sMatch=!search||u.name.toLowerCase().includes(search.toLowerCase())||u.email.toLowerCase().includes(search.toLowerCase())||u.company.toLowerCase().includes(search.toLowerCase());
+      return fMatch&&sMatch;
+    });
+
+    const inner=document.getElementById('user-table-inner');
+    if(!inner)return;
+    inner.innerHTML=`
+      <table class="tbl">
+        <thead><tr>
+          <th style="width:32px"><input type="checkbox" onchange="toggleAllSelect(this)"/></th>
+          <th>Name</th><th>Role</th><th>Status</th><th>Tier</th><th>Fee</th><th>Country</th><th>Joined</th><th>Actions</th>
+        </tr></thead>
+        <tbody>
+          ${list.map(u=>`<tr>
+            <td><input type="checkbox" ${selected.has(u.id)?'checked':''} onchange="toggleSelect(${u.id},this.checked)"/></td>
+            <td><div style="display:flex;gap:8px;align-items:center">
+              <div class="av" style="width:26px;height:26px;font-size:10px;background:var(--bg3);border:1px solid var(--bdr2);color:${u.role==='company'?'var(--teal)':u.role==='partner'?'var(--blue)':'var(--amber)'}">${u.name.split(' ').map(w=>w[0]).join('').slice(0,2)}</div>
+              <div><div style="font-weight:500;font-size:13px">${u.name}</div><div style="font-size:11px;color:var(--txt2)">${u.email}</div></div>
+            </div></td>
+            <td>${stag(u.role)}</td>
+            <td>${stag(u.status)}</td>
+            <td><span class="tag tm" style="font-size:10px;text-transform:capitalize">${u.tier}</span></td>
+            <td><span style="font-size:12px;color:${u.fee?'var(--teal)':'var(--red)'}"><b>${u.fee?'✓':'✕'}</b> ${u.fee?'Paid':'Unpaid'}</span></td>
+            <td style="font-size:12px;color:var(--txt2)">${u.country}</td>
+            <td style="font-size:11px;color:var(--txt2)">${u.joined}</td>
+            <td><div style="display:flex;gap:4px">
+              ${u.status==='pending'?`<button class="btn btn-teal btn-xs" onclick="approveUser(${u.id})">Approve</button>`:''}
+              ${u.status==='active'?`<button class="btn btn-outline btn-xs" onclick="suspendUser(${u.id})">Suspend</button>`:''}
+              ${u.status==='suspended'?`<button class="btn btn-outline btn-xs" style="color:var(--teal)" onclick="alert('User ${u.name} restored')">Restore</button>`:''}
+              <button class="btn btn-ghost btn-xs" onclick="showUserDetail(${u.id})">View</button>
+            </div></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>`;
+  };
+
+  setTimeout(render,10);
+  const filterBtns=[{k:'all',l:'All'},{k:'active',l:'Active'},{k:'pending',l:'Pending'},{k:'suspended',l:'Suspended'},{k:'company',l:'Companies'},{k:'partner',l:'Partners'},{k:'advisor',l:'Advisors'}];
+
+  return `${tb()}
+  <div class="page-body fu">
+    <div class="g4" style="margin-bottom:14px">
+      ${['All','Active','Pending','Suspended'].map((l,i)=>{
+        const counts=[USERS.length,USERS.filter(u=>u.status==='active').length,USERS.filter(u=>u.status==='pending').length,USERS.filter(u=>u.status==='suspended').length];
+        return `<div class="sc" style="cursor:pointer" onclick="setUserFilter('${l.toLowerCase()}')"><div class="sc-l">${l}</div><div class="sc-v">${counts[i]}</div></div>`;
+      }).join('')}
+    </div>
+    <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap">
+      <div style="flex:1;min-width:200px;display:flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--bdr2);border-radius:6px;padding:7px 12px">
+        <span style="color:var(--txt3)">🔍</span>
+        <input id="userSearch" style="background:none;border:none;outline:none;color:var(--txt0);font-size:13px;flex:1" placeholder="Search name, email, company..." oninput="filterUsers(this.value)"/>
+      </div>
+      <select class="sel" id="userFilter" onchange="setUserFilter(this.value)">
+        ${filterBtns.map(f=>`<option value="${f.k}">${f.l}</option>`).join('')}
+      </select>
+      <div id="bulk-actions" style="display:none;gap:8px">
+        <button class="btn btn-teal btn-sm" id="bulk-approve-btn" onclick="bulkApprove()">Approve Selected</button>
+      </div>
+      <button class="btn btn-gold btn-sm">+ Invite Member</button>
+    </div>
+    <div class="card" style="overflow:hidden" id="user-table-inner"></div>
+  </div>
+  <script>
+    function setUserFilter(v){filter=v;document.getElementById('userFilter').value=v;render();}
+    function filterUsers(v){search=v;render();}
+    function toggleSelect(id,checked){if(checked)selected.add(id);else selected.delete(id);document.getElementById('bulk-actions').style.display=selected.size?'flex':'none';render();}
+    function toggleAllSelect(el){USERS.forEach(u=>{if(el.checked)selected.add(u.id);else selected.delete(u.id);});document.getElementById('bulk-actions').style.display=selected.size?'flex':'none';render();}
+    function bulkApprove(){selected.forEach(id=>{const u=USERS.find(u=>u.id===id);if(u)u.status='active';});selected.clear();document.getElementById('bulk-actions').style.display='none';render();}
+    function showUserDetail(id){const u=USERS.find(u=>u.id===id);if(!u)return;alert('User detail: '+u.name+'\\n'+u.email+'\\n'+u.company+'\\nRole: '+u.role+'\\nStatus: '+u.status+'\\nSessions: '+u.sessions);}
+  <\/script>`;
+}
+
+function approveUser(id){const u=USERS.find(u=>u.id===id);if(u){u.status='active';goto(currentPage);}}
+function rejectUser(id){const u=USERS.find(u=>u.id===id);if(u&&confirm('Reject '+u.name+'?')){u.status='rejected';goto(currentPage);}}
+function suspendUser(id){const u=USERS.find(u=>u.id===id);if(u&&confirm('Suspend '+u.name+'?')){u.status='suspended';goto(currentPage);}}
+
+function pagePrograms(){
+  return `${tb()}
+  <div class="page-body fu">
+    <div class="g4" style="margin-bottom:14px">
+      ${sc('Active Programs',PROGRAMS.filter(p=>p.status!=='waitlist').length)}
+      ${sc('Total Enrolled',PROGRAMS.reduce((s,p)=>s+p.enrolled,0),`${PROGRAMS.reduce((s,p)=>s+p.seats,0)} total capacity`)}
+      ${sc('Avg Completion','81%','across all cohorts',true)}
+      ${sc('Program Revenue','S$75,520','this cycle')}
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div class="sth">All Programs & Cohorts</div>
+      <button class="btn btn-gold btn-sm">+ New Program</button>
+    </div>
+    <div class="card" style="overflow:hidden">
+      <table class="tbl">
+        <thead><tr><th>Program</th><th>Format</th><th>Lead Advisor</th><th>Start</th><th>Status</th><th>Enrollment</th><th>Revenue</th><th>Actions</th></tr></thead>
+        <tbody>
+          ${PROGRAMS.map(p=>`<tr>
+            <td><div style="display:flex;gap:9px;align-items:center">
+              <span style="font-size:18px">${p.icon}</span>
+              <div><div style="font-weight:500;font-size:13px">${p.title}</div><div style="font-size:11px;color:var(--txt2)">${p.cat}</div></div>
+            </div></td>
+            <td style="font-size:12px;color:var(--txt2)">${p.format}</td>
+            <td style="font-size:12px;color:var(--txt2)">${p.advisor}</td>
+            <td style="font-size:12px;color:var(--txt2)">${p.start}</td>
+            <td>${stag(p.status)}</td>
+            <td style="min-width:120px">
+              <div style="display:flex;align-items:center;gap:8px">
+                <span style="font-size:12px">${p.enrolled}/${p.seats}</span>
+                <div style="flex:1;min-width:60px">${pb(p.enrolled/p.seats*100)}</div>
+              </div>
+            </td>
+            <td style="font-family:var(--fm);font-size:12px;color:var(--teal)">${p.revenue}</td>
+            <td><div style="display:flex;gap:4px">
+              <button class="btn btn-outline btn-xs">Edit</button>
+              <button class="btn btn-ghost btn-xs">Roster</button>
+            </div></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function pageSessions(){
+  return `${tb()}
+  <div class="page-body fu">
+    <div class="g4" style="margin-bottom:14px">
+      ${sc('This Month','38','↑ 7 vs Jan',true,'up')}
+      ${sc('Upcoming','3','next 7 days')}
+      ${sc('Completed','35','this month')}
+      ${sc('Avg Rating','4.8★','client-rated')}
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div class="sth">All Sessions</div>
+      <div style="display:flex;gap:8px">
+        <select class="sel"><option>All Types</option><option>Strategy</option><option>Market Entry</option><option>Revenue</option><option>Capital Readiness</option></select>
+        <button class="btn btn-gold btn-sm">+ Schedule Session</button>
+      </div>
+    </div>
+    <div class="card" style="overflow:hidden">
+      <table class="tbl">
+        <thead><tr><th>Client</th><th>Advisor</th><th>Topic</th><th>Type</th><th>Date</th><th>Time (SGT)</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody>
+          ${[...SESSIONS,...SESSIONS.map((s,i)=>({...s,id:s.id+10,status:'completed',client:['AgroSense','EduBridge','MedVault'][i%3],date:'Jan '+(i+2)}))].slice(0,9).map(s=>`<tr>
+            <td style="font-weight:500">${s.client}</td>
+            <td style="font-size:12px;color:var(--txt2)">${s.advisor}</td>
+            <td style="font-size:12px;color:var(--txt1);max-width:180px">${s.topic}</td>
+            <td><span class="tag tm" style="font-size:10px">${s.type}</span></td>
+            <td style="font-size:12px;color:var(--txt2)">${s.date}</td>
+            <td style="font-size:12px;color:var(--txt2);font-family:var(--fm)">${s.time}</td>
+            <td>${stag(s.status)}</td>
+            <td><div style="display:flex;gap:4px">
+              ${s.status==='upcoming'?`<button class="btn btn-teal btn-xs">Join</button><button class="btn btn-ghost btn-xs">Edit</button>`:`<button class="btn btn-ghost btn-xs">Notes</button>`}
+            </div></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function pageMatches(){
+  return `${tb()}
+  <div class="page-body fu">
+    <div class="notice nb" style="margin-bottom:14px;font-size:12px">
+      <strong style="color:var(--txt0)">Compliance:</strong> BANAHub is not licensed by MAS. All introductions are market facilitation only. Do not use language implying investment advice, fund management, or regulated financial services in any correspondence or documentation.
+    </div>
+    <div class="g4" style="margin-bottom:14px">
+      ${sc('Total Introductions',MATCHES.length,'all time')}
+      ${sc('Active',MATCHES.filter(m=>m.stage!=='Declined').length,'ongoing')}
+      ${sc('Meetings Arranged','4','via platform',true)}
+      ${sc('Declined',MATCHES.filter(m=>m.stage==='Declined').length,'stage mismatch or no fit')}
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div class="sth">All Capital Introductions</div>
+      <button class="btn btn-gold btn-sm" onclick="showNewIntroModal()">+ New Introduction</button>
+    </div>
+    <div class="card" style="overflow:hidden;margin-bottom:16px">
+      <table class="tbl">
+        <thead><tr><th>Company</th><th>Capital Partner</th><th>Type</th><th>Stage</th><th>Date</th><th>Coordinated By</th><th>Note</th><th>Actions</th></tr></thead>
+        <tbody>
+          ${MATCHES.map(m=>`<tr>
+            <td style="font-weight:500">${m.company}</td>
+            <td>${m.partner}</td>
+            <td style="font-size:12px;color:var(--txt2)">${m.type}</td>
+            <td>${stag(m.stage)}</td>
+            <td style="font-size:12px;color:var(--txt2)">${m.date}</td>
+            <td style="font-size:12px;color:var(--txt2)">${m.advisor}</td>
+            <td style="font-size:12px;color:var(--txt2);max-width:200px">${m.note.slice(0,50)}...</td>
+            <td><div style="display:flex;gap:4px">
+              <button class="btn btn-outline btn-xs" onclick="alert('Edit introduction ${m.id}')">Edit</button>
+              <button class="btn btn-ghost btn-xs">Log</button>
+            </div></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+    <div class="card-gold" style="padding:16px">
+      <div style="font-size:12px;font-weight:600;color:var(--gold2);margin-bottom:8px">⚖️ Legal Reminder — Capital Matching</div>
+      <div style="font-size:12px;color:var(--txt1);line-height:1.7">Every introduction must include our standard disclosure: <em>"This introduction is facilitated by Bana Private Limited as a market introduction service. Bana Private Limited is not licensed by MAS and does not provide investment advice. All commercial terms are negotiated independently between the parties."</em></div>
+    </div>
+  </div>`;
+}
+
+function pagePayments(){
+  const total=PAYMENTS.filter(p=>p.status==='succeeded').reduce((s,p)=>s+p.amount,0);
+  const failed=PAYMENTS.filter(p=>p.status==='failed'||p.status==='past_due');
+  return `${tb()}
+  <div class="page-body fu">
+    <div class="g4" style="margin-bottom:14px">
+      ${sc('Revenue (MTD)','S$'+total.toLocaleString(),'↑ 9.8% MoM',true,'up')}
+      ${sc('Transactions',PAYMENTS.length,'this period')}
+      ${sc('Failed/Overdue',failed.length,failed.length?'Action required':'')}
+      ${sc('Avg Transaction','S$'+Math.round(total/PAYMENTS.filter(p=>p.status==='succeeded').length))}
+    </div>
+    ${failed.length>0?`
+      <div class="card-red" style="padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px">
+        <span style="font-size:20px">⚠️</span>
+        <div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--red)">${failed.length} payment failure${failed.length>1?'s':''} detected</div><div style="font-size:12px;color:var(--txt1)">Stripe dunning emails sent automatically. Manual follow-up may be required.</div></div>
+        <button class="btn btn-danger btn-sm">Review Failed</button>
+      </div>`:''}
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div class="sth">All Transactions</div>
+      <div style="display:flex;gap:8px">
+        <select class="sel"><option>All Types</option><option>Advisory Retainer</option><option>Program Enrollment</option><option>Onboarding Assessment</option></select>
+        <select class="sel"><option>All Status</option><option>Succeeded</option><option>Failed</option><option>Past Due</option></select>
+        <button class="btn btn-outline btn-sm">Export CSV</button>
+      </div>
+    </div>
+    <div class="card" style="overflow:hidden">
+      <table class="tbl">
+        <thead><tr><th>Member</th><th>Type</th><th>Amount</th><th>Status</th><th>Method</th><th>Date</th><th>Reference</th><th>Action</th></tr></thead>
+        <tbody>
+          ${PAYMENTS.map(p=>`<tr>
+            <td style="font-weight:500">${p.user}</td>
+            <td style="font-size:12px;color:var(--txt2)">${p.type}</td>
+            <td style="font-family:var(--fm);font-size:12px">S$${p.amount}</td>
+            <td>${stag(p.status)}</td>
+            <td style="font-size:12px;color:var(--txt2)">${p.method}</td>
+            <td style="font-size:12px;color:var(--txt2)">${p.date}</td>
+            <td><span style="font-family:var(--fm);font-size:11px;color:var(--txt3)">${p.ref}</span></td>
+            <td><div style="display:flex;gap:4px">
+              ${(p.status==='failed'||p.status==='past_due')?`<button class="btn btn-danger btn-xs" onclick="alert('Retrying ${p.ref}')">Retry</button>`:''}
+              <button class="btn btn-ghost btn-xs">View</button>
+            </div></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function pageSettings(){
+  return `${tb()}
+  <div class="page-body fu">
+    <div class="g2">
+      <div>
+        <div class="sth" style="margin-bottom:12px">Platform Configuration</div>
+        <div class="card" style="padding:18px;margin-bottom:14px">
+          ${[['Platform Name','BANAHub'],['Company','Bana Private Limited'],['Country','Singapore'],['Currency','SGD (S$)'],['MAS Licensed','No — Introduction service only']].map(([l,v])=>`
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bdr);font-size:13px">
+              <span style="color:var(--txt2)">${l}</span>
+              <span style="font-weight:500;color:${l==='MAS Licensed'?'var(--amber)':'var(--txt0)'}">${v}</span>
+            </div>`).join('')}
+          <div style="border-bottom:none;padding:8px 0 0"></div>
+          <button class="btn btn-outline btn-sm" style="margin-top:4px">Edit Settings</button>
+        </div>
+        <div class="sth" style="margin-bottom:12px">Onboarding Fees</div>
+        <div class="card" style="padding:16px">
+          ${[['Company / Founder','S$299'],['Capital Partner','S$199'],['Expert Advisor','S$149']].map(([l,v])=>`
+            <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--bdr);font-size:13px">
+              <span style="color:var(--txt2)">${l}</span>
+              <div style="display:flex;align-items:center;gap:8px">
+                <span style="font-family:var(--fm);font-weight:500;color:var(--gold2)">${v}</span>
+                <button class="btn btn-ghost btn-xs">Edit</button>
+              </div>
+            </div>`).join('')}
+        </div>
+      </div>
+      <div>
+        <div class="sth" style="margin-bottom:12px">Subscription Plans</div>
+        <div class="card" style="padding:16px;margin-bottom:14px">
+          ${[['Program','S$198/mo'],['Pro','S$396/mo'],['Advisory','Custom — from S$2,800/mo'],['Capital Partner','S$500/mo']].map(([l,v])=>`
+            <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--bdr);font-size:13px">
+              <span style="color:var(--txt2)">${l}</span>
+              <div style="display:flex;gap:8px;align-items:center">
+                <span style="font-family:var(--fm);font-size:12px;color:var(--teal)">${v}</span>
+                <button class="btn btn-ghost btn-xs">Edit</button>
+              </div>
+            </div>`).join('')}
+        </div>
+        <div class="sth" style="margin-bottom:12px">Legal & Compliance</div>
+        <div class="card-gold" style="padding:16px">
+          <div style="font-size:12px;font-weight:600;color:var(--gold2);margin-bottom:8px">⚖️ Compliance Checklist</div>
+          ${['Capital matching templates include MAS disclaimer','Advisor profiles state "Not a licensed financial advisor"','Website footer includes regulatory notice','Terms of Use explicitly limits capital introduction scope'].map(item=>`
+            <div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid rgba(200,151,58,.12);font-size:12px;color:var(--txt1)">
+              <span style="color:var(--teal);flex-shrink:0">✓</span>${item}
+            </div>`).join('')}
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── ROUTER ──────────────────────────────────────────
+function goto(pg){
+  currentPage=pg;
+  const app=document.getElementById('app');
+  const pages={overview:pageOverview,users:pageUsers,programs:pagePrograms,sessions:pageSessions,matches:pageMatches,payments:pagePayments,settings:pageSettings};
+  const content=pages[pg]?pages[pg]():`<div class="page-body">Not found</div>`;
+  app.innerHTML=`${makeSidebar()}<div class="main">${content}</div>`;
+}
+
+goto('overview');
+</script>
+</body>
+</html>
