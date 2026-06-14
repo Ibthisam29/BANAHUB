@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Apply | BANAHub</title>
+<link rel="stylesheet" href="./output.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Manrope:wght@300;400;500;600;700&family=Material+Symbols+Outlined:wght,FILL@400,0&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;}
+body{font-family:'Manrope',system-ui,sans-serif;}
+.font-display{font-family:'Newsreader',Georgia,serif;}
+.ivory-texture{background-image:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23000' fill-opacity='.012' fill-rule='evenodd'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E");}
+.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;vertical-align:middle;}
+.sector-chip{cursor:pointer;user-select:none;}
+.sector-chip.selected{background:#003527;color:#fff;border-color:#003527;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.anim-up{animation:fadeUp 0.4s ease-out forwards;}
+</style>
+</head>
+<body class="min-h-screen bg-background ivory-texture antialiased">
+
+<!-- Nav -->
+<header class="px-10 py-5 flex items-center justify-between border-b border-outline-variant/20 bg-surface/80 backdrop-blur-md sticky top-0 z-10">
+  <a href="index.html" class="font-display font-semibold text-xl text-primary">BANAHub</a>
+  <a href="login.html" class="font-sans text-sm text-on-surface-variant hover:text-primary transition-colors">Already a member? Login →</a>
+</header>
+
+<main class="max-w-2xl mx-auto px-6 py-12 anim-up">
+  <span class="block font-sans font-bold text-xs text-on-surface-variant tracking-[0.15em] uppercase mb-2">Institutional Application</span>
+  <h1 class="font-display font-semibold text-4xl text-primary mb-2">Apply for Membership</h1>
+  <p class="font-sans text-base text-on-surface-variant mb-10">
+    Institutional access is by application only. Applications are reviewed within 2 business days.
+  </p>
+
+  <!-- Step indicator -->
+  <div class="flex items-center gap-3 mb-10">
+    <div id="step-dot-1" class="w-2.5 h-2.5 rounded-full bg-primary"></div>
+    <div id="step-dot-2" class="w-2.5 h-2.5 rounded-full bg-outline-variant"></div>
+    <div id="step-dot-3" class="w-2.5 h-2.5 rounded-full bg-outline-variant"></div>
+    <span id="step-label" class="font-sans text-xs text-on-surface-variant ml-2">Step 1 of 3 — Identity</span>
+  </div>
+
+  <!-- Step 1: Identity -->
+  <div id="step-1">
+    <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-xl p-8 flex flex-col gap-5">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div>
+          <label class="block font-sans font-bold text-xs text-on-surface-variant tracking-widest uppercase mb-2">Full Legal Name</label>
+          <input type="text" id="reg-name" required placeholder="As on official documents" class="w-full border border-outline-variant rounded px-3 py-2.5 font-sans text-sm bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20"/>
+        </div>
+        <div>
+          <label class="block font-sans font-bold text-xs text-on-surface-variant tracking-widest uppercase mb-2">Professional Title</label>
+          <input type="text" id="reg-title" required placeholder="CIO, MD, Partner…" class="w-full border border-outline-variant rounded px-3 py-2.5 font-sans text-sm bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20"/>
+        </div>
+        <div class="sm:col-span-2">
+          <label class="block font-sans font-bold text-xs text-on-surface-variant tracking-widest uppercase mb-2">Institutional Email</label>
+          <input type="email" id="reg-email" required placeholder="name@institution.com" class="w-full border border-outline-variant rounded px-3 py-2.5 font-sans text-sm bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20"/>
+        </div>
+        <div>
+          <label class="block font-sans font-bold text-xs text-on-surface-variant tracking-widest uppercase mb-2">Password</label>
+          <input type="password" id="reg-pw" required minlength="8" placeholder="Min 8 characters" class="w-full border border-outline-variant rounded px-3 py-2.5 font-sans text-sm bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20"/>
+        </div>
+        <div>
+          <label class="block font-sans font-bold text-xs text-on-surface-variant tracking-widest uppercase mb-2">Confirm Password</label>
+          <input type="password" id="reg-pw2" required minlength="8" placeholder="Re-enter password" class="w-full border border-outline-variant rounded px-3 py-2.5 font-sans text-sm bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20"/>
+        </div>
+        <div>
+          <label class="block font-sans font-bold text-xs text-on-surface-variant tracking-widest uppercase mb-2">Phone Number</label>
+          <input type="tel" id="reg-phone" required placeholder="+65 XXXX XXXX" class="w-full border border-outline-variant rounded px-3 py-2.5 font-sans text-sm bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20"/>
+        </div>
+      </div>
+      <button onclick="goStep(2)" class="bg-primary text-on-primary py-3 rounded font-sans font-semibold text-sm hover:bg-primary-container transition-colors mt-2">
+        Continue →
+      </button>
+    </div>
+  </div>
+
+  <!-- Step 2: Institution -->
+  <div id="step-2" class="hidden">
+    <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-xl p-8 flex flex-col gap-5">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div class="sm:col-span-2">
+          <label class="block font-sans font-bold text-xs text-on-surface-variant tracking-widest uppercase mb-2">Institution / Fund Name</label>
+          <input type="text" id="reg-institution" required placeholder="Full registered entity name" class="w-full border border-outline-variant rounded px-3 py-2.5 font-sans text-sm bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20"/>
+        </div>
+        <div>
+          <label class="block font-sans font-bold text-xs text-on-surface-variant tracking-widest uppercase mb-2">Institution Type</label>
+          <select class="w-full border border-outline-variant rounded px-3 py-2.5 font-sans text-sm bg-surface focus:outline-none focus:border-primary">
+            <option>Family Office</option>
+            <option>Sovereign Wealth Fund</option>
+            <option>Private Equity</option>
+            <option>Venture Capital</option>
+            <option>Asset Manager</option>
+            <option>Corporate Treasury</option>
+          </select>
+        </div>
+        <div>
+          <label class="block font-sans font-bold text-xs text-on-surface-variant tracking-widest uppercase mb-2">AUM Range</label>
+          <select class="w-full border border-outline-variant rounded px-3 py-2.5 font-sans text-sm bg-surface focus:outline-none focus:border-primary">
+            <option>Under $50M</option>
+            <option>$50M – $250M</option>
+            <option>$250M – $1B</option>
+            <option>$1B – $5B</option>
+            <option>$5B+</option>
+          </select>
+        </div>
+        <div>
+          <label class="block font-sans font-bold text-xs text-on-surface-variant tracking-widest uppercase mb-2">Country of Incorporation</label>
+          <input type="text" id="reg-country" required placeholder="Singapore" class="w-full border border-outline-variant rounded px-3 py-2.5 font-sans text-sm bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20"/>
+        </div>
+        <div>
+          <label class="block font-sans font-bold text-xs text-on-surface-variant tracking-widest uppercase mb-2">Primary Region</label>
+          <select class="w-full border border-outline-variant rounded px-3 py-2.5 font-sans text-sm bg-surface focus:outline-none focus:border-primary">
+            <option>Southeast Asia</option>
+            <option>Gulf Region</option>
+            <option>North Asia</option>
+            <option>Global</option>
+          </select>
+        </div>
+        <div class="sm:col-span-2">
+          <label class="block font-sans font-bold text-xs text-on-surface-variant tracking-widest uppercase mb-3">Investment Focus (select all that apply)</label>
+          <div class="flex flex-wrap gap-2" id="sectors">
+            <span class="sector-chip px-3 py-1.5 border border-outline-variant rounded-full font-sans text-xs text-on-surface-variant transition-all" onclick="toggleSector(this)">SEA Fintech</span>
+            <span class="sector-chip px-3 py-1.5 border border-outline-variant rounded-full font-sans text-xs text-on-surface-variant transition-all" onclick="toggleSector(this)">Gulf Infrastructure</span>
+            <span class="sector-chip px-3 py-1.5 border border-outline-variant rounded-full font-sans text-xs text-on-surface-variant transition-all" onclick="toggleSector(this)">North Asia Tech</span>
+            <span class="sector-chip px-3 py-1.5 border border-outline-variant rounded-full font-sans text-xs text-on-surface-variant transition-all" onclick="toggleSector(this)">Real Estate</span>
+            <span class="sector-chip px-3 py-1.5 border border-outline-variant rounded-full font-sans text-xs text-on-surface-variant transition-all" onclick="toggleSector(this)">ESG / Green</span>
+            <span class="sector-chip px-3 py-1.5 border border-outline-variant rounded-full font-sans text-xs text-on-surface-variant transition-all" onclick="toggleSector(this)">Private Credit</span>
+            <span class="sector-chip px-3 py-1.5 border border-outline-variant rounded-full font-sans text-xs text-on-surface-variant transition-all" onclick="toggleSector(this)">Direct Equity</span>
+          </div>
+        </div>
+      </div>
+      <div class="flex gap-3 mt-2">
+        <button onclick="goStep(1)" class="border border-outline-variant text-on-surface py-3 px-6 rounded font-sans font-semibold text-sm hover:bg-surface-container transition-colors">← Back</button>
+        <button onclick="goStep(3)" class="flex-1 bg-primary text-on-primary py-3 rounded font-sans font-semibold text-sm hover:bg-primary-container transition-colors">Continue →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 3: Submit -->
+  <div id="step-3" class="hidden">
+    <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-xl p-8 flex flex-col gap-5">
+      <p class="font-sans text-sm text-on-surface-variant">
+        By submitting, you confirm all information is accurate and consent to institutional verification checks.
+      </p>
+      <div>
+        <label class="block font-sans font-bold text-xs text-on-surface-variant tracking-widest uppercase mb-2">LinkedIn Profile (optional)</label>
+        <input type="url" placeholder="https://linkedin.com/in/…" class="w-full border border-outline-variant rounded px-3 py-2.5 font-sans text-sm bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20"/>
+      </div>
+      <div>
+        <label class="block font-sans font-bold text-xs text-on-surface-variant tracking-widest uppercase mb-3">KYC Document (Passport / NRIC)</label>
+        <label for="kyc-file" class="border-2 border-dashed border-outline-variant rounded-xl p-8 text-center hover:border-primary hover:bg-primary/[0.02] transition-all cursor-pointer block">
+          <span class="material-symbols-outlined text-outline text-[32px] mb-2 block">upload_file</span>
+          <p id="kyc-label" class="font-sans text-sm text-outline">Drop file or <span class="text-primary font-semibold">browse</span></p>
+          <p class="font-sans text-xs text-outline/70 mt-1">PDF, JPG, PNG · Max 10MB</p>
+          <input id="kyc-file" type="file" accept=".pdf,.jpg,.jpeg,.png" class="hidden" onchange="document.getElementById('kyc-label').textContent=this.files[0]?.name||'No file chosen'"/>
+        </label>
+      </div>
+      <label class="flex items-start gap-3 cursor-pointer">
+        <input type="checkbox" id="consent" class="mt-0.5 accent-primary"/>
+        <span class="font-sans text-sm text-on-surface-variant">
+          I confirm all information is accurate and consent to BANAHub conducting institutional verification checks in accordance with our
+          <a href="#" class="text-primary underline">Privacy Policy</a>.
+        </span>
+      </label>
+      <div class="flex gap-3 mt-2">
+        <button onclick="goStep(2)" class="border border-outline-variant text-on-surface py-3 px-6 rounded font-sans font-semibold text-sm hover:bg-surface-container transition-colors">← Back</button>
+        <button onclick="handleSubmit()" class="flex-1 bg-primary text-on-primary py-3 rounded font-sans font-semibold text-sm hover:bg-primary-container transition-colors">Submit Application</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success -->
+  <div id="step-success" class="hidden text-center py-16">
+    <div class="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+      <span class="material-symbols-outlined text-primary text-[40px]">check_circle</span>
+    </div>
+    <h2 class="font-display font-semibold text-3xl text-primary mb-3">Application Received</h2>
+    <p class="font-sans text-base text-on-surface-variant mb-8 max-w-md mx-auto">
+      Your institutional application has been submitted. Our team will review your profile and respond within 2 business days.
+    </p>
+    <a href="index.html" class="inline-block bg-primary text-on-primary px-8 py-3 rounded font-sans font-semibold text-sm hover:bg-primary-container transition-colors">
+      Return to Home
+    </a>
+  </div>
+
+  <p class="text-center font-sans text-sm text-on-surface-variant mt-6">
+    Already a member? <a href="login.html" class="text-primary font-semibold hover:underline">Sign in</a>
+  </p>
+</main>
+
+<script src="config.js"></script>
+<script src="api.js"></script>
+<script>
+/* API_BASE and apiFetch() are defined in api.js */
+
+const STEP_LABELS = ['','Step 1 of 3 — Identity','Step 2 of 3 — Institution','Step 3 of 3 — Verification'];
+
+function showErr(msg) {
+  let el = document.getElementById('step-err');
+  if (!el) {
+    el = document.createElement('p');
+    el.id = 'step-err';
+    el.className = 'font-sans text-xs text-red-600 mt-2';
+  }
+  el.textContent = msg;
+  const btn = document.querySelector('#step-1 button, #step-2 button:last-child, #step-3 button:last-child');
+  btn && btn.parentNode.insertBefore(el, btn);
+}
+function clearErr() { const el = document.getElementById('step-err'); if (el) el.remove(); }
+
+function goStep(n) {
+  clearErr();
+  if (n === 2) {
+    const name  = document.getElementById('reg-name')?.value.trim();
+    const email = document.getElementById('reg-email')?.value.trim();
+    const pw    = document.getElementById('reg-pw')?.value;
+    const pw2   = document.getElementById('reg-pw2')?.value;
+    const phone = document.getElementById('reg-phone')?.value.trim();
+    if (!name)              { showErr('Please enter your full legal name.'); return; }
+    if (!email)             { showErr('Please enter your institutional email.'); return; }
+    if (!pw || pw.length < 8) { showErr('Password must be at least 8 characters.'); return; }
+    if (pw !== pw2)         { showErr('Passwords do not match.'); return; }
+    if (!phone)             { showErr('Please enter your phone number.'); return; }
+  }
+  if (n === 3) {
+    const institution = document.getElementById('reg-institution')?.value.trim();
+    const country     = document.getElementById('reg-country')?.value.trim();
+    if (!institution) { showErr('Please enter your institution name.'); return; }
+    if (!country)     { showErr('Please enter your country of incorporation.'); return; }
+  }
+  [1,2,3].forEach(i => {
+    document.getElementById('step-'+i).classList.toggle('hidden', i !== n);
+    const dot = document.getElementById('step-dot-'+i);
+    dot.style.background = i <= n ? '#003527' : '#bfc9c3';
+  });
+  document.getElementById('step-label').textContent = STEP_LABELS[n];
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function toggleSector(el) { el.classList.toggle('selected'); }
+
+async function handleSubmit() {
+  const consent = document.getElementById('consent');
+  if (!consent.checked) { alert('Please confirm consent to proceed.'); return; }
+
+  // Gather selected sectors
+  const sectors = [...document.querySelectorAll('.sector-chip.selected')]
+    .map(el => el.textContent.trim());
+
+  // Collect KYC file (optional at registration stage)
+  const kycInput = document.getElementById('kyc-file');
+
+  const csrfBeforeRegister = await getCsrf(true);
+
+  const payload = {
+    csrf_token: csrfBeforeRegister,
+    email:     document.getElementById('reg-email').value.trim().toLowerCase(),
+    password:  document.getElementById('reg-pw').value,
+    full_name: document.getElementById('reg-name').value.trim(),
+    title:     document.getElementById('reg-title')?.value.trim() || '',
+    phone:     document.getElementById('reg-phone')?.value.trim() || '',
+  };
+
+  const submitBtn = document.querySelector('#step-3 button[type=button]') ||
+                    document.querySelector('#step-3 button:last-of-type');
+  if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Submitting…'; }
+
+  try {
+    // 1. Register user
+    const res = await apiFetch('/api/auth/register', {
+      method: 'POST',
+      body:   JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Registration failed.');
+
+    // 2. Submit application details (institution, sectors, etc.)
+    // Use returned csrf_token directly; getCsrf() in-memory cache is also updated.
+    const csrf = data.csrf_token || await getCsrf();
+    await apiFetch('/api/applications/submit', {
+      method: 'POST',
+      body: JSON.stringify({
+        institution: document.getElementById('reg-institution')?.value.trim() || '',
+        inst_type:   document.querySelector('select')?.value || '',
+        aum:         document.getElementById('reg-aum')?.value || '',
+        country:     document.getElementById('reg-country')?.value.trim() || '',
+        sectors,
+        membership:  document.querySelector('input[name=membership]:checked')?.value || '',
+        notes:       document.getElementById('reg-notes')?.value.trim() || '',
+        csrf_token:  csrf,
+      }),
+    });
+
+    // 3. Upload KYC file if provided
+    if (kycInput?.files?.length) {
+      const formData = new FormData();
+      formData.append('file', kycInput.files[0]);
+      formData.append('csrf_token', csrf);
+      // Use raw fetch for multipart (apiFetch forces application/json header)
+      await fetch(`${API_BASE}/api/kyc/upload`, {
+        method: 'POST',
+        credentials: 'include',
+        body: formData,
+      });
+    }
+
+    // 4. Show success screen
+    [1,2,3].forEach(i => document.getElementById('step-'+i).classList.add('hidden'));
+    document.getElementById('step-success').classList.remove('hidden');
+    document.querySelector('[id^=step-label]').textContent = 'Complete';
+
+  } catch (ex) {
+    showErr(ex.message || 'Submission failed. Please try again.');
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Submit Application'; }
+  }
+}
+</script>
+</body>
+</html>

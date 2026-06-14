@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description"
+    content="BANAHub — Institutional Cross-Border Ecosystem bridging sovereign capital with high-growth markets across Southeast Asia, the Gulf, and North Asia." />
+  <meta property="og:title" content="BANAHub | Institutional Cross-Border Ecosystem" />
+  <meta property="og:description"
+    content="Bridge the gap between sovereign capital and high-growth markets. Join elite cohorts designed for institutional excellence." />
+  <meta property="og:url" content="https://www.banahub.com/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://www.banahub.com/og-image.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="BANAHub | Institutional Cross-Border Ecosystem" />
+  <meta name="twitter:description" content="Bridge the gap between sovereign capital and high-growth markets." />
+  <link rel="canonical" href="https://www.banahub.com/" />
+  <title>BANAHub | Institutional Cross-Border Ecosystem</title>
+
+  <link rel="stylesheet" href="./output.css" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Manrope:wght@300;400;500;600;700&family=Material+Symbols+Outlined:wght,FILL@400,0&display=swap"
+    rel="stylesheet" />
+
+  <style>
+    /* ── Reset ────────────────────────────────────────────────────────────── */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Manrope', system-ui, sans-serif;
+    }
+
+    /* ── Glassmorphism ────────────────────────────────────────────────────── */
+    .glass {
+      background: rgba(250, 249, 245, 0.72);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(191, 201, 195, 0.3);
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(191, 201, 195, 0.4);
+    }
+
+    /* ── Typography ───────────────────────────────────────────────────────── */
+    .font-display {
+      font-family: 'Newsreader', Georgia, serif;
+    }
+
+    /* ── Ivory texture ────────────────────────────────────────────────────── */
+    .ivory-texture {
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23000' fill-opacity='.012' fill-rule='evenodd'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    /* ── Animations ───────────────────────────────────────────────────────── */
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    .anim-up {
+      animation: fadeUp 0.5s ease-out forwards;
+    }
+
+    .anim-in {
+      animation: fadeIn 0.4s ease-out forwards;
+    }
+
+    .delay-1 {
+      animation-delay: 0.1s;
+      opacity: 0;
+    }
+
+    .delay-2 {
+      animation-delay: 0.2s;
+      opacity: 0;
+    }
+
+    .delay-3 {
+      animation-delay: 0.3s;
+      opacity: 0;
+    }
+
+    .delay-4 {
+      animation-delay: 0.4s;
+      opacity: 0;
+    }
+
+    /* ── Filter chip active ───────────────────────────────────────────────── */
+    .chip-active {
+      background: #003527;
+      color: #fff;
+      border-color: #003527;
+    }
+
+    .chip-idle {
+      background: transparent;
+      color: #404944;
+      border-color: #bfc9c3;
+    }
+
+    .chip-idle:hover {
+      border-color: #003527;
+      color: #003527;
+    }
+
+    /* ── Mobile menu ─────────────────────────────────────────────────────── */
+    #mobile-menu {
+      display: none;
+    }
+
+    #mobile-menu.open {
+      display: flex;
+    }
+
+    /* ── Scrollbar ───────────────────────────────────────────────────────── */
+    ::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #bfc9c3;
+      border-radius: 2px;
+    }
+
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+
+<body class="bg-background text-on-surface ivory-texture antialiased">
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+     NAV
+════════════════════════════════════════════════════════════════════════════ -->
+  <nav class="fixed top-0 inset-x-0 z-50 glass">
+    <div class="flex items-center justify-between h-16 px-10 max-w-container-max mx-auto">
+
+      <!-- Logo -->
+      <span id="logo" class="font-display font-semibold text-xl text-primary tracking-tight select-none">BANAHub</span>
+
+      <!-- Desktop links -->
+      <div class="hidden md:flex items-center gap-8">
+        <a href="#ecosystem"
+          class="text-body-md font-sans text-on-surface-variant hover:text-primary transition-colors">Ecosystem</a>
+        <a href="#programs"
+          class="text-body-md font-sans text-on-surface-variant hover:text-primary transition-colors">Expansion</a>
+        <a href="#summits"
+          class="text-body-md font-sans text-on-surface-variant hover:text-primary transition-colors">Capital</a>
+        <a href="#briefing"
+          class="text-body-md font-sans text-on-surface-variant hover:text-primary transition-colors">Solutions</a>
+      </div>
+
+      <!-- CTA -->
+      <div class="hidden md:flex items-center gap-4">
+        <a href="login.html"
+          class="text-body-md font-sans text-on-surface-variant hover:text-primary transition-colors">Login</a>
+        <a href="register.html"
+          class="bg-primary text-on-primary px-5 py-2 rounded font-sans font-semibold text-body-md hover:bg-primary-container transition-colors">Apply
+          Now</a>
+      </div>
+
+      <!-- Mobile hamburger -->
+      <button id="nav-toggle" class="md:hidden p-2 text-on-surface" aria-label="Menu">
+        <span class="material-symbols-outlined">menu</span>
+      </button>
+    </div>
+
+    <!-- Mobile menu -->
+    <div id="mobile-menu"
+      class="flex-col gap-4 px-10 py-5 bg-surface-container-lowest border-t border-outline-variant/20 anim-in">
+      <a href="#ecosystem" class="text-body-lg font-sans text-on-surface">Ecosystem</a>
+      <a href="#programs" class="text-body-lg font-sans text-on-surface">Expansion</a>
+      <a href="#summits" class="text-body-lg font-sans text-on-surface">Capital</a>
+      <a href="#briefing" class="text-body-lg font-sans text-on-surface">Solutions</a>
+      <div class="flex gap-3 pt-3 border-t border-outline-variant/20">
+        <a href="login.html"
+          class="flex-1 text-center py-2.5 border border-outline-variant rounded font-sans font-semibold text-body-md text-on-surface">Login</a>
+        <a href="register.html"
+          class="flex-1 text-center py-2.5 bg-primary text-on-primary rounded font-sans font-semibold text-body-md">Apply
+          Now</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="pt-16">
+
+    <!-- ═══════════════════════════════════════════════════════════════════════════
+     HERO
+════════════════════════════════════════════════════════════════════════════ -->
+    <section class="relative min-h-[600px] flex items-center overflow-hidden bg-background">
+
+      <!-- Watermark B -->
+      <div
+        class="absolute right-0 top-0 w-[520px] h-[520px] flex items-center justify-center pointer-events-none select-none opacity-[0.04]"
+        aria-hidden="true">
+        <span class="font-display font-bold text-[480px] leading-none text-primary">B</span>
+      </div>
+
+      <div class="relative z-10 px-10 max-w-container-max mx-auto w-full py-20">
+        <span class="block font-sans font-bold text-label-caps text-secondary tracking-widest uppercase mb-5 anim-up">
+          Global Institutional Gateway
+        </span>
+        <h1
+          class="font-display font-semibold text-4xl md:text-5xl lg:text-display-xl text-primary leading-none mb-6 max-w-2xl anim-up delay-1">
+          Institutional Programs &amp;<br>Global Events
+        </h1>
+        <p class="font-sans text-body-lg text-on-surface-variant mb-10 max-w-md anim-up delay-2">
+          Bridge the gap between sovereign capital and high-growth markets. Join elite cohorts designed for
+          institutional excellence and cross-border expansion.
+        </p>
+        <div class="flex flex-wrap gap-4 anim-up delay-3">
+          <a href="#programs"
+            class="bg-primary text-on-primary px-8 py-3.5 rounded font-sans font-semibold text-body-lg hover:bg-primary-container transition-all hover:shadow-lg">
+            View All Programs
+          </a>
+          <a href="#briefing"
+            class="border border-outline text-primary px-8 py-3.5 rounded font-sans font-semibold text-body-lg hover:bg-surface-container transition-all">
+            Sponsorship Inquiry
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════════
+     ACTIVE PROGRAMS
+════════════════════════════════════════════════════════════════════════════ -->
+    <section id="programs" class="py-section-gap px-10 max-w-container-max mx-auto">
+
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+        <div>
+          <h2 class="font-display font-semibold text-headline-lg text-primary">Active Programs</h2>
+          <p class="font-sans text-body-md text-on-surface-variant mt-1">Curated acceleration for global institutions.
+          </p>
+        </div>
+        <!-- Filter chips -->
+        <div class="flex flex-wrap gap-2" id="program-filters">
+          <button onclick="setFilter(this,'all')"
+            class="chip-active  px-4 py-1.5 rounded-full border text-body-md font-sans font-medium transition-all">All</button>
+          <button onclick="setFilter(this,'asia')"
+            class="chip-idle    px-4 py-1.5 rounded-full border text-body-md font-sans font-medium transition-all">Asia
+            Pacific</button>
+          <button onclick="setFilter(this,'middle')"
+            class="chip-idle    px-4 py-1.5 rounded-full border text-body-md font-sans font-medium transition-all">Middle
+            East</button>
+          <button onclick="setFilter(this,'tech')"
+            class="chip-idle    px-4 py-1.5 rounded-full border text-body-md font-sans font-medium transition-all">Technology</button>
+        </div>
+      </div>
+
+      <!-- Bento grid -->
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+
+        <!-- Featured cohort card -->
+        <div data-filter="asia"
+          class="md:col-span-8 bg-surface-container-lowest border border-outline-variant/30 rounded-lg overflow-hidden shadow-card hover:shadow-card-hover transition-shadow flex flex-col md:flex-row">
+          <!-- Image -->
+          <div
+            class="md:w-5/12 h-64 md:h-auto bg-primary flex items-center justify-center overflow-hidden flex-shrink-0">
+            <div class="text-center select-none">
+              <p class="font-display font-bold text-6xl text-white/10 leading-none">NAH</p>
+              <p class="font-display font-bold text-4xl text-white/10">INESS</p>
+            </div>
+          </div>
+          <!-- Content -->
+          <div class="flex flex-col justify-between p-10">
+            <div>
+              <span
+                class="block font-sans font-bold text-label-caps text-secondary tracking-widest uppercase mb-4">Active
+                Enrollment</span>
+              <h3 class="font-display font-semibold text-headline-md text-primary mb-3">Southeast Asia Expansion Cohort
+              </h3>
+              <p class="font-sans text-body-md text-on-surface-variant mb-6">A high-velocity 12-week program
+                facilitating market entry for Western institutions into the ASEAN digital economy.</p>
+              <ul class="space-y-2 mb-8">
+                <li class="flex items-center gap-2 font-sans text-body-md text-on-surface">
+                  <span class="material-symbols-outlined text-primary text-[18px]">check_circle</span>
+                  Direct regulatory access
+                </li>
+                <li class="flex items-center gap-2 font-sans text-body-md text-on-surface">
+                  <span class="material-symbols-outlined text-primary text-[18px]">check_circle</span>
+                  Family office network intro
+                </li>
+              </ul>
+            </div>
+            <a href="register.html"
+              class="inline-block bg-primary text-on-primary px-6 py-3 rounded font-sans font-semibold text-body-md hover:bg-primary-container transition-colors text-center">
+              Apply for Cohort
+            </a>
+          </div>
+        </div>
+
+        <!-- Gulf Tech Bridge card -->
+        <div data-filter="middle"
+          class="md:col-span-4 bg-primary text-on-primary rounded-lg p-10 flex flex-col justify-between">
+          <div>
+            <span
+              class="block font-sans font-bold text-label-caps text-on-primary-container tracking-widest uppercase mb-4">Upcoming</span>
+            <h3 class="font-display font-semibold text-headline-md text-primary-fixed mb-3">Gulf Tech Bridge</h3>
+            <p class="font-sans text-body-md text-on-primary-container mb-8">Connecting Riyadh and Abu Dhabi sovereign
+              funds with global technology leaders.</p>
+            <div class="bg-white/10 p-5 rounded-lg border border-white/20">
+              <div class="flex justify-between items-center mb-2">
+                <span class="font-sans font-bold text-label-caps text-white/60 tracking-widest">STATUS</span>
+                <span
+                  class="bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded text-[10px] font-bold font-sans">LIMITED</span>
+              </div>
+              <p class="font-sans font-semibold text-body-lg text-primary-fixed">Next Intake: Q4 2026</p>
+            </div>
+          </div>
+          <button onclick="showModal('prospectus')"
+            class="w-full border border-white/30 text-primary-fixed py-3 rounded font-sans font-semibold text-body-md mt-8 hover:bg-white/10 transition-colors">
+            Request Prospectus
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════════
+     UPCOMING SUMMITS
+════════════════════════════════════════════════════════════════════════════ -->
+    <section id="summits" class="bg-surface-container-low py-section-gap">
+      <div class="px-10 max-w-container-max mx-auto">
+
+        <div class="text-center mb-16">
+          <h2 class="font-display font-semibold text-headline-lg text-primary mb-3">Upcoming Summits</h2>
+          <p class="font-sans text-body-lg text-on-surface-variant max-w-xl mx-auto">
+            Exclusive gatherings for institutional leaders, co-hosted with the world's premier financial entities.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+          <!-- Summit 1 -->
+          <div
+            class="bg-surface-container-lowest rounded-xl border border-outline-variant/20 shadow-card p-8 flex flex-col hover:-translate-y-1 transition-transform">
+            <div class="flex justify-between items-start mb-8">
+              <div class="bg-surface-container px-4 py-3 rounded-lg text-center min-w-[64px]">
+                <span class="block font-sans font-bold text-label-caps text-primary tracking-widest">SEP</span>
+                <span class="block font-display font-semibold text-headline-md text-primary leading-none">24</span>
+              </div>
+              <div class="text-right">
+                <span
+                  class="block font-sans font-bold text-label-caps text-secondary tracking-widest mb-2">PARTNERS</span>
+                <div class="flex -space-x-2">
+                  <div
+                    class="w-8 h-8 rounded-full bg-surface-variant border-2 border-surface-container-lowest flex items-center justify-center text-[10px] font-bold font-sans text-primary">
+                    GS</div>
+                  <div
+                    class="w-8 h-8 rounded-full bg-surface-variant border-2 border-surface-container-lowest flex items-center justify-center text-[10px] font-bold font-sans text-primary">
+                    TM</div>
+                </div>
+              </div>
+            </div>
+            <h4 class="font-display font-semibold text-headline-md text-primary mb-3">Asia North Sovereign Capital
+              Summit</h4>
+            <p class="font-sans text-body-md text-on-surface-variant mb-6 flex-1">Analyzing the shift in capital flows
+              across North Asian markets in 2025.</p>
+            <div class="flex items-center gap-2 text-on-surface-variant mb-6">
+              <span class="material-symbols-outlined text-[18px]">location_on</span>
+              <span class="font-sans text-body-md">Tokyo, Japan</span>
+            </div>
+            <button onclick="showModal('register','Asia North Sovereign Capital Summit')"
+              class="w-full border border-primary text-primary py-3 rounded font-sans font-semibold text-body-md hover:bg-primary hover:text-on-primary transition-all">
+              Register Interest
+            </button>
+          </div>
+
+          <!-- Summit 2 -->
+          <div
+            class="bg-surface-container-lowest rounded-xl border border-outline-variant/20 shadow-card p-8 flex flex-col hover:-translate-y-1 transition-transform">
+            <div class="flex justify-between items-start mb-8">
+              <div class="bg-surface-container px-4 py-3 rounded-lg text-center min-w-[64px]">
+                <span class="block font-sans font-bold text-label-caps text-primary tracking-widest">OCT</span>
+                <span class="block font-display font-semibold text-headline-md text-primary leading-none">12</span>
+              </div>
+              <div class="text-right">
+                <span
+                  class="block font-sans font-bold text-label-caps text-secondary tracking-widest mb-2">PARTNERS</span>
+                <div class="flex -space-x-2">
+                  <div
+                    class="w-8 h-8 rounded-full bg-surface-variant border-2 border-surface-container-lowest flex items-center justify-center text-[10px] font-bold font-sans text-primary">
+                    MS</div>
+                  <div
+                    class="w-8 h-8 rounded-full bg-surface-variant border-2 border-surface-container-lowest flex items-center justify-center text-[10px] font-bold font-sans text-primary">
+                    HS</div>
+                </div>
+              </div>
+            </div>
+            <h4 class="font-display font-semibold text-headline-md text-primary mb-3">The Digital Finance Round Table
+            </h4>
+            <p class="font-sans text-body-md text-on-surface-variant mb-6 flex-1">High-level discussion on CBDC
+              integration and cross-border settlement protocols.</p>
+            <div class="flex items-center gap-2 text-on-surface-variant mb-6">
+              <span class="material-symbols-outlined text-[18px]">location_on</span>
+              <span class="font-sans text-body-md">London, UK</span>
+            </div>
+            <button onclick="showModal('register','The Digital Finance Round Table')"
+              class="w-full border border-primary text-primary py-3 rounded font-sans font-semibold text-body-md hover:bg-primary hover:text-on-primary transition-all">
+              Register Interest
+            </button>
+          </div>
+
+          <!-- Summit 3 -->
+          <div
+            class="bg-surface-container-lowest rounded-xl border border-outline-variant/20 shadow-card p-8 flex flex-col hover:-translate-y-1 transition-transform">
+            <div class="flex justify-between items-start mb-8">
+              <div class="bg-surface-container px-4 py-3 rounded-lg text-center min-w-[64px]">
+                <span class="block font-sans font-bold text-label-caps text-primary tracking-widest">NOV</span>
+                <span class="block font-display font-semibold text-headline-md text-primary leading-none">05</span>
+              </div>
+              <div class="text-right">
+                <span
+                  class="block font-sans font-bold text-label-caps text-secondary tracking-widest mb-2">PARTNERS</span>
+                <div class="flex -space-x-2">
+                  <div
+                    class="w-8 h-8 rounded-full bg-surface-variant border-2 border-surface-container-lowest flex items-center justify-center text-[10px] font-bold font-sans text-primary">
+                    BH</div>
+                  <div
+                    class="w-8 h-8 rounded-full bg-surface-variant border-2 border-surface-container-lowest flex items-center justify-center text-[10px] font-bold font-sans text-primary">
+                    AD</div>
+                </div>
+              </div>
+            </div>
+            <h4 class="font-display font-semibold text-headline-md text-primary mb-3">Middle East Infrastructure Forum
+            </h4>
+            <p class="font-sans text-body-md text-on-surface-variant mb-6 flex-1">Unveiling new investment frameworks
+              for sustainable urban development projects.</p>
+            <div class="flex items-center gap-2 text-on-surface-variant mb-6">
+              <span class="material-symbols-outlined text-[18px]">location_on</span>
+              <span class="font-sans text-body-md">Dubai, UAE</span>
+            </div>
+            <button onclick="showModal('register','Middle East Infrastructure Forum')"
+              class="w-full border border-primary text-primary py-3 rounded font-sans font-semibold text-body-md hover:bg-primary hover:text-on-primary transition-all">
+              Register Interest
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════════
+     ECOSYSTEM NUMBERS
+════════════════════════════════════════════════════════════════════════════ -->
+    <section id="ecosystem" class="py-section-gap px-10 max-w-container-max mx-auto">
+      <div class="text-center mb-16">
+        <span class="block font-sans font-bold text-label-caps text-secondary tracking-widest uppercase mb-4">The
+          Network</span>
+        <h2 class="font-display font-semibold text-headline-lg text-primary">Sovereign Scale</h2>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div class="text-center">
+          <p class="font-display font-semibold text-display-xl text-primary leading-none mb-2">1,284</p>
+          <p class="font-sans text-body-md text-on-surface-variant">Institutional Members</p>
+        </div>
+        <div class="text-center">
+          <p class="font-display font-semibold text-display-xl text-primary leading-none mb-2">$4.2B</p>
+          <p class="font-sans text-body-md text-on-surface-variant">Capital Facilitated</p>
+        </div>
+        <div class="text-center">
+          <p class="font-display font-semibold text-display-xl text-primary leading-none mb-2">12</p>
+          <p class="font-sans text-body-md text-on-surface-variant">Countries of Reach</p>
+        </div>
+        <div class="text-center">
+          <p class="font-display font-semibold text-display-xl text-primary leading-none mb-2">24.8%</p>
+          <p class="font-sans text-body-md text-on-surface-variant">Avg. Net IRR</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════════
+     BRIEFING / NEWSLETTER
+════════════════════════════════════════════════════════════════════════════ -->
+    <section id="briefing" class="py-section-gap px-10 max-w-container-max mx-auto">
+      <div class="glass-card rounded-2xl p-16 flex flex-col items-center text-center">
+        <span class="material-symbols-outlined text-primary text-[48px] mb-6">mark_as_unread</span>
+        <h2 class="font-display font-semibold text-headline-lg text-primary mb-4">Institutional Briefing</h2>
+        <p class="font-sans text-body-lg text-on-surface-variant max-w-xl mb-10">
+          Subscribe to receive priority notifications for upcoming programs, summit invitations, and exclusive market
+          intelligence.
+        </p>
+        <form id="briefing-form" class="flex flex-col sm:flex-row gap-4 w-full max-w-md"
+          onsubmit="handleSubscribe(event)">
+          <input id="briefing-email" type="email" required placeholder="Institutional Email"
+            class="flex-1 bg-surface border-0 border-b border-outline focus:border-primary focus:ring-0 outline-none px-2 py-3 font-sans text-body-md" />
+          <button type="submit"
+            class="bg-primary text-on-primary px-8 py-3 rounded font-sans font-semibold text-body-md hover:bg-primary-container transition-colors whitespace-nowrap">
+            Subscribe
+          </button>
+        </form>
+        <p id="subscribe-success" class="hidden mt-4 font-sans text-body-md text-primary font-semibold">✓ You're on the
+          list. Priority briefings incoming.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+     FOOTER
+════════════════════════════════════════════════════════════════════════════ -->
+  <footer class="bg-surface-container-lowest border-t border-outline-variant py-section-gap">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 px-10 max-w-container-max mx-auto mb-10">
+      <div class="col-span-2 md:col-span-1">
+        <span class="font-display font-semibold text-headline-md text-primary block mb-3">BANAHub</span>
+        <p class="font-sans text-body-md text-on-surface-variant opacity-80 leading-relaxed">
+          © 2026 BANAHub. Institutional Cross-Border Excellence.
+        </p>
+      </div>
+      <div>
+        <h5 class="font-sans font-bold text-label-caps text-primary tracking-widest mb-5">REGIONS</h5>
+        <ul class="space-y-3">
+          <li><a href="#ecosystem"
+              class="font-sans text-body-md text-on-surface-variant hover:text-primary transition-colors">Singapore
+              HQ</a></li>
+          <li><a href="#programs"
+              class="font-sans text-body-md text-on-surface-variant hover:text-primary transition-colors">SEA
+              Gateway</a></li>
+          <li><a href="#summits"
+              class="font-sans text-body-md text-on-surface-variant hover:text-primary transition-colors">Asia North</a>
+          </li>
+          <li><a href="#summits"
+              class="font-sans text-body-md text-on-surface-variant hover:text-primary transition-colors">Gulf
+              Region</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5 class="font-sans font-bold text-label-caps text-primary tracking-widest mb-5">GOVERNANCE</h5>
+        <ul class="space-y-3">
+          <li><a href="#briefing"
+              class="font-sans text-body-md text-on-surface-variant hover:text-primary transition-colors">Privacy</a>
+          </li>
+          <li><a href="#briefing"
+              class="font-sans text-body-md text-on-surface-variant hover:text-primary transition-colors">Compliance</a>
+          </li>
+          <li><a href="#briefing"
+              class="font-sans text-body-md text-on-surface-variant hover:text-primary transition-colors">Transparency</a>
+          </li>
+        </ul>
+      </div>
+      <div>
+        <h5 class="font-sans font-bold text-label-caps text-primary tracking-widest mb-5">CONNECT</h5>
+        <div class="flex gap-3">
+          <a href="https://linkedin.com/company/banahub" target="_blank"
+            class="w-9 h-9 rounded-full border border-outline-variant flex items-center justify-center hover:bg-surface-container transition-colors">
+            <span class="material-symbols-outlined text-[18px] text-on-surface-variant">share</span>
+          </a>
+          <a href="mailto:contact@banahub.com"
+            class="w-9 h-9 rounded-full border border-outline-variant flex items-center justify-center hover:bg-surface-container transition-colors">
+            <span class="material-symbols-outlined text-[18px] text-on-surface-variant">mail</span>
+          </a>
+          <a href="https://www.banahub.com" target="_blank"
+            class="w-9 h-9 rounded-full border border-outline-variant flex items-center justify-center hover:bg-surface-container transition-colors">
+            <span class="material-symbols-outlined text-[18px] text-on-surface-variant">language</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+     MODAL — Register Interest / Request Prospectus
+════════════════════════════════════════════════════════════════════════════ -->
+  <div id="modal-overlay"
+    class="fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm hidden items-center justify-center p-4"
+    onclick="closeModal(event)">
+    <div class="bg-surface-container-lowest rounded-xl shadow-card-hover max-w-md w-full p-8"
+      onclick="event.stopPropagation()">
+      <div class="flex justify-between items-start mb-6">
+        <div>
+          <span id="modal-label"
+            class="block font-sans font-bold text-label-caps text-secondary tracking-widest mb-1"></span>
+          <h3 id="modal-title" class="font-display font-semibold text-headline-md text-primary"></h3>
+        </div>
+        <button onclick="hideModal()" class="text-outline hover:text-on-surface transition-colors p-1">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <form id="modal-form" onsubmit="handleModalSubmit(event)" class="flex flex-col gap-4">
+        <div>
+          <label class="block font-sans font-bold text-label-caps text-outline tracking-widest mb-2">Full Name</label>
+          <input type="text" required placeholder="Legal name"
+            class="w-full border border-outline-variant rounded px-3 py-2.5 font-sans text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 bg-surface" />
+        </div>
+        <div>
+          <label class="block font-sans font-bold text-label-caps text-outline tracking-widest mb-2">Institutional
+            Email</label>
+          <input type="email" required placeholder="name@institution.com"
+            class="w-full border border-outline-variant rounded px-3 py-2.5 font-sans text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 bg-surface" />
+        </div>
+        <div>
+          <label class="block font-sans font-bold text-label-caps text-outline tracking-widest mb-2">Institution</label>
+          <input type="text" required placeholder="Fund / Family Office / Corp"
+            class="w-full border border-outline-variant rounded px-3 py-2.5 font-sans text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 bg-surface" />
+        </div>
+        <button type="submit"
+          class="bg-primary text-on-primary w-full py-3 rounded font-sans font-semibold text-body-md hover:bg-primary-container transition-colors mt-2">
+          Submit Request
+        </button>
+      </form>
+      <p id="modal-success"
+        class="hidden text-center font-sans text-body-md text-primary font-semibold mt-4 pt-4 border-t border-outline-variant">
+        ✓ Request received. Our team will contact you within 48 hours.
+      </p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+     SCRIPTS
+════════════════════════════════════════════════════════════════════════════ -->
+  <script>
+    /* ── Mobile nav ─────────────────────────────────────────────────────────── */
+    document.getElementById('nav-toggle').addEventListener('click', () => {
+      const menu = document.getElementById('mobile-menu');
+      menu.classList.toggle('open');
+      const icon = document.querySelector('#nav-toggle .material-symbols-outlined');
+      icon.textContent = menu.classList.contains('open') ? 'close' : 'menu';
+    });
+
+    /* ── Filter chips ───────────────────────────────────────────────────────── */
+    function setFilter(btn, filter) {
+      document.querySelectorAll('#program-filters button').forEach(b => {
+        b.classList.remove('chip-active');
+        b.classList.add('chip-idle');
+      });
+      btn.classList.remove('chip-idle');
+      btn.classList.add('chip-active');
+      document.querySelectorAll('[data-filter]').forEach(card => {
+        if (filter === 'all' || card.dataset.filter === filter) {
+          card.style.display = '';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+
+    /* ── Subscribe form ─────────────────────────────────────────────────────── */
+    function handleSubscribe(e) {
+      e.preventDefault();
+      document.getElementById('briefing-form').style.display = 'none';
+      document.getElementById('subscribe-success').classList.remove('hidden');
+    }
+
+    /* ── Modal ──────────────────────────────────────────────────────────────── */
+    const MODAL_CONFIG = {
+      register: {
+        label: 'Register Interest',
+        title: event => event || 'Summit Registration',
+      },
+      prospectus: {
+        label: 'Request Prospectus',
+        title: () => 'Gulf Tech Bridge',
+      },
+    };
+
+    function showModal(type, event) {
+      const cfg = MODAL_CONFIG[type];
+      document.getElementById('modal-label').textContent = cfg.label;
+      document.getElementById('modal-title').textContent = cfg.title(event);
+      document.getElementById('modal-success').classList.add('hidden');
+      document.getElementById('modal-form').reset();
+      document.getElementById('modal-form').style.display = 'flex';
+      const overlay = document.getElementById('modal-overlay');
+      overlay.classList.remove('hidden');
+      overlay.classList.add('flex');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function hideModal() {
+      const overlay = document.getElementById('modal-overlay');
+      overlay.classList.add('hidden');
+      overlay.classList.remove('flex');
+      document.body.style.overflow = '';
+    }
+
+    function closeModal(e) {
+      if (e.target === document.getElementById('modal-overlay')) hideModal();
+    }
+
+    function handleModalSubmit(e) {
+      e.preventDefault();
+      document.getElementById('modal-form').style.display = 'none';
+      document.getElementById('modal-success').classList.remove('hidden');
+      setTimeout(hideModal, 2500);
+    }
+
+    /* ── Escape key ─────────────────────────────────────────────────────────── */
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') { hideModal(); }
+    });
+
+    /* ── Intersection observer animations ───────────────────────────────────── */
+    const observer = new IntersectionObserver(
+      entries => entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.style.animationPlayState = 'running';
+          observer.unobserve(e.target);
+        }
+      }),
+      { threshold: 0.1 }
+    );
+    document.querySelectorAll('.anim-up, .anim-in').forEach(el => {
+      el.style.animationPlayState = 'paused';
+      observer.observe(el);
+    });
+  </script>
+
+
+</body>
+
+</html>

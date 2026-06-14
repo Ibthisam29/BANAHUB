@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Dashboard | BANAHub</title>
+<link rel="stylesheet" href="./output.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Manrope:wght@300;400;500;600;700&family=Material+Symbols+Outlined:wght,FILL@400,0&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;}
+body{font-family:'Manrope',system-ui,sans-serif;}
+.font-display{font-family:'Newsreader',Georgia,serif;}
+.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;vertical-align:middle;}
+.glass{background:rgba(250,249,245,.72);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);}
+</style>
+</head>
+<body class="min-h-screen bg-background antialiased flex">
+
+<!-- Sidebar -->
+<aside class="w-52 flex-shrink-0 h-screen sticky top-0 flex flex-col bg-surface-container-lowest border-r border-outline-variant/20">
+  <div class="p-5 border-b border-outline-variant/20">
+    <div class="flex items-center gap-2 mb-1">
+      <div class="w-8 h-8 bg-primary rounded flex items-center justify-center">
+        <span class="text-white text-xs font-display font-bold">B</span>
+      </div>
+      <span class="font-sans font-bold text-xs text-on-surface tracking-widest">BANAHUB</span>
+    </div>
+    <p class="font-display font-semibold text-lg text-on-surface mt-3">Institutional OS</p>
+    <p class="font-sans font-bold text-xs text-on-surface-variant tracking-widest uppercase mt-0.5">Portfolio Discovery</p>
+  </div>
+  <nav class="flex-1 py-4 px-3 flex flex-col gap-1">
+    <a href="dashboard.html" class="flex items-center gap-3 px-3 py-2.5 rounded bg-primary text-white font-sans text-sm font-medium">
+      <span class="material-symbols-outlined text-[16px]">dashboard</span>Dashboard
+    </a>
+    <a href="index.html#programs" class="flex items-center gap-3 px-3 py-2.5 rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface font-sans text-sm font-medium transition-colors">
+      <span class="material-symbols-outlined text-[16px]">target</span>Strategy
+    </a>
+    <a href="index.html#ecosystem" class="flex items-center gap-3 px-3 py-2.5 rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface font-sans text-sm font-medium transition-colors">
+      <span class="material-symbols-outlined text-[16px]">hub</span>Network
+    </a>
+    <a href="index.html#summits" class="flex items-center gap-3 px-3 py-2.5 rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface font-sans text-sm font-medium transition-colors">
+      <span class="material-symbols-outlined text-[16px]">account_balance</span>Capital
+    </a>
+    <a href="index.html#briefing" class="flex items-center gap-3 px-3 py-2.5 rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface font-sans text-sm font-medium transition-colors">
+      <span class="material-symbols-outlined text-[16px]">settings</span>Settings
+    </a>
+  </nav>
+  <div class="p-4 border-t border-outline-variant/20">
+    <button class="w-full flex items-center justify-center gap-2 bg-primary text-white py-2.5 rounded font-sans font-semibold text-sm hover:bg-primary-container transition-colors mb-3">
+      <span class="material-symbols-outlined text-[14px]">add</span>New Expansion
+    </button>
+    <button onclick="signOut()" class="w-full flex items-center gap-3 px-3 py-2 rounded text-on-surface-variant hover:text-on-surface font-sans text-sm transition-colors">
+      <span class="material-symbols-outlined text-[14px]">logout</span>Sign Out
+    </button>
+  </div>
+</aside>
+
+<!-- Main -->
+<div class="flex-1 flex flex-col min-w-0">
+  <!-- Topbar -->
+  <header class="glass sticky top-0 z-40 border-b border-outline-variant/20 h-14 flex items-center px-6 gap-6">
+    <nav class="flex items-center gap-6 flex-1">
+      <a href="#" class="font-sans text-sm font-semibold text-on-surface border-b-2 border-on-surface pb-0.5">Dashboard</a>
+      <a href="index.html#programs" class="font-sans text-sm text-on-surface-variant hover:text-on-surface transition-colors">Memberships</a>
+      <a href="index.html#briefing" class="font-sans text-sm text-on-surface-variant hover:text-on-surface transition-colors">Compliance</a>
+      <a href="index.html#summits" class="font-sans text-sm text-on-surface-variant hover:text-on-surface transition-colors">Capital Flows</a>
+    </nav>
+    <div class="flex items-center gap-3">
+      <button class="relative p-2 text-on-surface-variant hover:text-on-surface">
+        <span class="material-symbols-outlined text-[18px]">notifications</span>
+        <span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-secondary rounded-full"></span>
+      </button>
+      <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+        <span class="material-symbols-outlined text-primary text-[16px]">person</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1 overflow-y-auto p-8">
+    <div class="mb-8">
+      <p class="font-sans font-bold text-xs text-on-surface-variant tracking-widest uppercase mb-1">Welcome back</p>
+      <h1 id="dash-welcome" class="font-display font-semibold text-4xl text-on-surface">Institutional Member</h1>
+      <p class="font-sans text-sm text-on-surface-variant mt-1">Singapore HQ · Southeast Asia</p>
+    </div>
+
+    <!-- Metrics -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+      <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-6 shadow-sm">
+        <div class="flex items-center justify-between mb-3">
+          <p class="font-sans font-bold text-xs text-on-surface-variant tracking-widest uppercase">Portfolio Value</p>
+          <span class="material-symbols-outlined text-outline text-[16px]">trending_up</span>
+        </div>
+        <p class="font-display font-semibold text-3xl text-on-surface">$412.8M</p>
+        <p class="font-sans text-xs text-primary font-semibold mt-1">+12.4% <span class="text-on-surface-variant font-normal">vs last quarter</span></p>
+      </div>
+      <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-6 shadow-sm">
+        <div class="flex items-center justify-between mb-3">
+          <p class="font-sans font-bold text-xs text-on-surface-variant tracking-widest uppercase">Active Mandates</p>
+          <span class="material-symbols-outlined text-outline text-[16px]">public</span>
+        </div>
+        <p class="font-display font-semibold text-3xl text-on-surface">3</p>
+        <p class="font-sans text-xs text-on-surface-variant mt-1">Across 3 regions</p>
+      </div>
+      <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-6 shadow-sm">
+        <div class="flex items-center justify-between mb-3">
+          <p class="font-sans font-bold text-xs text-on-surface-variant tracking-widest uppercase">Network Access</p>
+          <span class="material-symbols-outlined text-outline text-[16px]">group</span>
+        </div>
+        <p class="font-display font-semibold text-3xl text-on-surface">1,284+</p>
+        <p class="font-sans text-xs text-on-surface-variant mt-1">Institutions</p>
+      </div>
+      <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-6 shadow-sm">
+        <div class="flex items-center justify-between mb-3">
+          <p class="font-sans font-bold text-xs text-on-surface-variant tracking-widest uppercase">Vetting Status</p>
+          <span class="material-symbols-outlined text-outline text-[16px]">verified_user</span>
+        </div>
+        <p class="font-display font-semibold text-3xl text-on-surface">Gold</p>
+        <p class="font-sans text-xs text-primary font-semibold mt-1">⊙ Tier Verified</p>
+      </div>
+    </div>
+
+    <!-- CTA cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <a href="index.html#programs" class="bg-primary text-on-primary rounded-lg p-6 hover:bg-primary-container transition-colors">
+        <span class="material-symbols-outlined text-[24px] text-primary-fixed mb-3 block">calendar_today</span>
+        <p class="font-display font-semibold text-xl mb-1">Programs & Events</p>
+        <p class="font-sans text-sm text-on-primary-container">View active cohorts and upcoming summits</p>
+      </a>
+      <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-6 shadow-sm">
+        <span class="material-symbols-outlined text-primary text-[24px] mb-3 block">target</span>
+        <p class="font-display font-semibold text-xl text-on-surface mb-1">Deal Mandates</p>
+        <p class="font-sans text-sm text-on-surface-variant mb-4">Browse exclusive cross-border mandates</p>
+        <button class="bg-primary text-on-primary px-4 py-2 rounded font-sans font-semibold text-xs hover:bg-primary-container transition-colors">Browse Mandates</button>
+      </div>
+      <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-6 shadow-sm">
+        <span class="material-symbols-outlined text-secondary text-[24px] mb-3 block">account_balance_wallet</span>
+        <p class="font-display font-semibold text-xl text-on-surface mb-1">Portfolio</p>
+        <p class="font-sans text-sm text-on-surface-variant mb-4">Capital allocation and performance overview</p>
+        <button class="border border-outline-variant text-on-surface px-4 py-2 rounded font-sans font-semibold text-xs hover:bg-surface-container transition-colors">View Portfolio</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+
+<script src="config.js"></script>
+<script src="api.js"></script>
+<script>
+/* API_BASE and apiFetch() are defined in api.js */
+
+// ── Auth guard ────────────────────────────────────────────────────
+// Session lives in an HttpOnly cookie. JS cannot read it directly.
+// We verify it by calling /api/auth/me — if valid, the server returns user data.
+(async function authGuard() {
+  try {
+    const res = await apiFetch('/api/auth/me');
+    if (!res.ok) { window.location.href = 'login.html'; return; }
+
+    const { user } = await res.json();
+
+    // Admins should use admin.html, not this page
+    if (user.role === 'admin') { window.location.href = 'admin.html'; return; }
+
+    const name = user.full_name || user.email.split('@')[0] || 'Institutional Member';
+    const heading = document.getElementById('dash-welcome');
+    if (heading) heading.textContent = name;
+
+    if (user.status && user.status !== 'approved') {
+      const notice = document.createElement('div');
+      notice.style.cssText = 'margin:16px 0;padding:16px;border-radius:14px;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;font-weight:600;';
+      notice.textContent = 'Your account is pending approval. You can view this page, but full member access is limited until admin approval.';
+      document.querySelector('main')?.prepend(notice);
+    }
+
+  } catch (e) {
+    window.location.href = 'login.html';
+  }
+})();
+
+// ── Sign out ──────────────────────────────────────────────────────
+async function signOut() {
+  const csrf = await getCsrf();
+  await apiFetch('/api/auth/logout', {
+    method: 'POST',
+    body: JSON.stringify({ csrf_token: csrf }),
+  }).catch(() => {});
+  sessionStorage.clear();
+  window.location.href = 'login.html';
+}
+</script>
+
+</body>
+</html>

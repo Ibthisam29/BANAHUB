@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Login | BANAHub</title>
+<link rel="stylesheet" href="./output.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Manrope:wght@300;400;500;600;700&family=Material+Symbols+Outlined:wght,FILL@400,0&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;}
+body{font-family:'Manrope',system-ui,sans-serif;}
+.font-display{font-family:'Newsreader',Georgia,serif;}
+.ivory-texture{background-image:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23000' fill-opacity='.012' fill-rule='evenodd'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E");}
+.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;vertical-align:middle;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.anim-up{animation:fadeUp 0.4s ease-out forwards;}
+</style>
+</head>
+<body class="min-h-screen bg-background ivory-texture antialiased">
+
+<div class="min-h-screen flex">
+
+  <!-- Left panel -->
+  <div class="hidden lg:flex lg:w-1/2 bg-primary flex-col justify-between p-12">
+    <a href="index.html" class="font-display font-semibold text-xl text-white">BANAHub</a>
+    <div class="select-none" aria-hidden="true">
+      <p class="font-display font-bold text-[280px] leading-none text-white/[0.06]">B</p>
+    </div>
+    <div>
+      <p class="font-display italic text-2xl text-white/75 leading-relaxed mb-4 max-w-sm">
+        "The gateway between sovereign capital and the world's highest-growth markets."
+      </p>
+      <p class="font-sans text-sm text-white/40">BANAHub · Institutional Cross-Border Excellence</p>
+    </div>
+  </div>
+
+  <!-- Right form -->
+  <div class="flex-1 flex items-center justify-center p-8">
+    <div class="w-full max-w-sm anim-up">
+
+      <!-- Mobile logo -->
+      <a href="index.html" class="lg:hidden block font-display font-semibold text-xl text-primary mb-10">BANAHub</a>
+
+      <span class="block font-sans font-bold text-xs text-on-surface-variant tracking-[0.15em] uppercase mb-2">Institutional Access</span>
+      <h1 class="font-display font-semibold text-4xl text-primary mb-8">Welcome back</h1>
+
+      <div id="error-msg" class="hidden mb-5 px-4 py-3 bg-red-50 border border-red-200 rounded text-sm font-sans text-red-700"></div>
+
+      <form id="login-form" onsubmit="handleLogin(event)" class="flex flex-col gap-5">
+        <div>
+          <label class="block font-sans font-bold text-xs text-on-surface-variant tracking-widest uppercase mb-2">Email Address</label>
+          <input id="email" type="email" required placeholder="name@institution.com"
+            class="w-full border border-outline-variant rounded px-3 py-2.5 font-sans text-sm text-on-surface bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all"/>
+        </div>
+        <div>
+          <label class="block font-sans font-bold text-xs text-on-surface-variant tracking-widest uppercase mb-2">Password</label>
+          <div class="relative">
+            <input id="password" type="password" required placeholder="••••••••"
+              class="w-full border border-outline-variant rounded px-3 py-2.5 pr-10 font-sans text-sm text-on-surface bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all"/>
+            <button type="button" onclick="togglePw()" class="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface transition-colors">
+              <span id="pw-icon" class="material-symbols-outlined text-[18px]">visibility_off</span>
+            </button>
+          </div>
+        </div>
+        <button type="submit" id="submit-btn"
+          class="bg-primary text-white w-full py-3 rounded font-sans font-semibold text-sm hover:bg-primary-container transition-colors mt-1 flex items-center justify-center gap-2">
+          <span id="btn-text">Access Platform</span>
+          <span id="btn-spinner" class="hidden material-symbols-outlined text-[18px] animate-spin">progress_activity</span>
+        </button>
+      </form>
+
+      <p class="font-sans text-sm text-on-surface-variant text-center mt-6">
+        New institution?
+        <a href="register.html" class="text-primary font-semibold hover:underline">Apply for access</a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="api.js"></script>
+<script>
+/* API_BASE and apiFetch() are defined in api.js — edit that file to
+   change the backend URL for production. */
+
+function togglePw() {
+  const pw = document.getElementById('password');
+  const icon = document.getElementById('pw-icon');
+  if (pw.type === 'password') { pw.type = 'text'; icon.textContent = 'visibility'; }
+  else { pw.type = 'password'; icon.textContent = 'visibility_off'; }
+}
+
+async function handleLogin(e) {
+  e.preventDefault();
+  const btn  = document.getElementById('submit-btn');
+  const txt  = document.getElementById('btn-text');
+  const spin = document.getElementById('btn-spinner');
+  const err  = document.getElementById('error-msg');
+
+  btn.disabled = true;
+  txt.textContent = 'Authenticating…';
+  spin.classList.remove('hidden');
+  err.classList.add('hidden');
+
+  const email    = document.getElementById('email').value.trim().toLowerCase();
+  const password = document.getElementById('password').value;
+
+  try {
+    const csrf = await getCsrf(true);
+    const res = await apiFetch('/api/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password, csrf_token: csrf }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.detail || 'Invalid email or password.');
+    }
+
+    // CSRF token already cached in-memory by getCsrf() — no sessionStorage needed.
+
+    // Redirect based on role
+    if (data.user.role === 'admin') {
+      window.location.href = 'admin.html';
+    } else {
+      window.location.href = 'dashboard.html';
+    }
+
+  } catch (ex) {
+    err.textContent = ex.message || 'Invalid email or password.';
+    err.classList.remove('hidden');
+    btn.disabled = false;
+    txt.textContent = 'Access Platform';
+    spin.classList.add('hidden');
+  }
+}
+</script>
+</body>
+</html>
