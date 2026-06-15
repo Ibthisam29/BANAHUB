@@ -3,9 +3,9 @@
 // Fixes: error.detail format, all admin routes, role filters, KYC, content.
 
 const CONFIG = {
-  SUPABASE_URL: 'https://vapzyqcppimgignwbmda.supabase.co',
-  SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhcHp5cWNwcGltZ2lnbndibWRhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxNjkxODEsImV4cCI6MjA5NDc0NTE4MX0.UFmfs90fCuBea5J097iNInJdEjN4HX0wURYrhabr8xc',
-  VERSION: '2.2.0',
+  SUPABASE_URL: 'https://ositmmczozefrdzcgxrp.supabase.co',
+  SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9zaXRtbWN6b3plZnJkemNneHJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMjA0NjcsImV4cCI6MjA4OTY5NjQ2N30.waj1tkuz5M5kGRNa3qmo_DKt_2tslXX2W5Z_5jwpxiY',
+  VERSION: '2.3.0',
 };
 window.CONFIG = CONFIG;
 const API_BASE = '';
@@ -258,6 +258,198 @@ window.fetch = async function(input, opts) {
     if (route.includes('newsletter') || route.includes('subscribe')) {
       await sb.from('newsletter_subscribers').upsert({ email: body.email, name: body.name || '', is_active: true }, { onConflict: 'email' });
       return _resp({ success: true });
+    }
+
+
+    // ── COMPANIES ──────────────────────────────────────────────────────────
+    if (route.startsWith('/companies')) {
+      if (method === 'GET') {
+        const urlQ = new URLSearchParams(route.includes('?') ? route.split('?')[1] : '');
+        let q = sb.from('companies').select('*').eq('status', 'approved').order('featured', { ascending: false }).order('created_at', { ascending: false });
+        if (urlQ.get('industry')) q = q.contains('industry', [urlQ.get('industry')]);
+        if (urlQ.get('stage')) q = q.eq('stage', urlQ.get('stage'));
+        const { data } = await q;
+        return _resp({ companies: data || [], total: (data||[]).length });
+      }
+      if (method === 'POST') {
+        const { data: { user } } = await sb.auth.getUser();
+        if (!user) return _resp({ detail: 'Not authenticated' }, 401);
+        const { data } = await sb.from('companies').insert(Object.assign({}, body, { user_id: user.id, status: 'pending' })).select().single();
+        return _resp({ success: true, company: data }, 201);
+      }
+    }
+
+    // ── INVESTORS ──────────────────────────────────────────────────────────
+    if (route.startsWith('/investors')) {
+      if (method === 'GET') {
+        const urlQ = new URLSearchParams(route.includes('?') ? route.split('?')[1] : '');
+        let q = sb.from('investors').select('*').eq('status', 'approved').order('featured', { ascending: false }).order('created_at', { ascending: false });
+        if (urlQ.get('type')) q = q.eq('investor_type', urlQ.get('type'));
+        if (urlQ.get('sector')) q = q.contains('focus_sectors', [urlQ.get('sector')]);
+        const { data } = await q;
+        return _resp({ investors: data || [], total: (data||[]).length });
+      }
+      if (method === 'POST') {
+        const { data: { user } } = await sb.auth.getUser();
+        if (!user) return _resp({ detail: 'Not authenticated' }, 401);
+        const { data } = await sb.from('investors').insert(Object.assign({}, body, { user_id: user.id, status: 'pending' })).select().single();
+        return _resp({ success: true, investor: data }, 201);
+      }
+    }
+
+    // ── ADVISORS ──────────────────────────────────────────────────────────
+    if (route.startsWith('/advisors')) {
+      if (method === 'GET') {
+        const { data } = await sb.from('advisors').select('*').eq('status', 'approved').order('featured', { ascending: false });
+        return _resp({ advisors: data || [], total: (data||[]).length });
+      }
+      if (method === 'POST') {
+        const { data: { user } } = await sb.auth.getUser();
+        if (!user) return _resp({ detail: 'Not authenticated' }, 401);
+        const { data } = await sb.from('advisors').insert(Object.assign({}, body, { user_id: user.id, status: 'pending' })).select().single();
+        return _resp({ success: true, advisor: data }, 201);
+      }
+    }
+
+    // ── PARTNERS ──────────────────────────────────────────────────────────
+    if (route.startsWith('/partners')) {
+      if (method === 'GET') {
+        const { data } = await sb.from('partners').select('*').eq('status', 'approved').order('featured', { ascending: false });
+        return _resp({ partners: data || [], total: (data||[]).length });
+      }
+    }
+
+    // ── DEAL ROOMS ────────────────────────────────────────────────────────
+    if (route.startsWith('/deal-rooms') || route.startsWith('/deal_rooms')) {
+      if (method === 'GET') {
+        const { data: { user } } = await sb.auth.getUser();
+        if (!user) return _resp({ detail: 'Not authenticated' }, 401);
+        const { data: memberRooms } = await sb.from('deal_room_members').select('deal_room_id').eq('user_id', user.id).eq('status', 'accepted');
+        const ids = (memberRooms||[]).map(r => r.deal_room_id);
+        const { data } = await sb.from('deal_rooms').select('*, companies(company_name, logo_url)').in('id', ids.length ? ids : ['00000000-0000-0000-0000-000000000000']).order('created_at', { ascending: false });
+        return _resp({ deal_rooms: data || [], total: (data||[]).length });
+      }
+      if (method === 'POST') {
+        const { data: { user } } = await sb.auth.getUser();
+        if (!user) return _resp({ detail: 'Not authenticated' }, 401);
+        const { data } = await sb.from('deal_rooms').insert(Object.assign({}, body, { created_by: user.id, status: 'draft' })).select().single();
+        if (data) await sb.from('deal_room_members').insert({ deal_room_id: data.id, user_id: user.id, role: 'owner', status: 'accepted' });
+        return _resp({ success: true, deal_room: data }, 201);
+      }
+    }
+
+    // ── MESSAGES ──────────────────────────────────────────────────────────
+    if (route.startsWith('/messages')) {
+      const { data: { user } } = await sb.auth.getUser();
+      if (!user) return _resp({ detail: 'Not authenticated' }, 401);
+      if (method === 'GET') {
+        const { data } = await sb.from('messages').select('*, sender:sender_id(email, full_name)').eq('recipient_id', user.id).order('created_at', { ascending: false });
+        return _resp({ messages: data || [], unread: (data||[]).filter(m => !m.read).length });
+      }
+      if (method === 'POST') {
+        const { data } = await sb.from('messages').insert(Object.assign({}, body, { sender_id: user.id })).select().single();
+        return _resp({ success: true, message: data }, 201);
+      }
+    }
+
+    // ── INTRODUCTIONS ─────────────────────────────────────────────────────
+    if (route.startsWith('/introductions')) {
+      const { data: { user } } = await sb.auth.getUser();
+      if (!user) return _resp({ detail: 'Not authenticated' }, 401);
+      if (method === 'POST') {
+        const { data } = await sb.from('introductions').insert(Object.assign({}, body, { requester_id: user.id, status: 'pending' })).select().single();
+        return _resp({ success: true, introduction: data }, 201);
+      }
+      if (method === 'GET') {
+        const { data } = await sb.from('introductions').select('*').or(`requester_id.eq.${user.id},target_id.eq.${user.id}`).order('created_at', { ascending: false });
+        return _resp({ introductions: data || [], total: (data||[]).length });
+      }
+    }
+
+    // ── CRM (admin only) ─────────────────────────────────────────────────
+    if (route.startsWith('/admin/crm') || route.startsWith('/crm')) {
+      if (method === 'GET') {
+        const urlQ = new URLSearchParams(route.includes('?') ? route.split('?')[1] : '');
+        let q = sb.from('crm_contacts').select('*').order('created_at', { ascending: false });
+        if (urlQ.get('stage')) q = q.eq('pipeline_stage', urlQ.get('stage'));
+        if (urlQ.get('type')) q = q.eq('contact_type', urlQ.get('type'));
+        const { data } = await q;
+        return _resp({ contacts: data || [], total: (data||[]).length });
+      }
+      if (method === 'POST') {
+        const { data } = await sb.from('crm_contacts').insert(body).select().single();
+        return _resp({ success: true, contact: data }, 201);
+      }
+      const crmMatch = route.match(/\/crm\/([^/?]+)/);
+      if (crmMatch && method === 'PATCH') {
+        const { data } = await sb.from('crm_contacts').update(body).eq('id', crmMatch[1]).select().single();
+        return _resp({ success: true, contact: data });
+      }
+      if (crmMatch && method === 'DELETE') {
+        await sb.from('crm_contacts').delete().eq('id', crmMatch[1]);
+        return _resp({ success: true });
+      }
+    }
+
+    // ── ADMIN: companies/investors/advisors/partners management ─────────────
+    if (route.startsWith('/admin/companies')) {
+      const { data } = await sb.from('companies').select('*, users(email)').order('created_at', { ascending: false });
+      return _resp({ companies: data || [], total: (data||[]).length });
+    }
+    if (route.startsWith('/admin/investors')) {
+      const { data } = await sb.from('investors').select('*, users(email)').order('created_at', { ascending: false });
+      return _resp({ investors: data || [], total: (data||[]).length });
+    }
+    if (route.startsWith('/admin/advisors')) {
+      const { data } = await sb.from('advisors').select('*, users(email)').order('created_at', { ascending: false });
+      return _resp({ advisors: data || [], total: (data||[]).length });
+    }
+    if (route.startsWith('/admin/partners')) {
+      const { data } = await sb.from('partners').select('*').order('created_at', { ascending: false });
+      return _resp({ partners: data || [], total: (data||[]).length });
+    }
+    if (route.startsWith('/admin/deal-rooms') || route.startsWith('/admin/deal_rooms')) {
+      const { data } = await sb.from('deal_rooms').select('*, companies(company_name)').order('created_at', { ascending: false });
+      return _resp({ deal_rooms: data || [], total: (data||[]).length });
+    }
+    if (route.startsWith('/admin/introductions')) {
+      const { data } = await sb.from('introductions').select('*').order('created_at', { ascending: false });
+      return _resp({ introductions: data || [], total: (data||[]).length });
+    }
+    if (route.startsWith('/admin/subscriptions')) {
+      const { data } = await sb.from('subscriptions').select('*, users(email, full_name)').order('created_at', { ascending: false });
+      return _resp({ subscriptions: data || [], total: (data||[]).length });
+    }
+
+    // ── ADMIN: generic entity status update ─────────────────────────────────
+    const entityMatch = route.match(/^\/admin\/(companies|investors|advisors|partners|deal.rooms|introductions)\/([^/?]+)/);
+    if (entityMatch && (method === 'PATCH' || method === 'PUT')) {
+      const tbl = entityMatch[1].replace('-','_');
+      const { data } = await sb.from(tbl).update(Object.assign({}, body, { updated_at: new Date().toISOString() })).eq('id', entityMatch[2]).select().single();
+      return _resp({ success: true, data });
+    }
+
+    // ── ADMIN: enhanced stats ───────────────────────────────────────────────
+    if (route.startsWith('/admin/stats')) {
+      const [u, a, p, e, s, k, co, inv, adv, dr] = await Promise.all([
+        sb.from('users').select('id', { count: 'exact', head: true }),
+        sb.from('applications').select('id', { count: 'exact', head: true }),
+        sb.from('applications').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+        sb.from('events').select('id', { count: 'exact', head: true }),
+        sb.from('newsletter_subscribers').select('id', { count: 'exact', head: true }).eq('is_active', true),
+        sb.from('kyc_uploads').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+        sb.from('companies').select('id', { count: 'exact', head: true }),
+        sb.from('investors').select('id', { count: 'exact', head: true }),
+        sb.from('advisors').select('id', { count: 'exact', head: true }),
+        sb.from('deal_rooms').select('id', { count: 'exact', head: true }).eq('status', 'open'),
+      ]);
+      return _resp({
+        total_users: u.count||0, total_applications: a.count||0,
+        pending_applications: p.count||0, total_events: e.count||0,
+        total_subscribers: s.count||0, pending_kyc: k.count||0,
+        total_companies: co.count||0, total_investors: inv.count||0,
+        total_advisors: adv.count||0, open_deal_rooms: dr.count||0,
+      });
     }
 
     // ── 404 (return empty success so panels don't crash) ────────────────────
