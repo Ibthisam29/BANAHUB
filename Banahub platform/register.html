@@ -252,7 +252,7 @@ async function handleSubmit() {
   // Collect KYC file (optional at registration stage)
   const kycInput = document.getElementById('kyc-file');
 
-  const csrfBeforeRegister = await getCsrf(true);
+  // CSRF handled by Supabase JWT
 
   const payload = {
     csrf_token: csrfBeforeRegister,
@@ -278,7 +278,7 @@ async function handleSubmit() {
 
     // 2. Submit application details (institution, sectors, etc.)
     // Use returned csrf_token directly; getCsrf() in-memory cache is also updated.
-    const csrf = data.csrf_token || await getCsrf();
+    // Session stored in localStorage
     await apiFetch('/api/applications/submit', {
       method: 'POST',
       body: JSON.stringify({

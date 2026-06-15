@@ -1531,7 +1531,7 @@ async function doLogin() {
       method:      'POST',
       credentials: 'include',
       headers:     { 'Content-Type': 'application/json' },
-      body:        JSON.stringify({ email, password, csrf_token: CSRF_TOKEN || await getCsrf(true) }),
+      body:        JSON.stringify({ email, password }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || 'Invalid credentials');

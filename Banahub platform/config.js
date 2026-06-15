@@ -81,10 +81,27 @@ window.fetch = async function(input, opts) {
     if (route.startsWith('/auth/register') && method === 'POST') {
       const { data, error } = await sb.auth.signUp({
         email: body.email, password: body.password,
-        options: { data: { full_name: body.full_name, role: body.role || 'applicant',
-                             company_name: body.company_name, country: body.country } },
+        options: { data: { full_name: body.full_name || '', role: body.role || 'applicant' } },
       });
       if (error) return _resp({ success: false, detail: error.message, error: error.message }, 400);
+      if (data && data.user) {
+        // Upsert into users table
+        await sb.from('users').upsert({
+          id: data.user.id,
+          email: body.email,
+          full_name: body.full_name || '',
+          role: body.role || 'applicant',
+          company_name: body.company_name || null,
+          country: body.country || null,
+          phone: body.phone || null,
+          status: 'pending',
+        }, { onConflict: 'email' });
+        // Auto sign in
+        const { data: loginData } = await sb.auth.signInWithPassword({ email: body.email, password: body.password });
+        const { data: userRow } = await sb.from('users').select('*').eq('email', body.email).single();
+        const user = Object.assign({}, { id: data.user.id, email: body.email }, userRow || {});
+        return _resp({ success: true, user, access_token: loginData?.session?.access_token, refresh_token: loginData?.session?.refresh_token }, 201);
+      }
       return _resp({ success: true, user_id: data.user && data.user.id }, 201);
     }
 
@@ -92,10 +109,19 @@ window.fetch = async function(input, opts) {
     if (route.startsWith('/auth/login') && method === 'POST') {
       const { data, error } = await sb.auth.signInWithPassword({ email: body.email, password: body.password });
       if (error) return _resp({ success: false, detail: error.message, error: error.message }, 401);
-      const { data: p } = await sb.from('users').select('*').eq('id', data.user.id).single();
-      const user = Object.assign({}, { id: data.user.id, email: data.user.email }, p || {});
-      return _resp({ success: true, user: user, csrf_token: 'supabase-managed',
-                      access_token: data.session.access_token, refresh_token: data.session.refresh_token });
+      // Get from users table (has role, status)
+      const { data: p } = await sb.from('users').select('*').eq('email', body.email).single();
+      // If user not in users table yet, create record
+      if (!p) {
+        await sb.from('users').upsert({
+          id: data.user.id, email: body.email,
+          full_name: data.user.user_metadata?.full_name || '',
+          role: data.user.user_metadata?.role || 'applicant',
+          status: 'pending',
+        }, { onConflict: 'email' });
+      }
+      const user = Object.assign({}, { id: data.user.id, email: data.user.email }, p || { role: 'applicant', status: 'pending' });
+      return _resp({ success: true, user, access_token: data.session.access_token, refresh_token: data.session.refresh_token });
     }
 
     // ── Auth: logout ────────────────────────────────────────────────────────
@@ -115,8 +141,9 @@ window.fetch = async function(input, opts) {
     if (route.startsWith('/auth/me') && method === 'GET') {
       const { data: { user }, error } = await sb.auth.getUser();
       if (error || !user) return _resp({ success: false, detail: 'Not authenticated', error: 'Not authenticated' }, 401);
-      const { data: p } = await sb.from('users').select('*').eq('id', user.id).single();
-      return _resp({ success: true, user: Object.assign({}, { id: user.id, email: user.email }, p || {}) });
+      const { data: p } = await sb.from('users').select('*').eq('email', user.email).single();
+      const merged = Object.assign({}, { id: user.id, email: user.email }, p || {});
+      return _resp({ success: true, user: merged });
     }
 
     // ── Admin: stats ────────────────────────────────────────────────────────
@@ -467,3 +494,10 @@ window.apiFetch = async function(path, opts) {
   const p = path.startsWith('/api') ? path : '/api' + (path.startsWith('/') ? path : '/' + path);
   return window.fetch(p, opts || {});
 };
+
+// ── getCsrf (CSRF is handled by Supabase JWT — this is a stub for compatibility) ──
+var _csrfToken = 'supabase-managed';
+window.getCsrf = async function getCsrf(force) {
+  return _csrfToken;
+};
+window.clearCsrfCache = function() {};

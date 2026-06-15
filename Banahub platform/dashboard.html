@@ -153,22 +153,31 @@ body{font-family:'Manrope',system-ui,sans-serif;}
 // We verify it by calling /api/auth/me — if valid, the server returns user data.
 (async function authGuard() {
   try {
-    const res = await apiFetch('/api/auth/me');
-    if (!res.ok) { window.location.href = 'login.html'; return; }
+    // Check local session first
+    const stored = localStorage.getItem('bana_user');
+    let user = stored ? JSON.parse(stored) : null;
 
-    const { user } = await res.json();
+    if (!user) {
+      // Try live check
+      const res = await apiFetch('/api/auth/me');
+      if (!res.ok) { window.location.href = 'login.html'; return; }
+      const d = await res.json();
+      if (!d.success || !d.user) { window.location.href = 'login.html'; return; }
+      user = d.user;
+      localStorage.setItem('bana_user', JSON.stringify(user));
+    }
 
-    // Admins should use admin.html, not this page
+    // Admins → admin panel
     if (user.role === 'admin') { window.location.href = 'admin.html'; return; }
 
-    const name = user.full_name || user.email.split('@')[0] || 'Institutional Member';
+    const name = user.full_name || (user.email && user.email.split('@')[0]) || 'Institutional Member';
     const heading = document.getElementById('dash-welcome');
     if (heading) heading.textContent = name;
 
-    if (user.status && user.status !== 'approved') {
+    if (user.status && user.status !== 'approved' && user.status !== 'active') {
       const notice = document.createElement('div');
       notice.style.cssText = 'margin:16px 0;padding:16px;border-radius:14px;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;font-weight:600;';
-      notice.textContent = 'Your account is pending approval. You can view this page, but full member access is limited until admin approval.';
+      notice.textContent = 'Your account is pending approval. Full member access will be available after admin review.';
       document.querySelector('main')?.prepend(notice);
     }
 
@@ -179,12 +188,10 @@ body{font-family:'Manrope',system-ui,sans-serif;}
 
 // ── Sign out ──────────────────────────────────────────────────────
 async function signOut() {
-  const csrf = await getCsrf();
-  await apiFetch('/api/auth/logout', {
-    method: 'POST',
-    body: JSON.stringify({ csrf_token: csrf }),
-  }).catch(() => {});
-  sessionStorage.clear();
+  await apiFetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
+  localStorage.removeItem('bana_user');
+  localStorage.removeItem('bana_access_token');
+  localStorage.removeItem('bana_refresh_token');
   window.location.href = 'login.html';
 }
 </script>
