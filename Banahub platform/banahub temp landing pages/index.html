@@ -1,0 +1,1881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BANAHUB — Business Hive</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;0,9..144,700;0,9..144,800;1,9..144,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --teal: #1B6B6B;
+  --teal-dark: #124848;
+  --teal-light: #2A9090;
+  --teal-pale: #E8F4F4;
+  --teal-mid: #C2DFE0;
+  --violet: #6B4FBB;
+  --violet-light: #8B6DD4;
+  --violet-pale: #EEE9FF;
+  --indigo: #3D5AF1;
+  --indigo-light: #6A7FF5;
+  --indigo-pale: #EBF0FF;
+  --chrome: linear-gradient(135deg, #6B4FBB 0%, #3D5AF1 40%, #1B9AB0 100%);
+  --chrome-text: linear-gradient(90deg, #6B4FBB, #3D5AF1, #1B9AB0);
+  --white: #FFFFFF;
+  --off-white: #F7F9FA;
+  --gray-50: #F0F2F5;
+  --gray-100: #E1E5EB;
+  --gray-300: #B0BAC8;
+  --gray-500: #6B7A8D;
+  --gray-700: #3A4455;
+  --gray-900: #111827;
+  --text: #1A2332;
+  --text-muted: #5A6A7E;
+  --border: #E1E5EB;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --shadow: 0 4px 24px rgba(27,107,107,0.08);
+  --shadow-lg: 0 12px 48px rgba(27,107,107,0.14);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'DM Sans', sans-serif; background: #fff; color: var(--text); overflow-x: hidden; line-height: 1.7; font-size: 16px; }
+
+/* ---- NAV ---- */
+#nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 900;
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 5%;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 70px;
+}
+.nav-logo img { height: 44px; width: auto; }
+.nav-links { display: flex; gap: 0; list-style: none; align-items: center; }
+.nav-links a {
+  color: var(--text-muted); text-decoration: none;
+  font-size: 0.875rem; font-weight: 500; padding: 8px 14px;
+  border-radius: 8px; transition: all 0.18s;
+}
+.nav-links a:hover { color: var(--teal); background: var(--teal-pale); }
+.nav-links a.active { color: var(--teal); }
+.nav-actions { display: flex; gap: 10px; align-items: center; }
+.btn { display: inline-flex; align-items: center; gap: 6px; text-decoration: none; font-family: 'DM Sans', sans-serif; font-weight: 600; border-radius: 10px; padding: 9px 20px; font-size: 0.875rem; cursor: pointer; border: none; transition: all 0.2s; }
+.btn-teal { background: var(--teal); color: #fff; }
+.btn-teal:hover { background: var(--teal-dark); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(27,107,107,0.25); }
+.btn-outline { background: transparent; color: var(--teal); border: 1.5px solid var(--teal); }
+.btn-outline:hover { background: var(--teal-pale); }
+.btn-chrome { background: var(--chrome); color: #fff; }
+.btn-chrome:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 4px 20px rgba(107,79,187,0.3); }
+.btn-ghost { background: transparent; color: var(--text-muted); border: 1.5px solid var(--border); }
+.btn-ghost:hover { border-color: var(--teal); color: var(--teal); }
+.btn-sm { padding: 7px 16px; font-size: 0.82rem; }
+.admin-btn { background: none; border: 1px solid var(--gray-100); color: var(--gray-500); padding: 7px 14px; border-radius: 8px; font-size: 0.8rem; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 500; transition: all 0.2s; }
+.admin-btn:hover { border-color: var(--teal); color: var(--teal); }
+
+/* ---- PAGE SYSTEM ---- */
+.page { display: none; min-height: 100vh; padding-top: 70px; }
+.page.active { display: block; }
+
+/* ---- HERO ---- */
+#page-home .hero {
+  padding: 80px 5% 70px;
+  max-width: 1200px; margin: 0 auto;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;
+}
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--teal-pale); border: 1px solid var(--teal-mid);
+  color: var(--teal-dark); padding: 5px 14px; border-radius: 100px;
+  font-size: 0.78rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+  margin-bottom: 1.5rem;
+}
+.hero-eyebrow span { width: 6px; height: 6px; background: var(--teal); border-radius: 50%; animation: blink 2s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+.hero-h1 { font-family: 'Syne', sans-serif; font-size: clamp(2.4rem, 4.5vw, 3.8rem); font-weight: 800; line-height: 1.1; margin-bottom: 1.25rem; color: var(--gray-900); }
+.hero-h1 .chrome { background: var(--chrome-text); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.hero-p { color: var(--text-muted); font-size: 1.05rem; margin-bottom: 2.2rem; max-width: 480px; font-weight: 400; line-height: 1.75; }
+.hero-btns { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 3rem; }
+.hero-metrics { display: flex; gap: 32px; }
+.metric-item {}
+.metric-num { font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 800; color: var(--teal); line-height: 1; }
+.metric-label { font-size: 0.78rem; color: var(--text-muted); font-weight: 500; }
+.hero-visual {
+  position: relative; background: var(--off-white); border-radius: 24px;
+  overflow: hidden; padding: 32px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-lg);
+}
+.hero-card {
+  background: #fff; border-radius: 14px; padding: 20px 24px;
+  border: 1px solid var(--border); margin-bottom: 12px;
+  display: flex; align-items: center; gap: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  animation: floatIn 0.6s ease both;
+}
+.hero-card:nth-child(2) { animation-delay: 0.15s; }
+.hero-card:nth-child(3) { animation-delay: 0.3s; }
+@keyframes floatIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+.hero-card-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+.ic-teal { background: var(--teal-pale); }
+.ic-violet { background: var(--violet-pale); }
+.ic-indigo { background: var(--indigo-pale); }
+.hero-card h4 { font-size: 0.9rem; font-weight: 600; margin-bottom: 2px; }
+.hero-card p { font-size: 0.78rem; color: var(--text-muted); }
+.hero-card-badge { margin-left: auto; font-size: 0.7rem; font-weight: 600; padding: 4px 10px; border-radius: 100px; white-space: nowrap; }
+.badge-teal { background: var(--teal-pale); color: var(--teal-dark); }
+.badge-violet { background: var(--violet-pale); color: var(--violet); }
+.badge-indigo { background: var(--indigo-pale); color: var(--indigo); }
+.badge-green { background: #E8F8EE; color: #1A7A42; }
+
+/* ---- SECTION BASE ---- */
+.section { padding: 80px 5%; max-width: 1200px; margin: 0 auto; }
+.section-full { padding: 80px 5%; }
+.section-bg { background: var(--off-white); }
+.section-teal-bg { background: var(--teal); }
+.section-chrome-bg { background: linear-gradient(135deg, var(--teal-dark) 0%, var(--violet) 60%, var(--indigo) 100%); }
+.section-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--teal); font-weight: 700; margin-bottom: 0.5rem; }
+.section-label-light { color: rgba(255,255,255,0.7); }
+.section-h2 { font-family: 'Syne', sans-serif; font-size: clamp(1.8rem, 3.5vw, 2.8rem); font-weight: 800; line-height: 1.18; margin-bottom: 0.75rem; color: var(--gray-900); }
+.section-h2-light { color: #fff; }
+.section-sub { color: var(--text-muted); font-size: 1rem; max-width: 520px; margin-bottom: 3rem; line-height: 1.75; }
+.section-sub-light { color: rgba(255,255,255,0.75); }
+.teal-line { display: block; width: 40px; height: 3px; background: var(--teal); border-radius: 2px; margin: 0.75rem 0 2rem; }
+.chrome-line { display: block; width: 40px; height: 3px; background: var(--chrome); border-radius: 2px; margin: 0.75rem 0 2rem; }
+
+/* ---- CARDS ---- */
+.card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; transition: all 0.22s; }
+.card:hover { box-shadow: var(--shadow); border-color: var(--teal-mid); transform: translateY(-2px); }
+.card-chrome { border-top: 3px solid transparent; border-image: var(--chrome); border-image-slice: 1; }
+.card-teal { border-top: 3px solid var(--teal); }
+.card-violet { border-top: 3px solid var(--violet); }
+.card-indigo { border-top: 3px solid var(--indigo); }
+
+/* ---- GRIDS ---- */
+.grid-2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 20px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
+
+/* ---- WHO WE SERVE ---- */
+.serve-card .serve-icon { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; margin-bottom: 1rem; }
+.serve-card h3 { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 0.4rem; }
+.serve-card p { font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.25rem; }
+.link-arrow { color: var(--teal); font-size: 0.85rem; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; }
+.link-arrow::after { content: '→'; transition: transform 0.2s; }
+.link-arrow:hover::after { transform: translateX(4px); }
+
+/* ---- SERVICES ---- */
+.service-num { font-family: 'Syne', sans-serif; font-size: 2.2rem; font-weight: 800; color: var(--gray-100); line-height: 1; margin-bottom: 0.75rem; }
+.service-tag { display: inline-block; padding: 3px 12px; border-radius: 100px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 0.75rem; }
+.tag-teal { background: var(--teal-pale); color: var(--teal-dark); }
+.tag-violet { background: var(--violet-pale); color: var(--violet); }
+.tag-indigo { background: var(--indigo-pale); color: var(--indigo); }
+.service-card h3 { font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 700; margin-bottom: 0.4rem; }
+.service-card p { font-size: 0.87rem; color: var(--text-muted); line-height: 1.65; margin-bottom: 1.25rem; }
+
+/* ---- EVENTS PAGE ---- */
+.event-hero { background: var(--off-white); padding: 60px 5% 50px; }
+.event-hero-inner { max-width: 1200px; margin: 0 auto; }
+.event-filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 2rem; }
+.filter-btn { padding: 7px 18px; border-radius: 100px; border: 1.5px solid var(--border); background: #fff; font-size: 0.83rem; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; color: var(--text-muted); transition: all 0.18s; }
+.filter-btn.active, .filter-btn:hover { background: var(--teal); color: #fff; border-color: var(--teal); }
+.events-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; }
+.event-card { border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); background: #fff; transition: all 0.22s; }
+.event-card:hover { box-shadow: var(--shadow); transform: translateY(-2px); }
+.event-card-top { padding: 20px 20px 0; }
+.event-date-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.event-date-badge { background: var(--teal); color: #fff; border-radius: 10px; padding: 8px 12px; text-align: center; min-width: 52px; }
+.event-date-badge .ed-month { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
+.event-date-badge .ed-day { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; line-height: 1; }
+.event-type-pill { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 4px 12px; border-radius: 100px; }
+.event-card h3 { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
+.event-card p { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px; }
+.event-meta { display: flex; align-items: center; gap: 12px; font-size: 0.78rem; color: var(--text-muted); }
+.event-meta span { display: flex; align-items: center; gap: 4px; }
+.event-card-footer { padding: 16px 20px; border-top: 1px solid var(--gray-50); display: flex; align-items: center; justify-content: space-between; }
+.event-price { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.1rem; color: var(--teal); }
+.event-price.free { color: var(--teal); }
+
+/* ---- ECOSYSTEM ---- */
+.eco-hero { padding: 60px 5% 50px; background: var(--off-white); }
+.eco-hero-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+.eco-form-card { background: #fff; border-radius: 20px; border: 1px solid var(--border); padding: 36px; box-shadow: var(--shadow); }
+.eco-form-card h3 { font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 800; margin-bottom: 0.3rem; }
+.eco-form-card .sub { font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.75rem; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-group { margin-bottom: 14px; }
+.form-group label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--gray-700); margin-bottom: 5px; letter-spacing: 0.02em; }
+.form-group input, .form-group select, .form-group textarea {
+  width: 100%; padding: 10px 14px;
+  border: 1.5px solid var(--border); border-radius: 10px;
+  font-family: 'DM Sans', sans-serif; font-size: 0.9rem; color: var(--text);
+  background: #fff; outline: none; transition: border-color 0.18s;
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--teal); }
+.form-group select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B7A8D' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; }
+.success-msg { display: none; background: #E8F8EE; border: 1px solid #B0DFC0; border-radius: 12px; padding: 16px 20px; font-size: 0.9rem; color: #1A7A42; text-align: center; margin-top: 12px; }
+.success-msg.show { display: block; }
+
+/* ---- STRIPE MODAL ---- */
+#stripe-modal {
+  display: none; position: fixed; inset: 0; z-index: 9998;
+  background: rgba(17,24,39,0.6); backdrop-filter: blur(8px);
+  align-items: center; justify-content: center;
+}
+#stripe-modal.open { display: flex; }
+.stripe-box {
+  background: rgba(255,255,255,0.88); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255,255,255,0.85); border-radius: 24px; padding: 28px 28px 24px;
+  width: 420px; max-width: 92vw; max-height: 90vh; overflow-y: auto;
+  position: relative; animation: popIn 0.3s ease;
+  box-shadow: 0 24px 80px rgba(27,107,107,0.22);
+}
+@keyframes popIn { from{opacity:0;transform:scale(0.95) translateY(10px)} to{opacity:1;transform:scale(1) translateY(0)} }
+.stripe-box h2 { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; margin-bottom: 4px; }
+.stripe-box .stripe-sub { font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.75rem; }
+.stripe-amount { font-family: 'Syne', sans-serif; font-size: 2.5rem; font-weight: 800; color: var(--teal); margin-bottom: 1.5rem; }
+.stripe-amount small { font-size: 0.9rem; font-weight: 500; color: var(--text-muted); }
+.stripe-field { margin-bottom: 14px; }
+.stripe-field label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--gray-700); margin-bottom: 5px; }
+.stripe-field input { width: 100%; padding: 11px 14px; border: 1.5px solid var(--border); border-radius: 10px; font-size: 0.9rem; font-family: 'DM Sans', sans-serif; outline: none; transition: border-color 0.18s; }
+.stripe-field input:focus { border-color: var(--teal); }
+.card-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.stripe-secure { display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--text-muted); margin-top: 12px; justify-content: center; }
+.stripe-secure::before { content: '🔒'; }
+.stripe-notice { background: var(--indigo-pale); border-radius: 10px; padding: 12px 14px; font-size: 0.8rem; color: var(--indigo); margin-bottom: 16px; }
+.close-modal { position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.07); border: none; font-size: 1rem; cursor: pointer; color: var(--gray-500); transition: all 0.18s; line-height: 1; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+.close-modal:hover { color: var(--gray-700); }
+
+/* ---- ADMIN LOGIN ---- */
+#admin-login {
+  display: none; position: fixed; inset: 0; z-index: 9999;
+  background: rgba(17,24,39,0.7); backdrop-filter: blur(10px);
+  align-items: center; justify-content: center;
+}
+#admin-login.open { display: flex; }
+.login-box { background: rgba(255,255,255,0.88); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid rgba(255,255,255,0.85); border-radius: 24px; padding: 32px 28px 28px; width: 400px; max-width: 92vw; position: relative; animation: popIn 0.3s ease; box-shadow: 0 24px 80px rgba(27,107,107,0.22); }
+.login-box .llogo { margin-bottom: 1.75rem; }
+.login-box .llogo img { height: 40px; }
+.login-box h2 { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; margin-bottom: 4px; }
+.login-box .lsub { font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.75rem; }
+.login-error { background: #FFF0EE; border: 1px solid #F5C5BC; color: #C0392B; border-radius: 10px; padding: 10px 14px; font-size: 0.85rem; margin-bottom: 14px; display: none; }
+.login-error.show { display: block; }
+
+/* ---- ADMIN DASHBOARD ---- */
+#admin-panel { display: none; position: fixed; inset: 0; z-index: 9900; background: var(--gray-50); overflow-y: auto; }
+#admin-panel.open { display: block; }
+.admin-topbar {
+  background: #fff; border-bottom: 1px solid var(--border);
+  padding: 0 32px; height: 64px; display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 10;
+}
+.admin-topbar .alogo img { height: 36px; }
+.admin-topbar .alogo span { font-size: 0.7rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; display: block; margin-top: -2px; }
+.admin-topbar-r { display: flex; align-items: center; gap: 12px; }
+.admin-tag { background: var(--teal-pale); color: var(--teal-dark); padding: 5px 12px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; }
+.admin-logout-btn { background: none; border: 1px solid var(--border); color: var(--text-muted); padding: 7px 14px; border-radius: 8px; font-size: 0.8rem; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.18s; }
+.admin-logout-btn:hover { border-color: #E25050; color: #E25050; }
+.admin-layout { display: flex; min-height: calc(100vh - 64px); }
+.admin-sidebar {
+  width: 240px; flex-shrink: 0; background: #fff;
+  border-right: 1px solid var(--border); padding: 24px 16px;
+  position: sticky; top: 64px; height: calc(100vh - 64px); overflow-y: auto;
+}
+.sidebar-section { margin-bottom: 24px; }
+.sidebar-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-300); padding: 0 10px; margin-bottom: 6px; }
+.sidebar-link {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 10px; border-radius: 10px; cursor: pointer;
+  font-size: 0.875rem; font-weight: 500; color: var(--text-muted);
+  transition: all 0.18s; margin-bottom: 2px;
+}
+.sidebar-link:hover { background: var(--gray-50); color: var(--text); }
+.sidebar-link.active { background: var(--teal-pale); color: var(--teal-dark); font-weight: 600; }
+.sidebar-link .icon { font-size: 1rem; width: 22px; text-align: center; }
+.admin-content { flex: 1; padding: 32px 36px; }
+.admin-section-view { display: none; }
+.admin-section-view.active { display: block; }
+.admin-page-title { font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 800; margin-bottom: 4px; }
+.admin-page-sub { font-size: 0.875rem; color: var(--text-muted); margin-bottom: 28px; }
+
+/* ADMIN STAT CARDS */
+.admin-stat-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 28px; }
+.astat { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 20px 22px; position: relative; overflow: hidden; }
+.astat::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--chrome); }
+.astat .alabel { font-size: 0.73rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px; }
+.astat .aval { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; color: var(--gray-900); line-height: 1; margin-bottom: 5px; }
+.astat .adelta { font-size: 0.78rem; color: #1A7A42; font-weight: 600; }
+
+/* ADMIN TABLES */
+.admin-table-wrap { background: #fff; border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 24px; }
+.atw-header { padding: 16px 22px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.atw-header h3 { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; }
+.atw-badge { background: var(--teal-pale); color: var(--teal-dark); padding: 3px 12px; border-radius: 100px; font-size: 0.72rem; font-weight: 700; }
+table.atable { width: 100%; border-collapse: collapse; font-size: 0.855rem; }
+table.atable th { text-align: left; padding: 11px 20px; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-muted); font-weight: 700; background: var(--gray-50); border-bottom: 1px solid var(--border); }
+table.atable td { padding: 12px 20px; border-bottom: 1px solid var(--gray-50); color: var(--text-muted); }
+table.atable tr:last-child td { border: none; }
+table.atable td:first-child { color: var(--text); font-weight: 600; }
+.pill { display: inline-block; padding: 3px 10px; border-radius: 100px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+.pill-teal { background: var(--teal-pale); color: var(--teal-dark); }
+.pill-violet { background: var(--violet-pale); color: var(--violet); }
+.pill-indigo { background: var(--indigo-pale); color: var(--indigo); }
+.pill-green { background: #E8F8EE; color: #1A7A42; }
+.pill-orange { background: #FFF4E6; color: #C05E00; }
+.pill-red { background: #FFF0EE; color: #C0392B; }
+
+/* ADMIN CONTENT EDITOR */
+.content-editor { display: grid; grid-template-columns: 280px 1fr; gap: 24px; }
+.content-pages-list { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 16px; }
+.page-list-item { padding: 10px 14px; border-radius: 10px; cursor: pointer; font-size: 0.875rem; font-weight: 500; color: var(--text-muted); transition: all 0.18s; margin-bottom: 2px; display: flex; align-items: center; justify-content: space-between; }
+.page-list-item:hover { background: var(--gray-50); color: var(--text); }
+.page-list-item.active { background: var(--teal-pale); color: var(--teal-dark); font-weight: 600; }
+.content-edit-panel { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 28px; }
+.content-edit-panel h4 { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 1.25rem; }
+.edit-field { margin-bottom: 16px; }
+.edit-field label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--gray-700); margin-bottom: 5px; }
+.edit-field input, .edit-field textarea { width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; color: var(--text); outline: none; transition: border-color 0.18s; background: #fff; }
+.edit-field input:focus, .edit-field textarea:focus { border-color: var(--teal); }
+.edit-field textarea { resize: vertical; min-height: 80px; }
+.save-bar { display: flex; align-items: center; gap: 12px; padding-top: 16px; border-top: 1px solid var(--border); margin-top: 16px; }
+.save-indicator { font-size: 0.82rem; color: #1A7A42; display: none; }
+.save-indicator.show { display: inline; }
+
+/* ---- ABOUT / FOOTER ---- */
+.about-section { padding: 80px 5%; }
+.about-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: start; }
+.diff-list { list-style: none; margin-top: 2rem; }
+.diff-li { display: flex; gap: 14px; padding: 16px 0; border-bottom: 1px solid var(--border); }
+.diff-li:last-child { border: none; }
+.diff-num { font-family: 'Syne', sans-serif; font-weight: 800; color: var(--teal); flex-shrink: 0; padding-top: 2px; }
+.diff-li h4 { font-size: 0.93rem; font-weight: 700; margin-bottom: 2px; }
+.diff-li p { font-size: 0.83rem; color: var(--text-muted); }
+.mission-card { background: var(--off-white); border-radius: 20px; padding: 36px; border: 1px solid var(--border); }
+.mission-card h3 { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; margin-bottom: 1rem; }
+.mission-card p { font-size: 0.9rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 1.25rem; }
+
+footer { background: var(--gray-900); color: rgba(255,255,255,0.55); padding: 48px 5% 32px; }
+.footer-inner { max-width: 1200px; margin: 0 auto; }
+.footer-top { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 40px; }
+.footer-brand img { height: 40px; filter: brightness(0) invert(1); margin-bottom: 12px; }
+.footer-brand p { font-size: 0.84rem; line-height: 1.7; }
+.footer-col h4 { color: #fff; font-size: 0.85rem; font-weight: 700; margin-bottom: 12px; letter-spacing: 0.04em; }
+.footer-col a { display: block; color: rgba(255,255,255,0.5); font-size: 0.83rem; text-decoration: none; padding: 3px 0; transition: color 0.18s; cursor: pointer; }
+.footer-col a:hover { color: rgba(255,255,255,0.9); }
+.footer-bottom { border-top: 1px solid rgba(255,255,255,0.08); padding-top: 24px; display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; }
+
+/* ---- STRIPE PROCESS ---- */
+.stripe-processing { display: none; text-align: center; padding: 20px 0; }
+.stripe-success-view { display: none; text-align: center; padding: 10px 0; }
+.stripe-success-view .checkmark { font-size: 3rem; margin-bottom: 12px; }
+.stripe-success-view h3 { font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 800; color: var(--teal); margin-bottom: 8px; }
+.stripe-success-view p { font-size: 0.9rem; color: var(--text-muted); }
+.spin { display: inline-block; width: 36px; height: 36px; border: 3px solid var(--teal-pale); border-top-color: var(--teal); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 12px; }
+@keyframes spin { to{transform:rotate(360deg)} }
+
+/* ---- PROGRAMS / ABOUT SECTIONS ---- */
+.program-tag { display: inline-block; padding: 4px 14px; border-radius: 100px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; }
+.program-card h3 { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 800; margin-bottom: 8px; }
+.program-card p { font-size: 0.87rem; color: var(--text-muted); margin-bottom: 1.25rem; }
+.program-list { list-style: none; margin-bottom: 1.5rem; }
+.program-list li { font-size: 0.85rem; color: var(--text-muted); padding: 5px 0; border-bottom: 1px solid var(--gray-50); display: flex; align-items: center; gap: 8px; }
+.program-list li::before { content: '✦'; color: var(--teal); font-size: 0.55rem; flex-shrink: 0; }
+.program-featured { border: 2px solid var(--teal); }
+
+/* ---- CTA STRIP ---- */
+.cta-strip { text-align: center; }
+.cta-strip h2 { font-family: 'Syne', sans-serif; font-size: 2.4rem; font-weight: 800; color: #fff; margin-bottom: 0.75rem; }
+.cta-strip p { color: rgba(255,255,255,0.75); font-size: 1rem; margin-bottom: 2.5rem; max-width: 500px; margin-left: auto; margin-right: auto; }
+.cta-strip-btns { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
+.btn-white { background: #fff; color: var(--teal); font-weight: 700; }
+.btn-white:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(0,0,0,0.15); }
+.btn-white-outline { background: transparent; border: 2px solid rgba(255,255,255,0.5); color: #fff; font-weight: 600; }
+.btn-white-outline:hover { background: rgba(255,255,255,0.1); border-color: #fff; }
+
+/* ---- RESPONSIVE ---- */
+@media(max-width: 1024px) { .grid-4{grid-template-columns:repeat(2,1fr)} .admin-stat-row{grid-template-columns:repeat(2,1fr)} }
+@media(max-width: 900px) { #page-home .hero{grid-template-columns:1fr} .hero-visual{display:none} .grid-3{grid-template-columns:1fr} .grid-2{grid-template-columns:1fr} .eco-hero-inner{grid-template-columns:1fr} .about-inner{grid-template-columns:1fr} .events-grid{grid-template-columns:1fr} .footer-top{grid-template-columns:1fr 1fr} .content-editor{grid-template-columns:1fr} .admin-layout{flex-direction:column} .admin-sidebar{width:100%;height:auto;position:static} .nav-links{display:none} }
+
+/* ===== GLASSMORPHISM + PREMIUM UI OVERRIDES ===== */
+:root {
+  --glass-bg: rgba(255,255,255,0.55);
+  --glass-bg-dark: rgba(15,20,35,0.65);
+  --glass-border: rgba(255,255,255,0.4);
+  --glass-border-dark: rgba(255,255,255,0.12);
+  --glass-shadow: 0 8px 32px rgba(27,107,107,0.14), 0 1.5px 8px rgba(0,0,0,0.06);
+  --glass-shadow-lg: 0 20px 60px rgba(27,107,107,0.18), 0 4px 20px rgba(0,0,0,0.08);
+  --blur: blur(18px);
+  --blur-sm: blur(10px);
+  --teal-glow: 0 0 32px rgba(27,154,176,0.22);
+  --violet-glow: 0 0 28px rgba(107,79,187,0.18);
+}
+
+/* FONT OVERRIDES */
+body {
+  font-family: 'Outfit', sans-serif !important;
+  background: linear-gradient(135deg, #f0f6f7 0%, #eef2ff 50%, #f3f0fa 100%) !important;
+  background-attachment: fixed !important;
+}
+.hero-h1, .section-h2, .cta-strip h2,
+.hero-card h4, .serve-card h3, .service-card h3,
+.program-card h3, .event-card h3, .eco-form-card h3,
+.mission-card h3, .stripe-box h2, .login-box h2,
+.admin-page-title, .atw-header h3, .content-edit-panel h4,
+.metric-num, .service-num, .ed-day, .aval, .stripe-amount,
+.event-price, .program-card h3 {
+  font-family: 'Fraunces', serif !important;
+}
+code, .stripe-notice, .admin-tag { font-family: 'JetBrains Mono', monospace !important; }
+
+/* NAV — glass */
+#nav {
+  background: rgba(255,255,255,0.72) !important;
+  backdrop-filter: var(--blur) !important;
+  -webkit-backdrop-filter: var(--blur) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.6) !important;
+  box-shadow: 0 2px 24px rgba(27,107,107,0.08) !important;
+}
+.nav-links a { border-radius: 10px !important; font-weight: 500 !important; letter-spacing: 0.01em !important; }
+.nav-links a:hover { background: rgba(27,107,107,0.08) !important; }
+
+/* HERO */
+#page-home .hero { padding: 90px 5% 80px !important; }
+.hero-eyebrow {
+  background: rgba(27,107,107,0.1) !important;
+  border: 1px solid rgba(27,107,107,0.25) !important;
+  backdrop-filter: var(--blur-sm) !important;
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 0.72rem !important;
+  letter-spacing: 0.1em !important;
+}
+.hero-h1 { letter-spacing: -0.02em !important; font-weight: 700 !important; }
+.hero-p { font-size: 1.08rem !important; font-weight: 400 !important; color: #4a5568 !important; }
+
+/* HERO VISUAL — glass panel */
+.hero-visual {
+  background: rgba(255,255,255,0.5) !important;
+  backdrop-filter: var(--blur) !important;
+  -webkit-backdrop-filter: var(--blur) !important;
+  border: 1px solid rgba(255,255,255,0.7) !important;
+  box-shadow: var(--glass-shadow-lg) !important;
+  border-radius: 28px !important;
+}
+.hero-card {
+  background: rgba(255,255,255,0.7) !important;
+  backdrop-filter: var(--blur-sm) !important;
+  -webkit-backdrop-filter: var(--blur-sm) !important;
+  border: 1px solid rgba(255,255,255,0.8) !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06) !important;
+  border-radius: 16px !important;
+  transition: transform 0.25s, box-shadow 0.25s !important;
+}
+.hero-card:hover { transform: translateX(4px) !important; box-shadow: 0 8px 28px rgba(27,107,107,0.14) !important; }
+.hero-card h4 { font-size: 0.95rem !important; font-weight: 600 !important; }
+
+/* CARDS — glassmorphism */
+.card {
+  background: rgba(255,255,255,0.62) !important;
+  backdrop-filter: var(--blur-sm) !important;
+  -webkit-backdrop-filter: var(--blur-sm) !important;
+  border: 1px solid rgba(255,255,255,0.75) !important;
+  box-shadow: 0 4px 20px rgba(27,107,107,0.08) !important;
+  border-radius: 20px !important;
+  transition: transform 0.22s, box-shadow 0.22s !important;
+}
+.card:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 12px 40px rgba(27,107,107,0.15) !important;
+  border-color: rgba(255,255,255,0.9) !important;
+}
+
+/* SECTION BGs */
+.section-bg {
+  background: rgba(240,246,247,0.6) !important;
+  backdrop-filter: var(--blur-sm) !important;
+}
+
+/* STRIPE MODAL */
+.stripe-box {
+  background: rgba(255,255,255,0.88) !important;
+  backdrop-filter: var(--blur) !important;
+  -webkit-backdrop-filter: var(--blur) !important;
+  border: 1px solid rgba(255,255,255,0.9) !important;
+  box-shadow: 0 24px 80px rgba(27,107,107,0.22) !important;
+  border-radius: 28px !important;
+}
+
+/* LOGIN BOX */
+.login-box {
+  background: rgba(255,255,255,0.88) !important;
+  backdrop-filter: var(--blur) !important;
+  -webkit-backdrop-filter: var(--blur) !important;
+  border: 1px solid rgba(255,255,255,0.9) !important;
+  box-shadow: 0 24px 80px rgba(27,107,107,0.22) !important;
+  border-radius: 28px !important;
+}
+
+/* ECO FORM CARD */
+.eco-form-card {
+  background: rgba(255,255,255,0.75) !important;
+  backdrop-filter: var(--blur) !important;
+  -webkit-backdrop-filter: var(--blur) !important;
+  border: 1px solid rgba(255,255,255,0.85) !important;
+  box-shadow: var(--glass-shadow-lg) !important;
+  border-radius: 24px !important;
+}
+
+/* MISSION CARD */
+.mission-card {
+  background: rgba(240,246,247,0.8) !important;
+  backdrop-filter: var(--blur-sm) !important;
+  border: 1px solid rgba(255,255,255,0.7) !important;
+  border-radius: 24px !important;
+}
+
+/* PROGRAM FEATURED */
+.program-featured {
+  background: rgba(27,107,107,0.06) !important;
+  border: 2px solid rgba(27,107,107,0.35) !important;
+  box-shadow: 0 0 0 4px rgba(27,107,107,0.06), var(--glass-shadow) !important;
+}
+
+/* BUTTONS */
+.btn {
+  font-family: 'Outfit', sans-serif !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em !important;
+  border-radius: 12px !important;
+}
+.btn-teal {
+  background: linear-gradient(135deg, #1B9AB0 0%, #1B6B6B 100%) !important;
+  box-shadow: 0 4px 16px rgba(27,107,107,0.28) !important;
+}
+.btn-teal:hover {
+  box-shadow: 0 6px 24px rgba(27,107,107,0.4) !important;
+  transform: translateY(-2px) !important;
+}
+.btn-outline {
+  background: rgba(255,255,255,0.5) !important;
+  backdrop-filter: var(--blur-sm) !important;
+  border: 1.5px solid rgba(27,107,107,0.4) !important;
+}
+.btn-ghost {
+  background: rgba(255,255,255,0.35) !important;
+  backdrop-filter: var(--blur-sm) !important;
+}
+
+/* EVENT CARDS */
+.event-card {
+  background: rgba(255,255,255,0.65) !important;
+  backdrop-filter: var(--blur-sm) !important;
+  -webkit-backdrop-filter: var(--blur-sm) !important;
+  border: 1px solid rgba(255,255,255,0.8) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06) !important;
+}
+.event-card:hover { box-shadow: 0 12px 40px rgba(27,107,107,0.14) !important; }
+.event-date-badge { border-radius: 12px !important; }
+
+/* FILTER BUTTONS */
+.filter-btn {
+  background: rgba(255,255,255,0.6) !important;
+  backdrop-filter: var(--blur-sm) !important;
+  border-radius: 100px !important;
+  font-family: 'Outfit', sans-serif !important;
+}
+.filter-btn.active, .filter-btn:hover {
+  background: linear-gradient(135deg, #1B9AB0, #1B6B6B) !important;
+  box-shadow: 0 4px 14px rgba(27,107,107,0.3) !important;
+}
+
+/* ADMIN PANEL */
+#admin-panel { background: linear-gradient(135deg, #f0f4f8 0%, #e8f0fa 100%) !important; }
+.admin-topbar {
+  background: rgba(255,255,255,0.8) !important;
+  backdrop-filter: var(--blur) !important;
+  -webkit-backdrop-filter: var(--blur) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.6) !important;
+  box-shadow: 0 2px 20px rgba(0,0,0,0.06) !important;
+}
+.admin-sidebar {
+  background: rgba(255,255,255,0.7) !important;
+  backdrop-filter: var(--blur-sm) !important;
+  -webkit-backdrop-filter: var(--blur-sm) !important;
+  border-right: 1px solid rgba(255,255,255,0.6) !important;
+}
+.admin-table-wrap {
+  background: rgba(255,255,255,0.75) !important;
+  backdrop-filter: var(--blur-sm) !important;
+  -webkit-backdrop-filter: var(--blur-sm) !important;
+  border: 1px solid rgba(255,255,255,0.8) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06) !important;
+}
+.astat {
+  background: rgba(255,255,255,0.75) !important;
+  backdrop-filter: var(--blur-sm) !important;
+  border: 1px solid rgba(255,255,255,0.8) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06) !important;
+}
+.content-pages-list, .content-edit-panel {
+  background: rgba(255,255,255,0.75) !important;
+  backdrop-filter: var(--blur-sm) !important;
+  border: 1px solid rgba(255,255,255,0.8) !important;
+  border-radius: 18px !important;
+}
+.sidebar-link { font-family: 'Outfit', sans-serif !important; font-size: 0.875rem !important; }
+.sidebar-link.active { background: rgba(27,107,107,0.1) !important; }
+.admin-page-title { font-weight: 700 !important; letter-spacing: -0.02em !important; }
+
+/* FOOTER */
+footer {
+  background: linear-gradient(135deg, #0d1a1a 0%, #111827 60%, #1a1030 100%) !important;
+  backdrop-filter: var(--blur-sm) !important;
+}
+
+/* SECTION LABELS */
+.section-label { font-family: 'JetBrains Mono', monospace !important; font-size: 0.7rem !important; letter-spacing: 0.12em !important; }
+
+/* INPUT FIELDS — glass */
+.form-group input, .form-group select, .form-group textarea,
+.stripe-field input, .edit-field input, .edit-field textarea {
+  background: rgba(255,255,255,0.7) !important;
+  backdrop-filter: var(--blur-sm) !important;
+  border: 1.5px solid rgba(200,215,220,0.7) !important;
+  border-radius: 12px !important;
+  font-family: 'Outfit', sans-serif !important;
+  transition: border-color 0.2s, box-shadow 0.2s !important;
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus,
+.stripe-field input:focus, .edit-field input:focus, .edit-field textarea:focus {
+  border-color: rgba(27,154,176,0.6) !important;
+  box-shadow: 0 0 0 3px rgba(27,107,107,0.1) !important;
+  outline: none !important;
+}
+
+/* BODY BG MESH */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(ellipse 70% 50% at 15% 20%, rgba(27,154,176,0.10) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 45% at 85% 75%, rgba(107,79,187,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 50% 50%, rgba(61,90,241,0.05) 0%, transparent 60%),
+    linear-gradient(135deg, #f0f6f7 0%, #eef2ff 50%, #f3f0fa 100%);
+  pointer-events: none;
+}
+
+/* METRIC NUMBERS */
+.metric-num { font-size: 2rem !important; letter-spacing: -0.03em !important; }
+
+/* CHROME TEXT */
+.hero-h1 .chrome {
+  background: linear-gradient(90deg, #1B9AB0 0%, #6B4FBB 50%, #3D5AF1 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+/* TEAL/CHROME LINE */
+.teal-line { height: 3px !important; background: linear-gradient(90deg, #1B9AB0, #6B4FBB) !important; border-radius: 2px !important; }
+
+/* ADMIN BTN */
+.admin-btn {
+  background: rgba(255,255,255,0.5) !important;
+  backdrop-filter: var(--blur-sm) !important;
+  border: 1px solid rgba(200,215,220,0.6) !important;
+  border-radius: 10px !important;
+  font-family: 'Outfit', sans-serif !important;
+}
+
+/* SERVICE NUMBERS */
+.service-num { color: rgba(27,107,107,0.12) !important; font-size: 2.5rem !important; }
+
+/* TAGS */
+.service-tag, .program-tag, .event-type-pill {
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 0.65rem !important;
+  letter-spacing: 0.08em !important;
+  border-radius: 6px !important;
+}
+
+</style>
+</head>
+<body>
+
+<!-- ========== NAV ========== -->
+<nav id="nav">
+  <a class="nav-logo" href="#" onclick="showPage('home')">
+    <img src="data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAJPA+wDASIAAhEBAxEB/8QAHQABAAEEAwEAAAAAAAAAAAAAAAgBBgcJAgMEBf/EAFsQAQABAwMBBAUFBg8NBgYDAAABAgMEBQYRIQcSMUEIEyJRYRQycYGxFUJ0kaGzFiMkMzU2N1Jyc3WSssHSFxglJic0Q1RWgpOi0URGVWLC4UVTY2SEo2WD8P/EABoBAQADAQEBAAAAAAAAAAAAAAABAwQCBQb/xAAoEQEAAgIDAAEEAgMAAwAAAAAAAQIDEQQSITEFEyJBFDIVI1EGM0P/2gAMAwEAAhEDEQA/AJlgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA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AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAf/Z" alt="BANAHUB Business Hive" style="height:44px;width:auto;object-fit:contain;">
+  </a>
+  <ul class="nav-links">
+    <li><a href="#" onclick="showPage('home');return false;">Home</a></li>
+    <li><a href="#" onclick="showPage('services');return false;">Services</a></li>
+    <li><a href="#" onclick="showPage('programs');return false;">Programs</a></li>
+    <li><a href="#" onclick="showPage('events');return false;">Events</a></li>
+    <li><a href="#" onclick="showPage('ecosystem');return false;">Ecosystem</a></li>
+    <li><a href="#" onclick="showPage('about');return false;">About</a></li>
+  </ul>
+  <div class="nav-actions">
+    <a class="btn btn-teal btn-sm" href="#" onclick="openStripe('Strategy Call','Strategy Call – 1hr','149');return false;">Book a Call</a>
+    <button class="btn btn-ghost btn-sm" onclick="openContactModal()" title="Contact Us" style="padding:9px 13px;font-size:1rem;">✉️</button>
+    <button class="admin-btn" onclick="openAdminLogin()" id="admin-nav-btn" style="display:none!important;opacity:0;pointer-events:none;position:absolute;width:1px;height:1px;">Admin ↗</button>
+  </div>
+</nav>
+
+<!-- ===================== HOME PAGE ===================== -->
+<div id="page-home" class="page active">
+
+  <div class="hero">
+    <div class="hero-left">
+      <div class="hero-eyebrow"><span></span>Business Growth Ecosystem</div>
+      <h1 class="hero-h1">Where Businesses <span class="chrome">Scale, Expand</span> &amp; Thrive</h1>
+      <p class="hero-p">BANAHUB is a premium business ecosystem platform built for founders, SMEs, and investors serious about GTM strategy, cross-border growth, and structured acceleration.</p>
+      <div class="hero-btns">
+        <a class="btn btn-teal" href="#" onclick="openStripe('Strategy Call','1-Hour Strategy Session','149');return false;">Book a Strategy Call</a>
+        <a class="btn btn-outline" href="#" onclick="showPage('programs');return false;">Apply for Incubation</a>
+        <a class="btn btn-ghost" href="#" onclick="showPage('ecosystem');return false;">Join Ecosystem</a>
+      </div>
+      <div class="hero-metrics">
+        <div class="metric-item"><div class="metric-num">3</div><div class="metric-label">Revenue Engines</div></div>
+        <div class="metric-item"><div class="metric-num">4+</div><div class="metric-label">User Segments</div></div>
+        <div class="metric-item"><div class="metric-num">30+</div><div class="metric-label">Events / Year</div></div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-card">
+        <div class="hero-card-icon ic-teal">🎯</div>
+        <div><h4>GTM Advisory</h4><p>Go-to-market strategy built for conversion</p></div>
+        <span class="hero-card-badge badge-teal">Core</span>
+      </div>
+      <div class="hero-card">
+        <div class="hero-card-icon ic-violet">🌐</div>
+        <div><h4>Market Expansion Desk</h4><p>Cross-border intelligence &amp; entry</p></div>
+        <span class="hero-card-badge badge-violet">Core</span>
+      </div>
+      <div class="hero-card">
+        <div class="hero-card-icon ic-indigo">🚀</div>
+        <div><h4>Growth Incubation</h4><p>Cohort-based acceleration programs</p></div>
+        <span class="hero-card-badge badge-indigo">Core</span>
+      </div>
+      <div class="hero-card">
+        <div class="hero-card-icon ic-teal">💰</div>
+        <div><h4>Capital Match</h4><p>Investor-ready deal flow network</p></div>
+        <span class="hero-card-badge badge-green">Live</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- WHO WE SERVE -->
+  <div class="section-full section-bg">
+    <div class="section">
+      <div class="section-label">User Segments</div>
+      <h2 class="section-h2">Built For Every Stage of Growth</h2>
+      <span class="teal-line"></span>
+      <div class="grid-4">
+        <div class="card serve-card card-teal">
+          <div class="serve-icon ic-teal">🏗️</div>
+          <h3>Founders</h3>
+          <p>Early to growth-stage founders who need structure, funding readiness, and acceleration.</p>
+          <a class="link-arrow" onclick="showPage('programs')">Apply for Incubation</a>
+        </div>
+        <div class="card serve-card card-violet">
+          <div class="serve-icon ic-violet">🏢</div>
+          <h3>SMEs &amp; Business</h3>
+          <p>Established businesses looking for GTM support and cross-border market entry strategy.</p>
+          <a class="link-arrow" onclick="openStripe('Strategy Call','1-Hour Strategy Session','149')">Book a Strategy Call</a>
+        </div>
+        <div class="card serve-card card-indigo">
+          <div class="serve-icon ic-indigo">💼</div>
+          <h3>Investors</h3>
+          <p>Angel investors and VCs wanting curated deal flow access and pre-vetted ventures.</p>
+          <a class="link-arrow" onclick="showPage('ecosystem')">Join as Investor</a>
+        </div>
+        <div class="card serve-card card-chrome">
+          <div class="serve-icon ic-teal">🤝</div>
+          <h3>Partners</h3>
+          <p>Strategic partners, advisors, and service providers who grow with our ecosystem.</p>
+          <a class="link-arrow" onclick="showPage('ecosystem')">Become a Partner</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SERVICES PREVIEW -->
+  <div class="section">
+    <div class="section-label">Core Revenue Offerings</div>
+    <h2 class="section-h2">Services Built to Convert Growth</h2>
+    <span class="teal-line"></span>
+    <div class="grid-3">
+      <div class="card service-card card-teal">
+        <div class="service-num">01</div>
+        <span class="service-tag tag-teal">High Priority</span>
+        <h3>GTM Advisory</h3>
+        <p>Architect your go-to-market strategy from ICP definition to launch sequencing — built for real commercial outcomes.</p>
+        <a class="link-arrow" onclick="openStripe('GTM Advisory','GTM Advisory Retainer','1200')">Start Advisory</a>
+      </div>
+      <div class="card service-card card-violet">
+        <div class="service-num">02</div>
+        <span class="service-tag tag-violet">High Priority</span>
+        <h3>Market Expansion</h3>
+        <p>Cross-border market entry made operational. We scope and execute your expansion with local intelligence.</p>
+        <a class="link-arrow" onclick="openStripe('Market Expansion','Expansion Consultation','499')">Request Consultation</a>
+      </div>
+      <div class="card service-card card-indigo">
+        <div class="service-num">03</div>
+        <span class="service-tag tag-indigo">Core Program</span>
+        <h3>Growth Incubation</h3>
+        <p>Cohort-based intensive program for startups ready to scale with expert mentorship and investor access.</p>
+        <a class="link-arrow" onclick="showPage('programs')">View Programs</a>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:2rem;">
+      <a class="btn btn-outline" href="#" onclick="showPage('services');return false;">View All Services</a>
+    </div>
+  </div>
+
+  <!-- CTA STRIP -->
+  <div class="section-full section-chrome-bg" style="padding: 70px 5%;">
+    <div class="section cta-strip" style="padding: 0;">
+      <h2>Ready to Grow with BANAHUB?</h2>
+      <p>One conversation could be the catalyst for your next stage. Book a strategy call, apply for incubation, or join our ecosystem today.</p>
+      <div class="cta-strip-btns">
+        <a class="btn btn-white" href="#" onclick="openStripe('Strategy Call','1-Hour Strategy Session','149');return false;">Book a Strategy Call</a>
+        <a class="btn btn-white-outline" href="#" onclick="showPage('ecosystem');return false;">Join the Ecosystem</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===================== SERVICES PAGE ===================== -->
+<div id="page-services" class="page">
+  <div class="section-full section-bg" style="padding: 50px 5% 30px;">
+    <div class="section" style="padding: 0;">
+      <div class="section-label">What We Offer</div>
+      <h2 class="section-h2">Services &amp; Offerings</h2>
+      <span class="teal-line"></span>
+    </div>
+  </div>
+  <div class="section">
+    <div class="grid-3">
+      <div class="card service-card card-teal">
+        <div class="service-num">01</div>
+        <span class="service-tag tag-teal">Retainer + Project</span>
+        <h3>GTM Advisory</h3>
+        <p>We architect your go-to-market strategy from the ground up. From ICP definition to sales playbooks, channel strategy and launch sequencing.</p>
+        <a class="btn btn-teal btn-sm" href="#" onclick="openStripe('GTM Advisory','Monthly GTM Advisory Retainer','1200');return false;">Start — from $1,200/mo</a>
+      </div>
+      <div class="card service-card card-violet">
+        <div class="service-num">02</div>
+        <span class="service-tag tag-violet">Retainer + Setup Fee</span>
+        <h3>Market Expansion Desk</h3>
+        <p>Cross-border market entry made operational. We scope, structure, and execute your expansion into new geographies with local intelligence.</p>
+        <a class="btn btn-chrome btn-sm" href="#" onclick="openStripe('Market Expansion','Expansion Consultation Package','499');return false;">Request — from $499</a>
+      </div>
+      <div class="card service-card card-indigo">
+        <div class="service-num">03</div>
+        <span class="service-tag tag-indigo">Cohort Program Fee</span>
+        <h3>Growth Incubation</h3>
+        <p>A cohort-based intensive program for startups ready to scale. Structured curriculum, expert mentorship, investor access, and clear milestones.</p>
+        <a class="btn btn-teal btn-sm" href="#" onclick="showPage('programs');return false;">View Programs</a>
+      </div>
+      <div class="card service-card card-teal">
+        <div class="service-num">04</div>
+        <span class="service-tag tag-teal">Fixed Package</span>
+        <h3>Investor Readiness Sprint</h3>
+        <p>Prepare for fundraising. We sharpen your pitch, structure your financials, and position your venture for credible investor conversations.</p>
+        <a class="btn btn-teal btn-sm" href="#" onclick="openStripe('Investor Readiness','Investor Readiness Sprint','2500');return false;">Start — $2,500</a>
+      </div>
+      <div class="card service-card card-violet">
+        <div class="service-num">05</div>
+        <span class="service-tag tag-violet">Success Fee</span>
+        <h3>Capital Match</h3>
+        <p>Intelligent connection between investment-ready ventures and our curated investor network. We only win when you close.</p>
+        <a class="btn btn-outline btn-sm" href="#" onclick="showPage('ecosystem');return false;">Join Network</a>
+      </div>
+      <div class="card service-card card-indigo">
+        <div class="service-num">06</div>
+        <span class="service-tag tag-indigo">Ticket + Sponsor</span>
+        <h3>Workshops &amp; Connect</h3>
+        <p>Hands-on growth workshops, masterclasses, and networking events designed to build ecosystem depth and qualify opportunities.</p>
+        <a class="btn btn-chrome btn-sm" href="#" onclick="showPage('events');return false;">View Events</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== PROGRAMS PAGE ===================== -->
+<div id="page-programs" class="page">
+  <div class="section-full section-bg" style="padding: 50px 5% 30px;">
+    <div class="section" style="padding: 0;">
+      <div class="section-label">Incubation Tracks</div>
+      <h2 class="section-h2">Growth Incubation Programs</h2>
+      <span class="teal-line"></span>
+      <p class="section-sub">Structured cohort programs built to take ventures from concept to commercial traction with expert guidance and investor access.</p>
+    </div>
+  </div>
+  <div class="section">
+    <div class="grid-3">
+      <div class="card program-card">
+        <span class="program-tag tag-teal">Launchpad Track</span>
+        <h3>Launchpad Track</h3>
+        <p>For early-stage founders who need to validate their model, find product-market fit, and build their first commercial pipeline.</p>
+        <ul class="program-list">
+          <li>8-week intensive program</li>
+          <li>Weekly mentor sessions</li>
+          <li>ICP and GTM validation</li>
+          <li>Demo day with investors</li>
+        </ul>
+        <div style="margin-bottom:14px;"><strong style="font-size:1.3rem;font-family:'Syne',sans-serif;">$3,500</strong> <span style="font-size:0.82rem;color:var(--text-muted);">per cohort</span></div>
+        <a class="btn btn-outline btn-sm" href="#" onclick="openStripe('Launchpad Track','Growth Incubation — Launchpad Track','3500');return false;">Apply Now</a>
+      </div>
+      <div class="card program-card program-featured">
+        <span class="program-tag tag-teal">⭐ Flagship</span>
+        <h3>Scale Track</h3>
+        <p>For growth-stage ventures with early traction ready to accelerate revenue, build their team, and access institutional capital.</p>
+        <ul class="program-list">
+          <li>12-week cohort program</li>
+          <li>Revenue acceleration focus</li>
+          <li>Investor readiness module</li>
+          <li>Expansion desk access</li>
+          <li>Capital match qualification</li>
+        </ul>
+        <div style="margin-bottom:14px;"><strong style="font-size:1.3rem;font-family:'Syne',sans-serif;">$6,500</strong> <span style="font-size:0.82rem;color:var(--text-muted);">per cohort</span></div>
+        <a class="btn btn-teal btn-sm" href="#" onclick="openStripe('Scale Track','Growth Incubation — Scale Track','6500');return false;">Apply Now</a>
+      </div>
+      <div class="card program-card">
+        <span class="program-tag tag-violet">Expansion Track</span>
+        <h3>Expansion Track</h3>
+        <p>For established SMEs and startups looking to expand into new markets with strategic guidance and in-market partner access.</p>
+        <ul class="program-list">
+          <li>10-week market-entry program</li>
+          <li>Target market analysis</li>
+          <li>Local partner introductions</li>
+          <li>Cross-border GTM planning</li>
+        </ul>
+        <div style="margin-bottom:14px;"><strong style="font-size:1.3rem;font-family:'Syne',sans-serif;">$5,000</strong> <span style="font-size:0.82rem;color:var(--text-muted);">per cohort</span></div>
+        <a class="btn btn-outline btn-sm" href="#" onclick="openStripe('Expansion Track','Growth Incubation — Expansion Track','5000');return false;">Apply Now</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== EVENTS PAGE ===================== -->
+<div id="page-events" class="page">
+  <div class="event-hero">
+    <div class="event-hero-inner">
+      <div class="section-label">Workshops &amp; Networking</div>
+      <h2 class="section-h2">Events &amp; Connect Series</h2>
+      <span class="teal-line"></span>
+      <div class="event-filters">
+        <button class="filter-btn active" onclick="filterEvents(this,'all')">All Events</button>
+        <button class="filter-btn" onclick="filterEvents(this,'workshop')">Workshops</button>
+        <button class="filter-btn" onclick="filterEvents(this,'networking')">Networking</button>
+        <button class="filter-btn" onclick="filterEvents(this,'showcase')">Showcases</button>
+      </div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="events-grid" id="events-grid">
+      <!-- events injected by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- ===================== ECOSYSTEM PAGE ===================== -->
+<div id="page-ecosystem" class="page">
+  <div class="eco-hero">
+    <div class="eco-hero-inner">
+      <div>
+        <div class="section-label">Our Network</div>
+        <h2 class="section-h2">Join the BANAHUB Ecosystem</h2>
+        <span class="teal-line"></span>
+        <p class="section-sub" style="margin-bottom: 1.5rem;">Connect with founders, investors, partners, and mentors all in one active ecosystem built for commercial growth.</p>
+        <div class="grid-2" style="gap:14px;">
+          <div class="card" style="padding:20px 22px;">
+            <div style="font-size:1.4rem;margin-bottom:8px;">👨‍💼</div>
+            <h4 style="font-size:.93rem;font-weight:700;margin-bottom:3px;">Founder Network</h4>
+            <p style="font-size:.82rem;color:var(--text-muted);">Peers, mentors, and growth advisors at every stage.</p>
+          </div>
+          <div class="card" style="padding:20px 22px;">
+            <div style="font-size:1.4rem;margin-bottom:8px;">💰</div>
+            <h4 style="font-size:.93rem;font-weight:700;margin-bottom:3px;">Investor Circle</h4>
+            <p style="font-size:.82rem;color:var(--text-muted);">Curated deal flow access with pre-vetted ventures.</p>
+          </div>
+          <div class="card" style="padding:20px 22px;">
+            <div style="font-size:1.4rem;margin-bottom:8px;">🌍</div>
+            <h4 style="font-size:.93rem;font-weight:700;margin-bottom:3px;">Partner Alliance</h4>
+            <p style="font-size:.82rem;color:var(--text-muted);">Strategic collaborators and referral partners.</p>
+          </div>
+          <div class="card" style="padding:20px 22px;">
+            <div style="font-size:1.4rem;margin-bottom:8px;">📡</div>
+            <h4 style="font-size:.93rem;font-weight:700;margin-bottom:3px;">Market Intelligence</h4>
+            <p style="font-size:.82rem;color:var(--text-muted);">Proprietary insights and expansion intelligence.</p>
+          </div>
+        </div>
+      </div>
+      <div class="eco-form-card">
+        <h3>Join the Ecosystem</h3>
+        <div class="sub">Complete your profile and we'll match you with the right opportunities.</div>
+        <div class="form-row">
+          <div class="form-group"><label>First Name</label><input type="text" placeholder="Sarah"></div>
+          <div class="form-group"><label>Last Name</label><input type="text" placeholder="Okonkwo"></div>
+        </div>
+        <div class="form-group"><label>Email Address</label><input type="email" placeholder="sarah@company.com"></div>
+        <div class="form-group"><label>Company / Organisation</label><input type="text" placeholder="Company name"></div>
+        <div class="form-group">
+          <label>I am joining as</label>
+          <select>
+            <option value="">Select your role</option>
+            <option>Founder / Startup</option>
+            <option>SME / Business</option>
+            <option>Investor</option>
+            <option>Strategic Partner</option>
+            <option>Mentor / Advisor</option>
+            <option>Service Provider</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>What are you looking for?</label>
+          <textarea placeholder="Tell us briefly what you're hoping to get from the BANAHUB ecosystem..." rows="3"></textarea>
+        </div>
+        <button class="btn btn-teal" style="width:100%;justify-content:center;" onclick="submitEcoForm()">Join the Ecosystem — Free</button>
+        <div class="success-msg" id="eco-success">🎉 Welcome to BANAHUB! We'll be in touch shortly to complete your onboarding.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== ABOUT PAGE ===================== -->
+<div id="page-about" class="page">
+  <div class="about-section">
+    <div class="about-inner">
+      <div>
+        <div class="section-label">About BANAHUB</div>
+        <h2 class="section-h2">Why BANAHUB?</h2>
+        <span class="teal-line"></span>
+        <ul class="diff-list">
+          <li class="diff-li"><span class="diff-num">01</span><div><h4>Revenue-First Design</h4><p>Every service, program, and event is designed to create real commercial outcomes — not vanity metrics.</p></div></li>
+          <li class="diff-li"><span class="diff-num">02</span><div><h4>Ecosystem Leverage</h4><p>You gain access to a connected network of founders, investors, and partners — not just a consultant.</p></div></li>
+          <li class="diff-li"><span class="diff-num">03</span><div><h4>Lean &amp; Operational</h4><p>No bloated programs — every engagement is structured for speed and results.</p></div></li>
+          <li class="diff-li"><span class="diff-num">04</span><div><h4>Cross-Border Capability</h4><p>Our Market Expansion Desk gives you real in-market intelligence and local partner introductions.</p></div></li>
+        </ul>
+      </div>
+      <div class="mission-card">
+        <h3>Our Mission</h3>
+        <p>BANAHUB exists to close the gap between business ambition and execution. Too many capable businesses stall because they lack the right strategy, the right connections, or the right structure.</p>
+        <p>We provide all three — through world-class advisory, an active ecosystem, and a suite of programs built to take ventures from ambition to commercial momentum.</p>
+        <div style="background:var(--teal-pale);border-radius:12px;padding:20px 22px;margin-top:1.5rem;">
+          <div style="font-size:0.75rem;font-weight:700;color:var(--teal-dark);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;">Commercial Priority</div>
+          <p style="font-size:0.88rem;color:var(--teal-dark);margin-bottom:0;">GTM Advisory · Market Expansion · Growth Incubation<br><span style="color:var(--text-muted);font-size:.82rem;">Everything else strengthens the core engine.</span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== FOOTER ===================== -->
+<footer id="main-footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAAAoCAYAAAAIeF9DAAABhGlDQ1BJQ0MgcHJvZmlsZQAAKJF9kT1Iw0AcxV9TpSIVBzuIOGSoThZERRy1CkWoEGqFVh1MLv0CTRqSFBdHwbXg4Mdi1cHFWVcHV0EQfANxdXBSdJES/5cUWsR4cNyPd/ced+8AoV5mqtkWA1TNMlKJuJDJrgqhV4TQjzDCEGRm6rOplILnuK6Hh693MZ7lfe7P0avkTQZ4ROIEP" alt="BANAHUB" style="height:32px;filter:brightness(0) invert(1);margin-bottom:12px;">
+        <p>Premium Business Growth Ecosystem. GTM Advisory · Market Expansion · Growth Incubation.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Services</h4>
+        <a onclick="showPage('services')">GTM Advisory</a>
+        <a onclick="showPage('services')">Market Expansion</a>
+        <a onclick="showPage('services')">Growth Incubation</a>
+        <a onclick="showPage('services')">Investor Readiness</a>
+        <a onclick="showPage('services')">Capital Match</a>
+      </div>
+      <div class="footer-col">
+        <h4>Platform</h4>
+        <a onclick="showPage('programs')">Programs</a>
+        <a onclick="showPage('events')">Events</a>
+        <a onclick="showPage('ecosystem')">Ecosystem</a>
+        <a onclick="showPage('about')">About</a>
+      </div>
+      <div class="footer-col">
+        <h4>Connect</h4>
+        <a onclick="openStripe('Strategy Call','1-Hour Strategy Session','149')">Book a Strategy Call</a>
+        <a onclick="showPage('ecosystem')">Join Ecosystem</a>
+        <a href="mailto:hello@banahub.com">hello@banahub.com</a>
+        <a onclick="openAdminLogin()" style="display:none!important;">Admin Login</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 BANAHUB Business Hive. All rights reserved.</span>
+      <span>Built for Founders · Backed by Ecosystem</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ===================== STRIPE MODAL ===================== -->
+<div id="stripe-modal">
+  <div class="stripe-box">
+    <button class="close-modal" onclick="closeStripe()">×</button>
+    <div id="stripe-form-view">
+      <h2 id="stripe-title">Book a Strategy Call</h2>
+      <div class="stripe-sub" id="stripe-desc">1-hour strategy session with BANAHUB advisor</div>
+      <div class="stripe-amount" id="stripe-price">$149 <small>/ session</small></div>
+      <div class="stripe-notice">🔒 Payments processed securely via Stripe. Your card details are encrypted and never stored by BANAHUB.</div>
+      <div class="stripe-field"><label>Full Name</label><input type="text" placeholder="Sarah Okonkwo" id="s-name"></div>
+      <div class="stripe-field"><label>Email Address</label><input type="email" placeholder="sarah@company.com" id="s-email"></div>
+      <div class="stripe-field"><label>Card Number</label><input type="text" placeholder="4242 4242 4242 4242" maxlength="19" id="s-card" oninput="formatCard(this)"></div>
+      <div class="card-row">
+        <div class="stripe-field"><label>Expiry</label><input type="text" placeholder="MM / YY" maxlength="7" id="s-exp" oninput="formatExp(this)"></div>
+        <div class="stripe-field"><label>CVC</label><input type="text" placeholder="123" maxlength="4" id="s-cvc"></div>
+      </div>
+      <button class="btn btn-teal" style="width:100%;justify-content:center;padding:13px;margin-top:6px;font-size:0.95rem;" onclick="processPayment()">Pay Now →</button>
+      <div class="stripe-secure">Secured by Stripe · SSL encrypted</div>
+    </div>
+    <div class="stripe-processing" id="stripe-processing">
+      <div class="spin"></div>
+      <p style="color:var(--text-muted);font-size:.9rem;">Processing your payment...</p>
+    </div>
+    <div class="stripe-success-view" id="stripe-success">
+      <div class="checkmark">✅</div>
+      <h3>Payment Successful!</h3>
+      <p>Thank you! You'll receive a confirmation email shortly. Our team will be in touch to schedule your session.</p>
+      <button class="btn btn-outline" style="margin-top:1.25rem;" onclick="closeStripe()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== ADMIN LOGIN ===================== -->
+<div id="admin-login">
+  <div class="login-box">
+    <button class="close-modal" onclick="closeAdminLogin()">×</button>
+    <div class="llogo">
+      <span style="font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;color:var(--teal);">BANAHUB</span>
+      <span style="font-size:0.72rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.08em;display:block;">Business Hive</span>
+    </div>
+    <h2>Admin Access</h2>
+    <div class="lsub">Sign in to manage your platform content, leads, events, and applications.</div>
+    <div class="login-error" id="login-err">Incorrect username or password. Please try again.</div>
+    <div class="form-group"><label>Username</label><input type="text" id="l-user" placeholder="admin" autocomplete="off"></div>
+    <div class="form-group"><label>Password</label><input type="password" id="l-pass" placeholder="••••••••"></div>
+    <button class="btn btn-teal" style="width:100%;justify-content:center;padding:12px;" onclick="doLogin()">Sign In to Dashboard</button>
+  </div>
+</div>
+
+<!-- ===================== ADMIN DASHBOARD ===================== -->
+<div id="admin-panel">
+  <div class="admin-topbar">
+    <div class="alogo">
+      <span style="font-family:'Syne',sans-serif;font-size:1.15rem;font-weight:800;color:var(--teal);">BANAHUB</span>
+      <span>Admin Dashboard</span>
+    </div>
+    <div class="admin-topbar-r">
+      <span class="admin-tag">● admin</span>
+      <button class="admin-logout-btn" onclick="doLogout()">Logout</button>
+    </div>
+  </div>
+  <div class="admin-layout">
+    <div class="admin-sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Overview</div>
+        <div class="sidebar-link active" onclick="showAdminSection('dashboard',this)"><span class="icon">📊</span>Dashboard</div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Content</div>
+        <div class="sidebar-link" onclick="showAdminSection('pages',this)"><span class="icon">📄</span>Pages Manager</div>
+        <div class="sidebar-link" onclick="showAdminSection('services-mgr',this)"><span class="icon">⚙️</span>Services</div>
+        <div class="sidebar-link" onclick="showAdminSection('programs-mgr',this)"><span class="icon">🚀</span>Programs</div>
+        <div class="sidebar-link" onclick="showAdminSection('events-mgr',this)"><span class="icon">🗓️</span>Events Manager</div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">CRM</div>
+        <div class="sidebar-link" onclick="showAdminSection('leads',this)"><span class="icon">👥</span>Leads / CRM</div>
+        <div class="sidebar-link" onclick="showAdminSection('applications',this)"><span class="icon">📋</span>Applications</div>
+        <div class="sidebar-link" onclick="showAdminSection('ecosystem-mgr',this)"><span class="icon">🌐</span>Ecosystem Members</div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Payments</div>
+        <div class="sidebar-link" onclick="showAdminSection('payments',this)"><span class="icon">💳</span>Payments</div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Clients</div>
+        <div class="sidebar-link" onclick="showAdminSection('client-onboarding',this)"><span class="icon">🧩</span>Client Onboarding</div>
+        <div class="sidebar-link" onclick="showAdminSection('portfolio',this)"><span class="icon">📁</span>Client Portfolio</div>
+        <div class="sidebar-link" onclick="showAdminSection('cap-table',this)"><span class="icon">📊</span>Cap Table</div>
+        <div class="sidebar-link" onclick="showAdminSection('milestones',this)"><span class="icon">🏁</span>Milestones</div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Growth</div>
+        <div class="sidebar-link" onclick="showAdminSection('gtm-tracker',this)"><span class="icon">🎯</span>GTM Tracker</div>
+        <div class="sidebar-link" onclick="showAdminSection('expansion-tracker',this)"><span class="icon">🌍</span>Expansion Tracker</div>
+      </div>
+    </div>
+
+    <div class="admin-content">
+      <!-- DASHBOARD -->
+      <div class="admin-section-view active" id="as-dashboard">
+        <div class="admin-page-title">Dashboard</div>
+        <div class="admin-page-sub">Platform snapshot — today</div>
+        <div class="admin-stat-row">
+          <div class="astat"><div class="alabel">Strategy Call Leads</div><div class="aval">18</div><div class="adelta">↑ 4 this week</div></div>
+          <div class="astat"><div class="alabel">Incubation Applications</div><div class="aval">7</div><div class="adelta">↑ 2 new</div></div>
+          <div class="astat"><div class="alabel">Event Registrations</div><div class="aval">43</div><div class="adelta">↑ 11 this week</div></div>
+          <div class="astat"><div class="alabel">Ecosystem Members</div><div class="aval">31</div><div class="adelta">↑ 5 this month</div></div>
+        </div>
+        <div class="grid-2" style="gap:20px;">
+          <div class="admin-table-wrap">
+            <div class="atw-header"><h3>Recent Leads</h3><span class="atw-badge">18 Total</span></div>
+            <table class="atable">
+              <thead><tr><th>Name</th><th>Type</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td>Amir Maleki</td><td>GTM Advisory</td><td><span class="pill pill-teal">New</span></td></tr>
+                <tr><td>Sara Rahman</td><td>Market Expansion</td><td><span class="pill pill-violet">Called</span></td></tr>
+                <tr><td>David Kwon</td><td>Growth Incubation</td><td><span class="pill pill-indigo">Applied</span></td></tr>
+                <tr><td>Nour Al-Hassan</td><td>Investor / Capital</td><td><span class="pill pill-green">Partner</span></td></tr>
+                <tr><td>Priya Thenappan</td><td>GTM Advisory</td><td><span class="pill pill-teal">New</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="admin-table-wrap">
+            <div class="atw-header"><h3>Recent Payments</h3><span class="atw-badge">$12,400</span></div>
+            <table class="atable">
+              <thead><tr><th>Service</th><th>Amount</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td>Scale Track</td><td>$6,500</td><td><span class="pill pill-green">Paid</span></td></tr>
+                <tr><td>Strategy Call</td><td>$149</td><td><span class="pill pill-green">Paid</span></td></tr>
+                <tr><td>GTM Advisory</td><td>$1,200</td><td><span class="pill pill-green">Paid</span></td></tr>
+                <tr><td>Investor Sprint</td><td>$2,500</td><td><span class="pill pill-orange">Pending</span></td></tr>
+                <tr><td>Launchpad Track</td><td>$3,500</td><td><span class="pill pill-teal">Processing</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAGES MANAGER -->
+      <div class="admin-section-view" id="as-pages">
+        <div class="admin-page-title">Pages Manager</div>
+        <div class="admin-page-sub">Edit content for each page of the platform</div>
+        <div class="content-editor">
+          <div class="content-pages-list">
+            <div style="font-size:.73rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--gray-300);padding:0 10px;margin-bottom:8px;">Pages</div>
+            <div class="page-list-item active" onclick="selectPage(this,'Home')">🏠 Home</div>
+            <div class="page-list-item" onclick="selectPage(this,'Services')">⚙️ Services</div>
+            <div class="page-list-item" onclick="selectPage(this,'Programs')">🚀 Programs</div>
+            <div class="page-list-item" onclick="selectPage(this,'Events')">🗓️ Events</div>
+            <div class="page-list-item" onclick="selectPage(this,'Ecosystem')">🌐 Ecosystem</div>
+            <div class="page-list-item" onclick="selectPage(this,'About')">ℹ️ About</div>
+          </div>
+          <div class="content-edit-panel">
+            <h4 id="edit-page-name">Home Page</h4>
+            <div class="edit-field"><label>Hero Headline</label><input type="text" id="edit-headline" value="Where Businesses Scale, Expand &amp; Thrive"></div>
+            <div class="edit-field"><label>Hero Subtext</label><textarea id="edit-sub">BANAHUB is a premium business ecosystem platform built for founders, SMEs, and investors serious about GTM strategy, cross-border growth, and structured acceleration.</textarea></div>
+            <div class="edit-field"><label>Primary CTA Label</label><input type="text" id="edit-cta1" value="Book a Strategy Call"></div>
+            <div class="edit-field"><label>Secondary CTA Label</label><input type="text" id="edit-cta2" value="Apply for Incubation"></div>
+            <div class="edit-field"><label>Section Label</label><input type="text" id="edit-label" value="Business Growth Ecosystem"></div>
+            <div class="save-bar">
+              <button class="btn btn-teal btn-sm" onclick="savePage()">Save Changes</button>
+              <span class="save-indicator" id="save-ok">✓ Saved successfully</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SERVICES MANAGER -->
+      <div class="admin-section-view" id="as-services-mgr">
+        <div class="admin-page-title">Services Manager</div>
+        <div class="admin-page-sub">Manage service cards, pricing, and CTAs</div>
+        <div class="admin-table-wrap">
+          <div class="atw-header"><h3>Active Services</h3><span class="atw-badge">6 Services</span></div>
+          <table class="atable">
+            <thead><tr><th>Service</th><th>Priority</th><th>Revenue Model</th><th>Active Clients</th><th>Inquiries (30d)</th><th>Price</th></tr></thead>
+            <tbody>
+              <tr><td>GTM Advisory</td><td><span class="pill pill-teal">High</span></td><td>Retainer + Project</td><td>6</td><td>11</td><td>$1,200/mo</td></tr>
+              <tr><td>Market Expansion</td><td><span class="pill pill-teal">High</span></td><td>Retainer + Setup</td><td>3</td><td>7</td><td>$499+</td></tr>
+              <tr><td>Growth Incubation</td><td><span class="pill pill-teal">High</span></td><td>Cohort Fee</td><td>12</td><td>7</td><td>$3,500–$6,500</td></tr>
+              <tr><td>Investor Readiness</td><td><span class="pill pill-violet">Medium</span></td><td>Fixed Package</td><td>2</td><td>4</td><td>$2,500</td></tr>
+              <tr><td>Capital Match</td><td><span class="pill pill-indigo">Medium-High</span></td><td>Success Fee</td><td>4</td><td>3</td><td>% of raise</td></tr>
+              <tr><td>Workshops / Connect</td><td><span class="pill pill-orange">Medium</span></td><td>Ticket + Sponsor</td><td>—</td><td>102</td><td>$49–$199</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- PROGRAMS MANAGER -->
+      <div class="admin-section-view" id="as-programs-mgr">
+        <div class="admin-page-title">Programs Manager</div>
+        <div class="admin-page-sub">Manage incubation tracks, cohort details, and application routes</div>
+        <div class="admin-table-wrap">
+          <div class="atw-header"><h3>Active Programs</h3><span class="atw-badge">3 Tracks</span></div>
+          <table class="atable">
+            <thead><tr><th>Program</th><th>Duration</th><th>Price</th><th>Applications</th><th>Next Cohort</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Launchpad Track</td><td>8 weeks</td><td>$3,500</td><td>3</td><td>Jun 2025</td><td><span class="pill pill-green">Open</span></td></tr>
+              <tr><td>Scale Track</td><td>12 weeks</td><td>$6,500</td><td>4</td><td>Jun 2025</td><td><span class="pill pill-green">Open</span></td></tr>
+              <tr><td>Expansion Track</td><td>10 weeks</td><td>$5,000</td><td>2</td><td>Jul 2025</td><td><span class="pill pill-teal">Soon</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- EVENTS MANAGER -->
+      <div class="admin-section-view" id="as-events-mgr">
+        <div class="admin-page-title">Events Manager</div>
+        <div class="admin-page-sub">Manage workshops, showcases, and registration links</div>
+        <div style="margin-bottom:20px;"><button class="btn btn-teal btn-sm" onclick="alert('Add Event form coming soon!')">+ Add New Event</button></div>
+        <div class="admin-table-wrap">
+          <div class="atw-header"><h3>Upcoming Events</h3><span class="atw-badge">4 Scheduled</span></div>
+          <table class="atable">
+            <thead><tr><th>Event</th><th>Type</th><th>Date</th><th>Registrations</th><th>Price</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>GTM Masterclass</td><td>Workshop</td><td>May 14, 2025</td><td>28</td><td>$49</td><td><span class="pill pill-green">Live</span></td></tr>
+              <tr><td>BANAHUB Connect Evening</td><td>Networking</td><td>May 22, 2025</td><td>43</td><td>Free</td><td><span class="pill pill-green">Live</span></td></tr>
+              <tr><td>Cohort 1 Demo Day</td><td>Showcase</td><td>Jun 5, 2025</td><td>19</td><td>Free</td><td><span class="pill pill-teal">Open</span></td></tr>
+              <tr><td>Cross-Border Growth</td><td>Workshop</td><td>Jun 18, 2025</td><td>12</td><td>$79</td><td><span class="pill pill-teal">Open</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- LEADS CRM -->
+      <div class="admin-section-view" id="as-leads">
+        <div class="admin-page-title">Leads / CRM</div>
+        <div class="admin-page-sub">Track and manage incoming leads and follow-up status</div>
+        <div class="admin-table-wrap">
+          <div class="atw-header"><h3>All Leads</h3><span class="atw-badge">18 Total</span></div>
+          <table class="atable">
+            <thead><tr><th>Name</th><th>Company</th><th>Service Interest</th><th>Segment</th><th>Date</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Amir Maleki</td><td>TechCore</td><td>GTM Advisory</td><td>SME</td><td>Apr 18</td><td><span class="pill pill-teal">New</span></td></tr>
+              <tr><td>Sara Rahman</td><td>GreenBridge</td><td>Market Expansion</td><td>SME</td><td>Apr 17</td><td><span class="pill pill-violet">Called</span></td></tr>
+              <tr><td>David Kwon</td><td>TechNova AI</td><td>Growth Incubation</td><td>Startup</td><td>Apr 16</td><td><span class="pill pill-indigo">Applied</span></td></tr>
+              <tr><td>Nour Al-Hassan</td><td>AlphaVentures</td><td>Capital Match</td><td>Investor</td><td>Apr 15</td><td><span class="pill pill-green">Partner</span></td></tr>
+              <tr><td>Priya Thenappan</td><td>RetailPlus</td><td>GTM Advisory</td><td>SME</td><td>Apr 14</td><td><span class="pill pill-teal">New</span></td></tr>
+              <tr><td>Marcus Wu</td><td>UrbanCart</td><td>Expansion Track</td><td>Startup</td><td>Apr 12</td><td><span class="pill pill-violet">Called</span></td></tr>
+              <tr><td>Lina Osei</td><td>GreenRoot</td><td>Launchpad Track</td><td>Founder</td><td>Apr 11</td><td><span class="pill pill-teal">New</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- APPLICATIONS -->
+      <div class="admin-section-view" id="as-applications">
+        <div class="admin-page-title">Applications Manager</div>
+        <div class="admin-page-sub">Review and manage incubation program applications</div>
+        <div class="admin-table-wrap">
+          <div class="atw-header"><h3>All Applications</h3><span class="atw-badge">7 Total</span></div>
+          <table class="atable">
+            <thead><tr><th>Applicant</th><th>Business</th><th>Track</th><th>Stage</th><th>Date</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>David Kwon</td><td>TechNova AI</td><td>Scale Track</td><td>Series A Ready</td><td>Apr 18</td><td><span class="pill pill-indigo">Under Review</span></td></tr>
+              <tr><td>Lina Osei</td><td>GreenRoot</td><td>Launchpad Track</td><td>Early Stage</td><td>Apr 17</td><td><span class="pill pill-teal">New</span></td></tr>
+              <tr><td>Marcus Wu</td><td>UrbanCart</td><td>Expansion Track</td><td>Revenue Stage</td><td>Apr 15</td><td><span class="pill pill-violet">Interviewed</span></td></tr>
+              <tr><td>Fatima Okonkwo</td><td>HealthSync</td><td>Scale Track</td><td>Pre-Series A</td><td>Apr 12</td><td><span class="pill pill-green">Accepted</span></td></tr>
+              <tr><td>James Park</td><td>DataFlow</td><td>Launchpad Track</td><td>Pre-Revenue</td><td>Apr 10</td><td><span class="pill pill-orange">Waitlist</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ECOSYSTEM MEMBERS -->
+      <div class="admin-section-view" id="as-ecosystem-mgr">
+        <div class="admin-page-title">Ecosystem Members</div>
+        <div class="admin-page-sub">Manage ecosystem signups, roles, and member status</div>
+        <div class="admin-table-wrap">
+          <div class="atw-header"><h3>Members</h3><span class="atw-badge">31 Members</span></div>
+          <table class="atable">
+            <thead><tr><th>Name</th><th>Company</th><th>Role</th><th>Joined</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Nour Al-Hassan</td><td>AlphaVentures</td><td>Investor</td><td>Apr 15</td><td><span class="pill pill-green">Active</span></td></tr>
+              <tr><td>Yuki Tanaka</td><td>BridgeCapital</td><td>Investor</td><td>Apr 10</td><td><span class="pill pill-green">Active</span></td></tr>
+              <tr><td>Emma Nduka</td><td>NdukaPartners</td><td>Strategic Partner</td><td>Apr 8</td><td><span class="pill pill-green">Active</span></td></tr>
+              <tr><td>Chen Wei</td><td>ExpandAsia</td><td>Partner</td><td>Apr 5</td><td><span class="pill pill-teal">Onboarding</span></td></tr>
+              <tr><td>Ali Karimi</td><td>NanoHealth</td><td>Founder</td><td>Mar 28</td><td><span class="pill pill-green">Active</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- PAYMENTS -->
+      <div class="admin-section-view" id="as-payments">
+        <div class="admin-page-title">Payments</div>
+        <div class="admin-page-sub">Stripe payment transactions and revenue overview</div>
+        <div class="admin-stat-row">
+          <div class="astat"><div class="alabel">Revenue (Month)</div><div class="aval">$14,749</div><div class="adelta">↑ 18% vs last month</div></div>
+          <div class="astat"><div class="alabel">Transactions</div><div class="aval">23</div><div class="adelta">↑ 6 this week</div></div>
+          <div class="astat"><div class="alabel">Pending</div><div class="aval">$4,649</div><div class="adelta">3 pending</div></div>
+          <div class="astat"><div class="alabel">Avg. Value</div><div class="aval">$641</div><div class="adelta">↑ $82 vs last month</div></div>
+        </div>
+        <div class="admin-table-wrap">
+          <div class="atw-header"><h3>Recent Transactions</h3><span class="atw-badge">via Stripe</span></div>
+          <table class="atable">
+            <thead><tr><th>Customer</th><th>Service</th><th>Amount</th><th>Date</th><th>Stripe ID</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Fatima Okonkwo</td><td>Scale Track</td><td>$6,500</td><td>Apr 18</td><td>pi_3P4Xa...8Rk</td><td><span class="pill pill-green">Paid</span></td></tr>
+              <tr><td>Sara Rahman</td><td>Strategy Call</td><td>$149</td><td>Apr 17</td><td>pi_3P4Wz...9Xm</td><td><span class="pill pill-green">Paid</span></td></tr>
+              <tr><td>Amir Maleki</td><td>GTM Advisory</td><td>$1,200</td><td>Apr 16</td><td>pi_3P4Vy...2Qn</td><td><span class="pill pill-green">Paid</span></td></tr>
+              <tr><td>James Park</td><td>Investor Sprint</td><td>$2,500</td><td>Apr 15</td><td>pi_3P4Ux...4Rp</td><td><span class="pill pill-orange">Pending</span></td></tr>
+              <tr><td>Lina Osei</td><td>Launchpad Track</td><td>$3,500</td><td>Apr 14</td><td>pi_3P4Tw...7Sq</td><td><span class="pill pill-teal">Processing</span></td></tr>
+              <tr><td>David Kwon</td><td>GTM Workshop</td><td>$49</td><td>Apr 13</td><td>pi_3P4Sv...1Tr</td><td><span class="pill pill-green">Paid</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+
+      <!-- CLIENT ONBOARDING -->
+      <div class="admin-section-view" id="as-client-onboarding">
+        <div class="admin-page-title">Client Onboarding</div>
+        <div class="admin-page-sub">Manage new client intake, KYC, and onboarding workflow</div>
+        <div style="margin-bottom:20px;display:flex;gap:10px;">
+          <button class="btn btn-teal btn-sm" onclick="alert('New client form launched!')">+ Onboard New Client</button>
+          <button class="btn btn-ghost btn-sm" onclick="alert('Export to CSV')">Export CSV</button>
+        </div>
+        <div class="admin-stat-row">
+          <div class="astat"><div class="alabel">Pending KYC</div><div class="aval">4</div><div class="adelta">Action Required</div></div>
+          <div class="astat"><div class="alabel">In Onboarding</div><div class="aval">7</div><div class="adelta">↑ 2 this week</div></div>
+          <div class="astat"><div class="alabel">Completed</div><div class="aval">19</div><div class="adelta">This quarter</div></div>
+          <div class="astat"><div class="alabel">Avg. Onboard Time</div><div class="aval">4.2d</div><div class="adelta">↓ 0.8d improved</div></div>
+        </div>
+        <div class="admin-table-wrap">
+          <div class="atw-header"><h3>Onboarding Pipeline</h3><span class="atw-badge">11 Active</span></div>
+          <table class="atable">
+            <thead><tr><th>Client</th><th>Company</th><th>Track</th><th>KYC</th><th>Docs</th><th>Kickoff</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Fatima Okonkwo</td><td>HealthSync</td><td>Scale Track</td><td><span class="pill pill-green">Done</span></td><td><span class="pill pill-green">Done</span></td><td>Apr 25</td><td><span class="pill pill-teal">Kickoff Pending</span></td></tr>
+              <tr><td>David Kwon</td><td>TechNova AI</td><td>Scale Track</td><td><span class="pill pill-orange">Pending</span></td><td><span class="pill pill-teal">In Review</span></td><td>—</td><td><span class="pill pill-orange">KYC</span></td></tr>
+              <tr><td>Lina Osei</td><td>GreenRoot</td><td>Launchpad Track</td><td><span class="pill pill-green">Done</span></td><td><span class="pill pill-orange">Pending</span></td><td>—</td><td><span class="pill pill-violet">Docs</span></td></tr>
+              <tr><td>Marcus Wu</td><td>UrbanCart</td><td>Expansion Track</td><td><span class="pill pill-green">Done</span></td><td><span class="pill pill-green">Done</span></td><td>Apr 28</td><td><span class="pill pill-indigo">Scheduled</span></td></tr>
+              <tr><td>Priya Thenappan</td><td>RetailPlus</td><td>GTM Advisory</td><td><span class="pill pill-orange">Pending</span></td><td><span class="pill pill-red">Missing</span></td><td>—</td><td><span class="pill pill-red">Blocked</span></td></tr>
+              <tr><td>Amir Maleki</td><td>TechCore</td><td>GTM Advisory</td><td><span class="pill pill-green">Done</span></td><td><span class="pill pill-green">Done</span></td><td>Apr 22</td><td><span class="pill pill-green">Active</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="admin-table-wrap" style="margin-top:20px;">
+          <div class="atw-header"><h3>Onboarding Checklist Template</h3><span class="atw-badge">Standard</span></div>
+          <table class="atable">
+            <thead><tr><th>Step</th><th>Action</th><th>Owner</th><th>SLA</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>Welcome Email + Portal Access</td><td>Admin</td><td>Day 0</td></tr>
+              <tr><td>2</td><td>KYC Document Collection</td><td>Client</td><td>Day 1–2</td></tr>
+              <tr><td>3</td><td>Contract Signing (DocuSign)</td><td>Both</td><td>Day 2</td></tr>
+              <tr><td>4</td><td>Payment Confirmation (Stripe)</td><td>Client</td><td>Day 2–3</td></tr>
+              <tr><td>5</td><td>Kickoff Call Scheduled</td><td>Admin</td><td>Day 3</td></tr>
+              <tr><td>6</td><td>Program Access Granted</td><td>Admin</td><td>Day 4</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CLIENT PORTFOLIO -->
+      <div class="admin-section-view" id="as-portfolio">
+        <div class="admin-page-title">Client Portfolio</div>
+        <div class="admin-page-sub">Track all active clients across programs and advisory tracks</div>
+        <div class="admin-stat-row">
+          <div class="astat"><div class="alabel">Total Clients</div><div class="aval">24</div><div class="adelta">↑ 3 this month</div></div>
+          <div class="astat"><div class="alabel">GTM Advisory</div><div class="aval">6</div><div class="adelta">$7,200/mo MRR</div></div>
+          <div class="astat"><div class="alabel">Incubation</div><div class="aval">12</div><div class="adelta">Scale + Launchpad</div></div>
+          <div class="astat"><div class="alabel">Expansion</div><div class="aval">6</div><div class="adelta">3 markets active</div></div>
+        </div>
+        <div class="admin-table-wrap">
+          <div class="atw-header"><h3>Active Client Portfolio</h3><span class="atw-badge">24 Clients</span></div>
+          <table class="atable">
+            <thead><tr><th>Client</th><th>Company</th><th>Sector</th><th>Track</th><th>MRR / Fee</th><th>Health</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Fatima Okonkwo</td><td>HealthSync</td><td>HealthTech</td><td>Scale Track</td><td>$6,500</td><td><span class="pill pill-green">🟢 Strong</span></td><td><span class="pill pill-green">Active</span></td></tr>
+              <tr><td>Amir Maleki</td><td>TechCore</td><td>SaaS</td><td>GTM Advisory</td><td>$1,200/mo</td><td><span class="pill pill-green">🟢 Strong</span></td><td><span class="pill pill-green">Active</span></td></tr>
+              <tr><td>Marcus Wu</td><td>UrbanCart</td><td>eCommerce</td><td>Expansion Track</td><td>$5,000</td><td><span class="pill pill-teal">🟡 Fair</span></td><td><span class="pill pill-indigo">Expanding</span></td></tr>
+              <tr><td>Sara Rahman</td><td>GreenBridge</td><td>CleanTech</td><td>GTM Advisory</td><td>$1,200/mo</td><td><span class="pill pill-violet">🟡 Fair</span></td><td><span class="pill pill-green">Active</span></td></tr>
+              <tr><td>David Kwon</td><td>TechNova AI</td><td>AI/ML</td><td>Scale Track</td><td>$6,500</td><td><span class="pill pill-orange">🟠 At Risk</span></td><td><span class="pill pill-orange">Review</span></td></tr>
+              <tr><td>Lina Osei</td><td>GreenRoot</td><td>AgriTech</td><td>Launchpad</td><td>$3,500</td><td><span class="pill pill-green">🟢 Strong</span></td><td><span class="pill pill-green">Active</span></td></tr>
+              <tr><td>James Park</td><td>DataFlow</td><td>Data</td><td>Launchpad</td><td>$3,500</td><td><span class="pill pill-teal">🟡 Fair</span></td><td><span class="pill pill-orange">Waitlist</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CAP TABLE -->
+      <div class="admin-section-view" id="as-cap-table">
+        <div class="admin-page-title">Cap Table Manager</div>
+        <div class="admin-page-sub">Track equity, shareholding, and investment rounds per client venture</div>
+        <div style="margin-bottom:16px;display:flex;align-items:center;gap:12px;">
+          <label style="font-size:.82rem;font-weight:600;color:var(--gray-700);">Select Client:</label>
+          <select style="padding:8px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:'Outfit',sans-serif;font-size:.875rem;background:rgba(255,255,255,.7);outline:none;cursor:pointer;" onchange="alert('Cap table loaded for ' + this.value)">
+            <option>HealthSync (Fatima Okonkwo)</option>
+            <option>TechNova AI (David Kwon)</option>
+            <option>UrbanCart (Marcus Wu)</option>
+            <option>GreenRoot (Lina Osei)</option>
+          </select>
+          <button class="btn btn-teal btn-sm">Load Cap Table</button>
+          <button class="btn btn-ghost btn-sm" onclick="alert('Export cap table as CSV')">Export</button>
+        </div>
+        <div class="admin-stat-row">
+          <div class="astat"><div class="alabel">Total Shares</div><div class="aval">10M</div><div class="adelta">Authorized</div></div>
+          <div class="astat"><div class="alabel">Issued Shares</div><div class="aval">7.2M</div><div class="adelta">72% issued</div></div>
+          <div class="astat"><div class="alabel">Valuation</div><div class="aval">$4.8M</div><td><div class="adelta">Pre-money</div></div></div>
+          <div class="astat"><div class="alabel">ESOP Pool</div><div class="aval">10%</div><div class="adelta">720k shares</div></div>
+        </div>
+        <div class="admin-table-wrap">
+          <div class="atw-header"><h3>HealthSync — Shareholding Table</h3><span class="atw-badge">Seed Round</span></div>
+          <table class="atable">
+            <thead><tr><th>Shareholder</th><th>Type</th><th>Shares</th><th>%</th><th>Share Class</th><th>Round</th><th>Price/Share</th></tr></thead>
+            <tbody>
+              <tr><td>Fatima Okonkwo</td><td>Founder</td><td>3,500,000</td><td>48.6%</td><td>Common A</td><td>Founder</td><td>$0.001</td></tr>
+              <tr><td>Co-founder (TBD)</td><td>Founder</td><td>1,500,000</td><td>20.8%</td><td>Common A</td><td>Founder</td><td>$0.001</td></tr>
+              <tr><td>AlphaVentures</td><td>Investor</td><td>1,200,000</td><td>16.7%</td><td>Preferred A</td><td>Seed</td><td>$0.67</td></tr>
+              <tr><td>BridgeCapital</td><td>Investor</td><td>280,000</td><td>3.9%</td><td>Preferred A</td><td>Seed</td><td>$0.67</td></tr>
+              <tr><td>ESOP Pool</td><td>Option Pool</td><td>720,000</td><td>10.0%</td><td>Options</td><td>—</td><td>—</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="admin-table-wrap" style="margin-top:20px;">
+          <div class="atw-header"><h3>Investment Rounds History</h3><span class="atw-badge">2 Rounds</span></div>
+          <table class="atable">
+            <thead><tr><th>Round</th><th>Date</th><th>Amount Raised</th><th>Valuation (Pre)</th><th>Lead Investor</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Pre-Seed</td><td>Jan 2024</td><td>$150,000</td><td>$1.2M</td><td>Founders</td><td><span class="pill pill-green">Closed</span></td></tr>
+              <tr><td>Seed</td><td>Nov 2024</td><td>$800,000</td><td>$4.0M</td><td>AlphaVentures</td><td><span class="pill pill-green">Closed</span></td></tr>
+              <tr><td>Series A</td><td>Q3 2025</td><td>$3,000,000</td><td>$12M (target)</td><td>—</td><td><span class="pill pill-orange">Raising</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- MILESTONES -->
+      <div class="admin-section-view" id="as-milestones">
+        <div class="admin-page-title">Milestones Setup &amp; Tracker</div>
+        <div class="admin-page-sub">Define, assign, and track client milestones across programs</div>
+        <div style="margin-bottom:16px;display:flex;gap:10px;">
+          <button class="btn btn-teal btn-sm" onclick="alert('Add milestone modal')">+ Add Milestone</button>
+          <select style="padding:8px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:'Outfit',sans-serif;font-size:.875rem;background:rgba(255,255,255,.7);outline:none;cursor:pointer;">
+            <option>All Clients</option>
+            <option>HealthSync</option>
+            <option>TechNova AI</option>
+            <option>UrbanCart</option>
+          </select>
+        </div>
+        <div class="admin-stat-row">
+          <div class="astat"><div class="alabel">Total Milestones</div><div class="aval">38</div><div class="adelta">Across all clients</div></div>
+          <div class="astat"><div class="alabel">Completed</div><div class="aval">22</div><div class="adelta">↑ 5 this month</div></div>
+          <div class="astat"><div class="alabel">In Progress</div><div class="aval">12</div><div class="adelta">On track</div></div>
+          <div class="astat"><div class="alabel">Overdue</div><div class="aval">4</div><div class="adelta">⚠ Needs attention</div></div>
+        </div>
+        <div class="admin-table-wrap">
+          <div class="atw-header"><h3>Active Milestones</h3><span class="atw-badge">All Clients</span></div>
+          <table class="atable">
+            <thead><tr><th>Client</th><th>Milestone</th><th>Category</th><th>Due Date</th><th>Owner</th><th>Progress</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>HealthSync</td><td>Complete ICP Definition</td><td>GTM</td><td>Apr 30</td><td>BANAHUB</td><td>90%</td><td><span class="pill pill-teal">In Progress</span></td></tr>
+              <tr><td>HealthSync</td><td>First 10 Paying Customers</td><td>Revenue</td><td>May 31</td><td>Client</td><td>40%</td><td><span class="pill pill-orange">At Risk</span></td></tr>
+              <tr><td>TechNova AI</td><td>Pitch Deck v2 Ready</td><td>Fundraising</td><td>Apr 20</td><td>BANAHUB</td><td>100%</td><td><span class="pill pill-green">Done</span></td></tr>
+              <tr><td>TechNova AI</td><td>Investor Intro — 5 Meetings</td><td>Fundraising</td><td>May 15</td><td>Both</td><td>60%</td><td><span class="pill pill-teal">In Progress</span></td></tr>
+              <tr><td>UrbanCart</td><td>Market Entry Report — MY</td><td>Expansion</td><td>Apr 18</td><td>BANAHUB</td><td>100%</td><td><span class="pill pill-green">Done</span></td></tr>
+              <tr><td>UrbanCart</td><td>Local Partner MOU Signed</td><td>Expansion</td><td>May 5</td><td>Both</td><td>20%</td><td><span class="pill pill-orange">Behind</span></td></tr>
+              <tr><td>GreenRoot</td><td>MVP Demo Ready</td><td>Product</td><td>Apr 14</td><td>Client</td><td>100%</td><td><span class="pill pill-green">Done</span></td></tr>
+              <tr><td>GreenRoot</td><td>First Pilot Customer</td><td>Revenue</td><td>May 30</td><td>Both</td><td>25%</td><td><span class="pill pill-teal">In Progress</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- GTM TRACKER -->
+      <div class="admin-section-view" id="as-gtm-tracker">
+        <div class="admin-page-title">GTM Tracker</div>
+        <div class="admin-page-sub">Go-to-market execution tracker across all advisory clients</div>
+        <div class="admin-stat-row">
+          <div class="astat"><div class="alabel">Active GTM Plans</div><div class="aval">6</div><div class="adelta">Clients in advisory</div></div>
+          <div class="astat"><div class="alabel">Campaigns Live</div><div class="aval">9</div><div class="adelta">↑ 3 launched</div></div>
+          <div class="astat"><div class="alabel">Avg. Pipeline Built</div><div class="aval">$82K</div><div class="adelta">Per client</div></div>
+          <div class="astat"><div class="alabel">Conversion Rate</div><div class="aval">18%</div><div class="adelta">↑ 3% vs last Q</div></div>
+        </div>
+        <div class="admin-table-wrap">
+          <div class="atw-header"><h3>GTM Plans by Client</h3><span class="atw-badge">6 Active</span></div>
+          <table class="atable">
+            <thead><tr><th>Client</th><th>ICP Defined</th><th>Channels</th><th>Pipeline Value</th><th>Leads Generated</th><th>MQLs</th><th>SQLs</th><th>Health</th></tr></thead>
+            <tbody>
+              <tr><td>TechCore</td><td><span class="pill pill-green">Yes</span></td><td>Outbound, LinkedIn</td><td>$124,000</td><td>48</td><td>18</td><td>7</td><td><span class="pill pill-green">🟢</span></td></tr>
+              <tr><td>GreenBridge</td><td><span class="pill pill-green">Yes</span></td><td>Content, Events</td><td>$68,000</td><td>31</td><td>9</td><td>4</td><td><span class="pill pill-teal">🟡</span></td></tr>
+              <tr><td>HealthSync</td><td><span class="pill pill-orange">In Progress</span></td><td>Referral, Direct</td><td>$45,000</td><td>22</td><td>6</td><td>2</td><td><span class="pill pill-orange">🟠</span></td></tr>
+              <tr><td>RetailPlus</td><td><span class="pill pill-green">Yes</span></td><td>Performance, SEO</td><td>$93,000</td><td>61</td><td>24</td><td>11</td><td><span class="pill pill-green">🟢</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="admin-table-wrap" style="margin-top:20px;">
+          <div class="atw-header"><h3>GTM Campaigns</h3><span class="atw-badge">9 Live</span></div>
+          <table class="atable">
+            <thead><tr><th>Campaign</th><th>Client</th><th>Channel</th><th>Budget</th><th>Spend</th><th>Leads</th><th>CPL</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Q2 LinkedIn Outbound</td><td>TechCore</td><td>LinkedIn</td><td>$2,000</td><td>$1,450</td><td>18</td><td>$81</td><td><span class="pill pill-green">Live</span></td></tr>
+              <tr><td>Founder Content Series</td><td>GreenBridge</td><td>Content</td><td>$800</td><td>$600</td><td>9</td><td>$67</td><td><span class="pill pill-green">Live</span></td></tr>
+              <tr><td>HealthTech Referral Drive</td><td>HealthSync</td><td>Referral</td><td>$500</td><td>$200</td><td>6</td><td>$33</td><td><span class="pill pill-teal">Running</span></td></tr>
+              <tr><td>Retail SME Performance</td><td>RetailPlus</td><td>Google Ads</td><td>$3,500</td><td>$2,900</td><td>41</td><td>$71</td><td><span class="pill pill-green">Live</span></td></tr>
+              <tr><td>GTM Masterclass Nurture</td><td>All</td><td>Email</td><td>$300</td><td>$300</td><td>28</td><td>$11</td><td><span class="pill pill-green">Done</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- EXPANSION TRACKER -->
+      <div class="admin-section-view" id="as-expansion-tracker">
+        <div class="admin-page-title">Expansion Tracker</div>
+        <div class="admin-page-sub">Cross-border market entry execution per client and market</div>
+        <div class="admin-stat-row">
+          <div class="astat"><div class="alabel">Markets Tracked</div><div class="aval">7</div><div class="adelta">4 countries</div></div>
+          <div class="astat"><div class="alabel">Active Expansions</div><div class="aval">4</div><div class="adelta">In execution</div></div>
+          <div class="astat"><div class="alabel">Partners Introduced</div><div class="aval">11</div><div class="adelta">This quarter</div></div>
+          <div class="astat"><div class="alabel">MOUs Signed</div><div class="aval">3</div><div class="adelta">↑ 1 this month</div></div>
+        </div>
+        <div class="admin-table-wrap">
+          <div class="atw-header"><h3>Expansion Pipeline</h3><span class="atw-badge">7 Markets</span></div>
+          <table class="atable">
+            <thead><tr><th>Client</th><th>Target Market</th><th>Sector Fit</th><th>Intel Report</th><th>Partners ID'd</th><th>MOU</th><th>Revenue Live</th><th>Stage</th></tr></thead>
+            <tbody>
+              <tr><td>UrbanCart</td><td>Malaysia</td><td>eCommerce</td><td><span class="pill pill-green">Done</span></td><td>3</td><td><span class="pill pill-green">Signed</span></td><td><span class="pill pill-orange">Pending</span></td><td><span class="pill pill-indigo">Partner Phase</span></td></tr>
+              <tr><td>UrbanCart</td><td>Indonesia</td><td>eCommerce</td><td><span class="pill pill-teal">In Progress</span></td><td>1</td><td><span class="pill pill-orange">Pending</span></td><td><span class="pill pill-red">Not Started</span></td><td><span class="pill pill-orange">Research</span></td></tr>
+              <tr><td>GreenBridge</td><td>UAE</td><td>CleanTech</td><td><span class="pill pill-green">Done</span></td><td>2</td><td><span class="pill pill-green">Signed</span></td><td><span class="pill pill-teal">Pilot</span></td><td><span class="pill pill-green">Revenue Phase</span></td></tr>
+              <tr><td>TechCore</td><td>UK</td><td>B2B SaaS</td><td><span class="pill pill-green">Done</span></td><td>4</td><td><span class="pill pill-orange">In Review</span></td><td><span class="pill pill-red">Not Started</span></td><td><span class="pill pill-teal">Intro Phase</span></td></tr>
+              <tr><td>RetailPlus</td><td>Thailand</td><td>Retail Tech</td><td><span class="pill pill-orange">Pending</span></td><td>0</td><td><span class="pill pill-red">N/A</span></td><td><span class="pill pill-red">Not Started</span></td><td><span class="pill pill-violet">Scoping</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="admin-table-wrap" style="margin-top:20px;">
+          <div class="atw-header"><h3>Market Intelligence Notes</h3><span class="atw-badge">4 Markets</span></div>
+          <table class="atable">
+            <thead><tr><th>Market</th><th>Key Insight</th><th>Risk</th><th>Opportunity Score</th></tr></thead>
+            <tbody>
+              <tr><td>Malaysia</td><td>Strong eCommerce growth, Shopee dominant, logistics mature</td><td><span class="pill pill-teal">Low</span></td><td>8.4 / 10</td></tr>
+              <tr><td>UAE</td><td>CleanTech incentives, Vision 2030 alignment, capital accessible</td><td><span class="pill pill-teal">Low</span></td><td>9.1 / 10</td></tr>
+              <tr><td>UK</td><td>Competitive SaaS market, GDPR compliance required</td><td><span class="pill pill-orange">Medium</span></td><td>7.2 / 10</td></tr>
+              <tr><td>Indonesia</td><td>Fast-growing but regulatory complexity high, local partner critical</td><td><span class="pill pill-orange">Medium</span></td><td>7.8 / 10</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /admin-content -->
+  </div><!-- /admin-layout -->
+</div><!-- /admin-panel -->
+
+
+<script>
+// ===== PAGE NAVIGATION =====
+const pages = ['home','services','programs','events','ecosystem','about'];
+function showPage(id) {
+  pages.forEach(p => {
+    document.getElementById('page-'+p)?.classList.remove('active');
+  });
+  const el = document.getElementById('page-'+id);
+  if(el) { el.classList.add('active'); window.scrollTo(0,0); }
+  document.querySelector('footer').style.display = 'block';
+}
+
+// ===== EVENTS DATA =====
+const eventsData = [
+  { type:'workshop', month:'May', day:'14', title:'GTM Masterclass: Winning Your First 100 Customers', desc:'Deep-dive session on customer acquisition frameworks for B2B and B2C ventures.', time:'2:00 PM SGT', location:'Online', price:'$49', priceVal:'49' },
+  { type:'networking', month:'May', day:'22', title:'BANAHUB Connect: Founders & Investors Evening', desc:'Curated networking session bringing together founders and investors in our ecosystem.', time:'6:30 PM SGT', location:'Singapore CBD', price:'Free', priceVal:'0' },
+  { type:'showcase', month:'Jun', day:'05', title:'Cohort 1 Demo Day — Scale Track Presentations', desc:'Watch Scale Track graduates pitch live to a panel of investors and ecosystem leaders.', time:'10:00 AM SGT', location:'BANAHUB HQ', price:'Free', priceVal:'0' },
+  { type:'workshop', month:'Jun', day:'18', title:'Cross-Border Growth: Entering New Markets Playbook', desc:'Practical frameworks for market entry, regulatory considerations, and local partnerships.', time:'2:00 PM SGT', location:'Online', price:'$79', priceVal:'79' },
+  { type:'networking', month:'Jul', day:'03', title:'BANAHUB Connect — Mid-Year Ecosystem Mixer', desc:'Biannual ecosystem gathering for members, founders, and partners.', time:'7:00 PM SGT', location:'Singapore', price:'Free', priceVal:'0' },
+  { type:'workshop', month:'Jul', day:'17', title:'Investor Readiness Masterclass', desc:'How to prepare your financials, pitch deck, and narrative for institutional investors.', time:'3:00 PM SGT', location:'Online', price:'$99', priceVal:'99' },
+];
+const typeColors = { workshop: 'tag-indigo', networking: 'tag-teal', showcase: 'tag-violet' };
+
+function renderEvents(filter) {
+  const grid = document.getElementById('events-grid');
+  const filtered = filter === 'all' ? eventsData : eventsData.filter(e => e.type === filter);
+  grid.innerHTML = filtered.map(e => `
+    <div class="event-card">
+      <div class="event-card-top">
+        <div class="event-date-row">
+          <div class="event-date-badge"><div class="ed-month">${e.month}</div><div class="ed-day">${e.day}</div></div>
+          <span class="event-type-pill ${typeColors[e.type]} service-tag">${e.type}</span>
+        </div>
+        <h3>${e.title}</h3>
+        <p>${e.desc}</p>
+        <div class="event-meta">
+          <span>🕐 ${e.time}</span>
+          <span>📍 ${e.location}</span>
+        </div>
+      </div>
+      <div class="event-card-footer">
+        <div class="event-price ${e.priceVal==='0'?'free':''}">${e.price}</div>
+        <button class="btn btn-teal btn-sm" onclick="${e.priceVal==='0' ? "alert('Registered! Confirmation email sent.')" : `openStripe('${e.type === 'workshop' ? 'Workshop' : 'Event'} Registration','${e.title}','${e.priceVal}')`}">Register Now</button>
+      </div>
+    </div>`).join('');
+}
+renderEvents('all');
+
+function filterEvents(btn, type) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderEvents(type);
+}
+
+// ===== ECOSYSTEM FORM =====
+function submitEcoForm() {
+  document.getElementById('eco-success').classList.add('show');
+}
+
+// ===== STRIPE MODAL =====
+let stripeTitle = '', stripeService = '', stripePrice = '';
+function openStripe(title, service, price) {
+  stripeTitle = title; stripeService = service; stripePrice = price;
+  document.getElementById('stripe-title').textContent = title;
+  document.getElementById('stripe-desc').textContent = service;
+  document.getElementById('stripe-price').innerHTML = '$'+Number(price).toLocaleString()+' <small>/ session</small>';
+  document.getElementById('stripe-form-view').style.display = 'block';
+  document.getElementById('stripe-processing').style.display = 'none';
+  document.getElementById('stripe-success').style.display = 'none';
+  document.getElementById('stripe-modal').classList.add('open');
+}
+function closeStripe() {
+  document.getElementById('stripe-modal').classList.remove('open');
+  ['s-name','s-email','s-card','s-exp','s-cvc'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.value = '';
+  });
+}
+function formatCard(el) {
+  let v = el.value.replace(/\D/g,'').substring(0,16);
+  el.value = v.replace(/(\d{4})/g,'$1 ').trim();
+}
+function formatExp(el) {
+  let v = el.value.replace(/\D/g,'').substring(0,4);
+  if(v.length>=2) v = v.substring(0,2)+' / '+v.substring(2);
+  el.value = v;
+}
+function processPayment() {
+  const name = document.getElementById('s-name').value;
+  const email = document.getElementById('s-email').value;
+  const card = document.getElementById('s-card').value;
+  if(!name||!email||card.replace(/\s/g,'').length<16){
+    alert('Please complete all payment fields.');return;
+  }
+  document.getElementById('stripe-form-view').style.display = 'none';
+  document.getElementById('stripe-processing').style.display = 'block';
+  setTimeout(() => {
+    document.getElementById('stripe-processing').style.display = 'none';
+    document.getElementById('stripe-success').style.display = 'block';
+  }, 2200);
+}
+
+// ===== ADMIN =====
+function openAdminLogin() { document.getElementById('admin-login').classList.add('open'); }
+function closeAdminLogin() { document.getElementById('admin-login').classList.remove('open'); document.getElementById('login-err').classList.remove('show'); }
+function doLogin() {
+  const user = document.getElementById('l-user').value.trim();
+  const pass = document.getElementById('l-pass').value.trim();
+  if(user === 'admin' && pass === 'banasaniya') {
+    closeAdminLogin();
+    document.getElementById('admin-panel').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  } else {
+    document.getElementById('login-err').classList.add('show');
+    document.getElementById('l-pass').value = '';
+  }
+}
+function doLogout() {
+  document.getElementById('admin-panel').classList.remove('open');
+  document.body.style.overflow = '';
+  document.getElementById('l-user').value = '';
+  document.getElementById('l-pass').value = '';
+}
+function showAdminSection(id, link) {
+  document.querySelectorAll('.admin-section-view').forEach(v => v.classList.remove('active'));
+  document.getElementById('as-'+id)?.classList.add('active');
+  document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+  if(link) link.classList.add('active');
+}
+function selectPage(el, name) {
+  document.querySelectorAll('.page-list-item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('edit-page-name').textContent = name + ' Page';
+  document.getElementById('save-ok').classList.remove('show');
+}
+function savePage() {
+  const ok = document.getElementById('save-ok');
+  ok.classList.add('show');
+  setTimeout(() => ok.classList.remove('show'), 3000);
+}
+
+// Enter key on login
+document.addEventListener('keydown', e => {
+  if(e.key==='Enter' && document.getElementById('admin-login').classList.contains('open')) doLogin();
+  if(e.key==='Escape') { closeAdminLogin(); closeStripe(); closeContactModal(); }
+});
+// Contact Modal
+function openContactModal() {
+  const m = document.getElementById('contact-modal');
+  m.style.display = 'flex';
+  document.getElementById('c-success').style.display = 'none';
+}
+function closeContactModal() {
+  document.getElementById('contact-modal').style.display = 'none';
+  ['c-name','c-email','c-subject','c-msg'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+}
+function submitContact() {
+  const name = document.getElementById('c-name').value.trim();
+  const email = document.getElementById('c-email').value.trim();
+  const subject = document.getElementById('c-subject').value.trim();
+  const msg = document.getElementById('c-msg').value.trim();
+  if(!name || !email || !msg) { alert('Please fill in your name, email, and message.'); return; }
+  // Open email client as fallback delivery
+  const body = encodeURIComponent('From: ' + name + ' (' + email + ')\n\n' + msg);
+  const sub = encodeURIComponent(subject || 'BANAHUB Enquiry from ' + name);
+  window.location.href = 'mailto:Ibthisam@banahub.com?cc=Ibthisamkj@gmail.com&subject=' + sub + '&body=' + body;
+  document.getElementById('c-success').style.display = 'block';
+}
+// Close contact modal on backdrop click
+document.getElementById('contact-modal').addEventListener('click', function(e) {
+  if(e.target === this) closeContactModal();
+});
+
+// Secret admin access: type "bana" anywhere on page
+let _secretBuf = '';
+document.addEventListener('keydown', e => {
+  _secretBuf += e.key.toLowerCase();
+  if(_secretBuf.length > 6) _secretBuf = _secretBuf.slice(-6);
+  if(_secretBuf.includes('bana')) { openAdminLogin(); _secretBuf = ''; }
+});
+// Also: triple-click the nav logo
+let _logoClicks = 0, _logoTimer;
+document.querySelector('.nav-logo').addEventListener('click', function(e) {
+  _logoClicks++;
+  clearTimeout(_logoTimer);
+  _logoTimer = setTimeout(() => { _logoClicks = 0; }, 600);
+  if(_logoClicks >= 3) { e.preventDefault(); openAdminLogin(); _logoClicks = 0; }
+});
+</script>
+
+<!-- ===================== CONTACT MODAL ===================== -->
+<div id="contact-modal" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(17,24,39,0.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);align-items:center;justify-content:center;">
+  <div style="background:rgba(255,255,255,0.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,0.9);border-radius:24px;padding:32px 28px 28px;width:440px;max-width:92vw;position:relative;animation:popIn 0.3s ease;box-shadow:0 24px 80px rgba(27,107,107,0.22);">
+    <button onclick="closeContactModal()" style="position:absolute;top:12px;right:12px;background:rgba(0,0,0,0.07);border:none;font-size:1rem;cursor:pointer;color:#6B7A8D;width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:all 0.18s;">×</button>
+    <div style="font-family:'Fraunces',serif;font-size:1.5rem;font-weight:700;margin-bottom:4px;color:#111827;">Get in Touch</div>
+    <div style="font-size:0.88rem;color:#5A6A7E;margin-bottom:24px;font-family:'Outfit',sans-serif;">Send us a message — we'll get back within 24 hours.</div>
+    <div style="margin-bottom:14px;">
+      <label style="display:block;font-size:0.8rem;font-weight:600;color:#3A4455;margin-bottom:5px;font-family:'Outfit',sans-serif;">Your Name</label>
+      <input id="c-name" type="text" placeholder="Sarah Okonkwo" style="width:100%;padding:11px 14px;border:1.5px solid rgba(200,215,220,0.7);border-radius:12px;font-family:'Outfit',sans-serif;font-size:0.9rem;background:rgba(255,255,255,0.7);outline:none;box-sizing:border-box;">
+    </div>
+    <div style="margin-bottom:14px;">
+      <label style="display:block;font-size:0.8rem;font-weight:600;color:#3A4455;margin-bottom:5px;font-family:'Outfit',sans-serif;">Your Email</label>
+      <input id="c-email" type="email" placeholder="you@company.com" style="width:100%;padding:11px 14px;border:1.5px solid rgba(200,215,220,0.7);border-radius:12px;font-family:'Outfit',sans-serif;font-size:0.9rem;background:rgba(255,255,255,0.7);outline:none;box-sizing:border-box;">
+    </div>
+    <div style="margin-bottom:14px;">
+      <label style="display:block;font-size:0.8rem;font-weight:600;color:#3A4455;margin-bottom:5px;font-family:'Outfit',sans-serif;">Subject</label>
+      <input id="c-subject" type="text" placeholder="e.g. GTM Advisory Enquiry" style="width:100%;padding:11px 14px;border:1.5px solid rgba(200,215,220,0.7);border-radius:12px;font-family:'Outfit',sans-serif;font-size:0.9rem;background:rgba(255,255,255,0.7);outline:none;box-sizing:border-box;">
+    </div>
+    <div style="margin-bottom:20px;">
+      <label style="display:block;font-size:0.8rem;font-weight:600;color:#3A4455;margin-bottom:5px;font-family:'Outfit',sans-serif;">Message</label>
+      <textarea id="c-msg" rows="4" placeholder="Tell us what you're looking for..." style="width:100%;padding:11px 14px;border:1.5px solid rgba(200,215,220,0.7);border-radius:12px;font-family:'Outfit',sans-serif;font-size:0.9rem;background:rgba(255,255,255,0.7);outline:none;resize:vertical;box-sizing:border-box;"></textarea>
+    </div>
+    <button onclick="submitContact()" style="width:100%;padding:13px;background:linear-gradient(135deg,#1B9AB0,#1B6B6B);color:#fff;border:none;border-radius:12px;font-family:'Outfit',sans-serif;font-size:0.95rem;font-weight:600;cursor:pointer;letter-spacing:0.02em;">Send Message →</button>
+    <div style="text-align:center;margin-top:16px;font-size:0.78rem;color:#5A6A7E;font-family:'Outfit',sans-serif;">Or email us directly: <a href="mailto:Ibthisam@banahub.com" style="color:#1B6B6B;font-weight:600;">Ibthisam@banahub.com</a></div>
+    <div id="c-success" style="display:none;background:#E8F8EE;border:1px solid #B0DFC0;border-radius:12px;padding:14px;font-size:0.9rem;color:#1A7A42;text-align:center;margin-top:14px;font-family:'Outfit',sans-serif;">✅ Message sent! We'll be in touch shortly.</div>
+  </div>
+</div>
+
+</body>
+</html>
