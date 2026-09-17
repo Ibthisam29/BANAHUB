@@ -3,7 +3,7 @@
   "name": "banahub",
   "framework": null,
   "buildCommand": null,
-  "outputDirectory": "Banahub platform",
+  "outputDirectory": "banahub-complete-package/Banahub platform",
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
