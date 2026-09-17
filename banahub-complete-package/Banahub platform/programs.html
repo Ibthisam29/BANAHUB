@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description"
+    content="BANAHUB Programs — cohort-based acceleration, GTM advisory, and cross-border expansion programs for founders, SMEs, and startups." />
+  <meta property="og:title" content="Programs | BANAHub" />
+  <meta property="og:description" content="Cohort-based acceleration and expansion programs." />
+  <meta property="og:url" content="https://www.banahub.com/programs.html" />
+  <meta property="og:type" content="website" />
+  <link rel="canonical" href="https://www.banahub.com/programs.html" />
+  <title>Programs | BANAHub</title>
+
+  <link rel="icon" type="image/x-icon" href="favicon.ico" />
+  <link rel="icon" type="image/png" sizes="512x512" href="logo-icon-512.png" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+
+  <link rel="stylesheet" href="./output.css" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Manrope:wght@300;400;500;600;700&family=Material+Symbols+Outlined:wght,FILL@400,0&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="glass-theme.css" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Manrope', system-ui, sans-serif; }
+    .glass { background: rgba(250,249,245,.72); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(191,201,195,.3); }
+    .font-display { font-family: 'Newsreader', Georgia, serif; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+    .pg-card { transition: transform .2s ease, box-shadow .2s ease; }
+    .pg-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,53,39,.12); }
+    /* Glass status badges */
+    .badge-glass { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); background: rgba(255,255,255,0.55); border: 1px solid rgba(191,201,195,0.4); }
+  </style>
+</head>
+
+<body class="bg-background text-on-surface antialiased">
+  <div class="glass-bg-layer"></div>
+
+  <!-- NAV -->
+  <nav class="fixed top-0 inset-x-0 z-50 glass">
+    <div class="flex items-center justify-between h-16 px-10 max-w-container-max mx-auto">
+      <a href="index.html" id="logo" class="flex items-center select-none"><img src="logo.png" alt="BANAHub" class="brand-logo-img"/></a>
+      <div class="hidden md:flex items-center gap-8">
+        <a href="index.html#ecosystem" class="text-body-md font-sans text-on-surface-variant hover:text-primary transition-colors">Ecosystem</a>
+        <a href="programs.html" class="text-body-md font-sans text-primary font-semibold transition-colors">Programs</a>
+        <a href="events.html" class="text-body-md font-sans text-on-surface-variant hover:text-primary transition-colors">Events</a>
+        <a href="index.html#briefing" class="text-body-md font-sans text-on-surface-variant hover:text-primary transition-colors">Solutions</a>
+      </div>
+      <div class="hidden md:flex items-center gap-4">
+        <a href="login.html" class="text-body-md font-sans text-on-surface-variant hover:text-primary transition-colors">Login</a>
+        <a href="register.html" class="bg-primary text-on-primary px-5 py-2 rounded font-sans font-semibold text-body-md hover:bg-primary-container transition-colors">Apply Now</a>
+      </div>
+      <button id="nav-toggle" class="md:hidden p-2 text-on-surface" aria-label="Menu">
+        <span class="material-symbols-outlined">menu</span>
+      </button>
+    </div>
+    <div id="mobile-menu" class="hidden flex-col gap-4 px-10 py-5 bg-surface-container-lowest border-t border-outline-variant/20">
+      <a href="index.html#ecosystem" class="text-body-lg font-sans text-on-surface">Ecosystem</a>
+      <a href="programs.html" class="text-body-lg font-sans text-primary font-semibold">Programs</a>
+      <a href="events.html" class="text-body-lg font-sans text-on-surface">Events</a>
+      <a href="index.html#briefing" class="text-body-lg font-sans text-on-surface">Solutions</a>
+      <div class="flex gap-3 pt-3 border-t border-outline-variant/20">
+        <a href="login.html" class="flex-1 text-center py-2.5 border border-outline-variant rounded font-sans font-semibold text-body-md text-on-surface">Login</a>
+        <a href="register.html" class="flex-1 text-center py-2.5 bg-primary text-on-primary rounded font-sans font-semibold text-body-md">Apply Now</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="pt-16">
+
+    <!-- HERO -->
+    <section class="relative py-20 px-10 max-w-container-max mx-auto text-center">
+      <p class="font-sans font-bold text-label-caps text-secondary tracking-widest mb-4">STRUCTURED ACCELERATION</p>
+      <h1 class="font-display font-semibold text-display-md text-primary max-w-3xl mx-auto leading-tight">Programs</h1>
+      <p class="font-sans text-body-lg text-on-surface-variant mt-5 max-w-xl mx-auto">
+        Cohort-based programs taking founders and SMEs from concept to commercial traction — GTM advisory, market entry, and investor access.
+      </p>
+    </section>
+
+    <!-- FILTER -->
+    <section class="px-10 max-w-container-max mx-auto mb-6 flex flex-wrap gap-2" id="status-filters">
+      <button data-status="" class="pg-filter-btn bg-primary text-on-primary px-4 py-1.5 rounded-full font-sans text-body-sm font-semibold">All</button>
+      <button data-status="active" class="pg-filter-btn badge-glass text-on-surface px-4 py-1.5 rounded-full font-sans text-body-sm font-semibold">Active</button>
+      <button data-status="upcoming" class="pg-filter-btn badge-glass text-on-surface px-4 py-1.5 rounded-full font-sans text-body-sm font-semibold">Upcoming</button>
+      <button data-status="closed" class="pg-filter-btn badge-glass text-on-surface px-4 py-1.5 rounded-full font-sans text-body-sm font-semibold">Closed</button>
+    </section>
+
+    <!-- PROGRAMS GRID -->
+    <section class="px-10 max-w-container-max mx-auto pb-24">
+      <div id="programs-grid" class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="col-span-full text-center py-16 text-on-surface-variant font-sans">Loading programs…</div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-surface-container-lowest border-t border-outline-variant py-section-gap">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 px-10 max-w-container-max mx-auto mb-10">
+      <div class="col-span-2 md:col-span-1">
+        <span class="font-display font-semibold text-headline-md text-primary block mb-3">BANAHub</span>
+        <p class="font-sans text-body-md text-on-surface-variant opacity-80 leading-relaxed">© 2026 BANAHub. Institutional Cross-Border Excellence.</p>
+      </div>
+      <div>
+        <h5 class="font-sans font-bold text-label-caps text-primary tracking-widest mb-5">REGIONS</h5>
+        <ul class="space-y-3">
+          <li><a href="index.html#ecosystem" class="font-sans text-body-md text-on-surface-variant hover:text-primary transition-colors">Singapore HQ</a></li>
+          <li><a href="index.html#programs" class="font-sans text-body-md text-on-surface-variant hover:text-primary transition-colors">SEA Gateway</a></li>
+          <li><a href="index.html#summits" class="font-sans text-body-md text-on-surface-variant hover:text-primary transition-colors">Asia North</a></li>
+          <li><a href="index.html#summits" class="font-sans text-body-md text-on-surface-variant hover:text-primary transition-colors">Gulf Region</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5 class="font-sans font-bold text-label-caps text-primary tracking-widest mb-5">GOVERNANCE</h5>
+        <ul class="space-y-3">
+          <li><a href="index.html#briefing" class="font-sans text-body-md text-on-surface-variant hover:text-primary transition-colors">Privacy</a></li>
+          <li><a href="index.html#briefing" class="font-sans text-body-md text-on-surface-variant hover:text-primary transition-colors">Compliance</a></li>
+          <li><a href="index.html#briefing" class="font-sans text-body-md text-on-surface-variant hover:text-primary transition-colors">Transparency</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5 class="font-sans font-bold text-label-caps text-primary tracking-widest mb-5">CONNECT</h5>
+        <div class="flex gap-3">
+          <a href="https://linkedin.com/company/banahub" target="_blank" class="w-9 h-9 rounded-full border border-outline-variant flex items-center justify-center hover:bg-surface-container transition-colors"><span class="material-symbols-outlined text-[18px] text-on-surface-variant">share</span></a>
+          <a href="mailto:contact@banahub.com" class="w-9 h-9 rounded-full border border-outline-variant flex items-center justify-center hover:bg-surface-container transition-colors"><span class="material-symbols-outlined text-[18px] text-on-surface-variant">mail</span></a>
+          <a href="https://www.banahub.com" target="_blank" class="w-9 h-9 rounded-full border border-outline-variant flex items-center justify-center hover:bg-surface-container transition-colors"><span class="material-symbols-outlined text-[18px] text-on-surface-variant">language</span></a>
+        </div>
+      </div>
+    </div>
+    <p class="text-center text-body-sm text-on-surface-variant/70 font-sans px-10 max-w-container-max mx-auto">
+      BANAHUB is a market introduction and GTM advisory service. BANAHUB is not a licensed financial adviser under MAS and does not provide investment advice.
+    </p>
+  </footer>
+
+  <script src="config.js"></script>
+  <script src="api.js"></script>
+  <script>
+    document.getElementById('nav-toggle').addEventListener('click', () => {
+      document.getElementById('mobile-menu').classList.toggle('hidden');
+      document.getElementById('mobile-menu').classList.toggle('flex');
+    });
+
+    function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    function fmtDate(d) { if(!d) return 'Date TBD'; return new Date(d).toLocaleDateString('en-SG',{day:'numeric',month:'short',year:'numeric'}); }
+
+    let allPrograms = [];
+    function statusColor(s) {
+      return s === 'active' ? 'bg-primary text-on-primary' : s === 'upcoming' ? 'bg-secondary-container text-on-surface' : 'bg-outline-variant/40 text-on-surface-variant';
+    }
+
+    function programCard(p) {
+      return `
+        <div class="pg-card rounded-xl overflow-hidden border border-outline-variant bg-surface-container-lowest p-6">
+          <div class="flex items-center justify-between mb-4">
+            <span class="px-3 py-1 rounded-full text-body-sm font-sans font-semibold ${statusColor(p.status)}">${esc((p.status||'draft').toUpperCase())}</span>
+            <span class="material-symbols-outlined text-primary opacity-70">${p.type==='Cohort'?'groups':p.type==='Summit'?'account_balance':'forum'}</span>
+          </div>
+          <h3 class="font-display font-semibold text-headline-sm text-primary mb-2">${esc(p.title)}</h3>
+          <p class="font-sans text-body-sm text-on-surface-variant mb-3 line-clamp-3">${esc(p.description || '')}</p>
+          <p class="font-sans text-body-sm text-on-surface-variant mb-1">${esc(p.region || 'Region TBD')}</p>
+          <p class="font-sans text-body-sm text-primary mb-4">${fmtDate(p.start_date)}${p.end_date?' – '+fmtDate(p.end_date):''}</p>
+          ${p.max_participants ? `<p class="font-sans text-body-sm text-on-surface-variant mb-2">Max ${p.max_participants} participants</p>` : ''}
+          <p class="font-sans text-headline-sm font-display text-primary mb-4">${p.price_amount > 0 ? `${esc(p.currency||'SGD')} $${Number(p.price_amount).toLocaleString()}` : 'Free'}</p>
+          ${p.price_amount > 0
+            ? `<button onclick="startCheckout('program','${p.id}',this)" class="w-full bg-primary text-on-primary px-4 py-2.5 rounded font-sans font-semibold text-body-md hover:bg-primary-container transition-colors">Enroll — Pay Now</button>`
+            : `<a href="register.html" class="block text-center bg-primary text-on-primary px-4 py-2.5 rounded font-sans font-semibold text-body-md hover:bg-primary-container transition-colors">Apply</a>`}
+        </div>`;
+    }
+
+    function renderGrid(status) {
+      const grid = document.getElementById('programs-grid');
+      const filtered = status ? allPrograms.filter(p => p.status === status) : allPrograms;
+      grid.innerHTML = filtered.length
+        ? filtered.map(programCard).join('')
+        : `<div class="col-span-full text-center py-16 text-on-surface-variant font-sans">No programs in this category yet.</div>`;
+    }
+
+    document.querySelectorAll('.pg-filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.pg-filter-btn').forEach(b => {
+          b.className = 'pg-filter-btn badge-glass text-on-surface px-4 py-1.5 rounded-full font-sans text-body-sm font-semibold';
+        });
+        btn.className = 'pg-filter-btn bg-primary text-on-primary px-4 py-1.5 rounded-full font-sans text-body-sm font-semibold';
+        renderGrid(btn.dataset.status);
+      });
+    });
+
+    async function startCheckout(itemType, itemId, btn) {
+      const original = btn.textContent;
+      btn.disabled = true; btn.textContent = 'Redirecting to secure checkout…';
+      try {
+        await window.api.checkout(itemType, itemId);
+      } catch (err) {
+        alert(err.message || 'Could not start checkout. Please try again.');
+        btn.disabled = false; btn.textContent = original;
+      }
+    }
+
+    async function loadPrograms() {
+      const grid = document.getElementById('programs-grid');
+      try {
+        const res = await window.api.getPrograms();
+        allPrograms = (res && res.programs) || [];
+        renderGrid('');
+      } catch (err) {
+        console.warn('loadPrograms failed', err);
+        grid.innerHTML = `<div class="col-span-full text-center py-16 text-on-surface-variant font-sans">Could not load programs right now.</div>`;
+      }
+    }
+
+    loadPrograms();
+  </script>
+</body>
+</html>

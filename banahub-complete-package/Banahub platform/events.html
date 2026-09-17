@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description"
+    content="BANAHUB Events — Capital, Growth and Market Access forums, summits, and roundtables connecting investible businesses with investors across Singapore, ASEAN, the Gulf, and beyond." />
+  <meta property="og:title" content="Events | BANAHub" />
+  <meta property="og:description" content="Capital and Growth Exchange forums, summits, and roundtables." />
+  <meta property="og:url" content="https://www.banahub.com/events.html" />
+  <meta property="og:type" content="website" />
+  <link rel="canonical" href="https://www.banahub.com/events.html" />
+  <title>Events | BANAHub</title>
+
+  <link rel="icon" type="image/x-icon" href="favicon.ico" />
+  <link rel="icon" type="image/png" sizes="512x512" href="logo-icon-512.png" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+
+  <link rel="stylesheet" href="./output.css" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Manrope:wght@300;400;500;600;700&family=Material+Symbols+Outlined:wght,FILL@400,0&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="glass-theme.css" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Manrope', system-ui, sans-serif; }
+    .glass { background: rgba(250,249,245,.72); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(191,201,195,.3); }
+    .font-display { font-family: 'Newsreader', Georgia, serif; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+    .ev-card { transition: transform .2s ease, box-shadow .2s ease; }
+    .ev-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,53,39,.12); }
+    .skyline-mark { background: linear-gradient(135deg, #003527 0%, #262e42 100%); }
+  </style>
+</head>
+
+<body class="bg-background text-on-surface antialiased">
+  <div class="glass-bg-layer"></div>
+
+  <!-- NAV (same as index.html) -->
+  <nav class="fixed top-0 inset-x-0 z-50 glass">
+    <div class="flex items-center justify-between h-16 px-10 max-w-container-max mx-auto">
+      <a href="index.html" id="logo" class="flex items-center select-none"><img src="logo.png" alt="BANAHub" class="brand-logo-img"/></a>
+      <div class="hidden md:flex items-center gap-8">
+        <a href="index.html#ecosystem" class="text-body-md font-sans text-on-surface-variant hover:text-primary transition-colors">Ecosystem</a>
+        <a href="index.html#programs" class="text-body-md font-sans text-on-surface-variant hover:text-primary transition-colors">Expansion</a>
+        <a href="programs.html" class="text-body-md font-sans text-on-surface-variant hover:text-primary transition-colors">Programs</a>
+        <a href="events.html" class="text-body-md font-sans text-primary font-semibold transition-colors">Events</a>
+        <a href="index.html#briefing" class="text-body-md font-sans text-on-surface-variant hover:text-primary transition-colors">Solutions</a>
+      </div>
+      <div class="hidden md:flex items-center gap-4">
+        <a href="login.html" class="text-body-md font-sans text-on-surface-variant hover:text-primary transition-colors">Login</a>
+        <a href="register.html" class="bg-primary text-on-primary px-5 py-2 rounded font-sans font-semibold text-body-md hover:bg-primary-container transition-colors">Apply Now</a>
+      </div>
+      <button id="nav-toggle" class="md:hidden p-2 text-on-surface" aria-label="Menu">
+        <span class="material-symbols-outlined">menu</span>
+      </button>
+    </div>
+    <div id="mobile-menu" class="hidden flex-col gap-4 px-10 py-5 bg-surface-container-lowest border-t border-outline-variant/20">
+      <a href="index.html#ecosystem" class="text-body-lg font-sans text-on-surface">Ecosystem</a>
+      <a href="index.html#programs" class="text-body-lg font-sans text-on-surface">Expansion</a>
+      <a href="programs.html" class="text-body-lg font-sans text-on-surface">Programs</a>
+      <a href="events.html" class="text-body-lg font-sans text-primary font-semibold">Events</a>
+      <a href="index.html#briefing" class="text-body-lg font-sans text-on-surface">Solutions</a>
+      <div class="flex gap-3 pt-3 border-t border-outline-variant/20">
+        <a href="login.html" class="flex-1 text-center py-2.5 border border-outline-variant rounded font-sans font-semibold text-body-md text-on-surface">Login</a>
+        <a href="register.html" class="flex-1 text-center py-2.5 bg-primary text-on-primary rounded font-sans font-semibold text-body-md">Apply Now</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="pt-16">
+
+    <!-- HERO -->
+    <section class="relative py-20 px-10 max-w-container-max mx-auto text-center">
+      <p class="font-sans font-bold text-label-caps text-secondary tracking-widest mb-4">CAPITAL · COMMERCE · GLOBAL GROWTH</p>
+      <h1 class="font-display font-semibold text-display-md text-primary max-w-3xl mx-auto leading-tight">Events</h1>
+      <p class="font-sans text-body-lg text-on-surface-variant mt-5 max-w-xl mx-auto">
+        Invitation-led forums, summits, and roundtables connecting investible businesses with investors, corporate buyers, and strategic partners.
+      </p>
+    </section>
+
+    <!-- FEATURED EVENT (populated by JS if a featured event exists) -->
+    <section id="featured-wrap" class="hidden px-10 max-w-container-max mx-auto mb-16">
+      <div id="featured-event" class="rounded-xl overflow-hidden shadow-card-hover"></div>
+    </section>
+
+    <!-- EVENTS GRID -->
+    <section class="px-10 max-w-container-max mx-auto pb-24">
+      <h2 class="font-display font-semibold text-headline-lg text-primary mb-8">Upcoming & Past Events</h2>
+      <div id="events-grid" class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="col-span-full text-center py-16 text-on-surface-variant font-sans">Loading events…</div>
+      </div>
+    </section>
+
+    <!-- SPONSORSHIP OPPORTUNITIES -->
+    <section id="sponsorship-wrap" class="hidden px-10 max-w-container-max mx-auto pb-24">
+      <h2 class="font-display font-semibold text-headline-lg text-primary mb-3">Sponsorship Opportunities</h2>
+      <p class="font-sans text-body-md text-on-surface-variant mb-8 max-w-2xl">Partner with BANAHub's events — virtual and in-person sponsorship, speaking slots, and booth space.</p>
+      <div id="sponsorship-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER (same as index.html) -->
+  <footer class="bg-surface-container-lowest border-t border-outline-variant py-section-gap">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 px-10 max-w-container-max mx-auto mb-10">
+      <div class="col-span-2 md:col-span-1">
+        <span class="font-display font-semibold text-headline-md text-primary block mb-3">BANAHub</span>
+        <p class="font-sans text-body-md text-on-surface-variant opacity-80 leading-relaxed">© 2026 BANAHub. Institutional Cross-Border Excellence.</p>
+      </div>
+      <div>
+        <h5 class="font-sans font-bold text-label-caps text-primary tracking-widest mb-5">REGIONS</h5>
+        <ul class="space-y-3">
+          <li><a href="index.html#ecosystem" class="font-sans text-body-md text-on-surface-variant hover:text-primary transition-colors">Singapore HQ</a></li>
+          <li><a href="index.html#programs" class="font-sans text-body-md text-on-surface-variant hover:text-primary transition-colors">SEA Gateway</a></li>
+          <li><a href="index.html#summits" class="font-sans text-body-md text-on-surface-variant hover:text-primary transition-colors">Asia North</a></li>
+          <li><a href="index.html#summits" class="font-sans text-body-md text-on-surface-variant hover:text-primary transition-colors">Gulf Region</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5 class="font-sans font-bold text-label-caps text-primary tracking-widest mb-5">GOVERNANCE</h5>
+        <ul class="space-y-3">
+          <li><a href="index.html#briefing" class="font-sans text-body-md text-on-surface-variant hover:text-primary transition-colors">Privacy</a></li>
+          <li><a href="index.html#briefing" class="font-sans text-body-md text-on-surface-variant hover:text-primary transition-colors">Compliance</a></li>
+          <li><a href="index.html#briefing" class="font-sans text-body-md text-on-surface-variant hover:text-primary transition-colors">Transparency</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5 class="font-sans font-bold text-label-caps text-primary tracking-widest mb-5">CONNECT</h5>
+        <div class="flex gap-3">
+          <a href="https://linkedin.com/company/banahub" target="_blank" class="w-9 h-9 rounded-full border border-outline-variant flex items-center justify-center hover:bg-surface-container transition-colors"><span class="material-symbols-outlined text-[18px] text-on-surface-variant">share</span></a>
+          <a href="mailto:contact@banahub.com" class="w-9 h-9 rounded-full border border-outline-variant flex items-center justify-center hover:bg-surface-container transition-colors"><span class="material-symbols-outlined text-[18px] text-on-surface-variant">mail</span></a>
+          <a href="https://www.banahub.com" target="_blank" class="w-9 h-9 rounded-full border border-outline-variant flex items-center justify-center hover:bg-surface-container transition-colors"><span class="material-symbols-outlined text-[18px] text-on-surface-variant">language</span></a>
+        </div>
+      </div>
+    </div>
+    <p class="text-center text-body-sm text-on-surface-variant/70 font-sans px-10 max-w-container-max mx-auto">
+      BANAHUB facilitates business engagement, strategic introductions, and market-access discussions. Participation does not constitute an offer, recommendation, solicitation, or guarantee of investment. BANAHUB is not a licensed financial adviser under MAS.
+    </p>
+  </footer>
+
+  <script src="config.js"></script>
+  <script src="api.js"></script>
+  <script>
+    document.getElementById('nav-toggle').addEventListener('click', () => {
+      document.getElementById('mobile-menu').classList.toggle('hidden');
+      document.getElementById('mobile-menu').classList.toggle('flex');
+    });
+
+    function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    function fmtDate(d) { if(!d) return 'Date TBD'; return new Date(d).toLocaleDateString('en-SG',{day:'numeric',month:'long',year:'numeric'}); }
+
+    function renderFeatured(e) {
+      const wrap = document.getElementById('featured-wrap');
+      const el = document.getElementById('featured-event');
+      wrap.classList.remove('hidden');
+      el.innerHTML = `
+        <div class="relative min-h-[420px] flex items-end skyline-mark p-10 md:p-14">
+          ${e.cover_image ? `<img src="${esc(e.cover_image)}" alt="${esc(e.title)}" class="absolute inset-0 w-full h-full object-cover opacity-40"/>` : ''}
+          <div class="relative z-10 text-white max-w-2xl">
+            <p class="font-sans font-bold text-label-caps tracking-widest mb-3" style="color:#ffffff">${esc(e.type || 'Featured Event')} · Applications Open</p>
+            <h2 class="font-display font-semibold text-display-sm md:text-display-md leading-tight mb-4">${esc(e.title)}</h2>
+            <p class="font-sans text-body-lg opacity-90 mb-6">${esc(e.location || 'Singapore')} · ${fmtDate(e.event_date)}</p>
+            <p class="font-sans text-body-md opacity-80 mb-8 max-w-xl">${esc(e.description || '')}</p>
+            <div class="flex flex-wrap gap-3">
+              ${e.invite_only
+                ? `<a href="mailto:hello@banahub.com?subject=${encodeURIComponent('Invite request: '+e.title)}" class="bg-secondary-container text-on-surface px-6 py-3 rounded font-sans font-semibold text-body-md hover:opacity-90 transition-opacity">Invite Only — Request Access</a>`
+                : e.luma_url
+                ? `<a href="${esc(e.luma_url)}" target="_blank" class="bg-secondary-container text-on-surface px-6 py-3 rounded font-sans font-semibold text-body-md hover:opacity-90 transition-opacity">RSVP on Luma</a>`
+                : e.price_amount > 0
+                ? `<button onclick="startCheckout('event','${e.id}',this)" class="bg-secondary-container text-on-surface px-6 py-3 rounded font-sans font-semibold text-body-md hover:opacity-90 transition-opacity">Register — ${esc(e.currency||'SGD')} $${Number(e.price_amount).toLocaleString()}</button>`
+                : (e.registration_url ? `<a href="${esc(e.registration_url)}" target="_blank" class="bg-secondary-container text-on-surface px-6 py-3 rounded font-sans font-semibold text-body-md hover:opacity-90 transition-opacity">Apply to Participate</a>` : '')}
+              <a href="mailto:hello@banahub.com" class="border border-white/40 text-white px-6 py-3 rounded font-sans font-semibold text-body-md hover:bg-white/10 transition-colors">Enquire</a>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    function eventCard(e) {
+      const cover = e.cover_image ? `background-image:url('${esc(e.cover_image)}');background-size:cover;background-position:center;` : '';
+      const priceLine = e.price_amount > 0 ? `${esc(e.currency||'SGD')} $${Number(e.price_amount).toLocaleString()}` : 'Free';
+      let cta;
+      if (e.invite_only) {
+        cta = `<a href="mailto:hello@banahub.com?subject=${encodeURIComponent('Invite request: '+e.title)}" class="block text-center border border-primary text-primary px-4 py-2.5 rounded font-sans font-semibold text-body-md hover:bg-primary hover:text-on-primary transition-colors">Invite Only — Request Access</a>`;
+      } else if (e.luma_url) {
+        cta = `<a href="${esc(e.luma_url)}" target="_blank" class="block text-center bg-primary text-on-primary px-4 py-2.5 rounded font-sans font-semibold text-body-md hover:bg-primary-container transition-colors">RSVP on Luma</a>`;
+      } else if (e.price_amount > 0) {
+        cta = `<button onclick="startCheckout('event','${e.id}',this)" class="w-full bg-primary text-on-primary px-4 py-2.5 rounded font-sans font-semibold text-body-md hover:bg-primary-container transition-colors">Register — Pay Now</button>`;
+      } else if (e.registration_url) {
+        cta = `<a href="${esc(e.registration_url)}" target="_blank" class="block text-center bg-primary text-on-primary px-4 py-2.5 rounded font-sans font-semibold text-body-md hover:bg-primary-container transition-colors">Register</a>`;
+      } else { cta = ''; }
+      return `
+        <div class="ev-card rounded-xl overflow-hidden border border-outline-variant bg-surface-container-lowest">
+          <div class="h-40 skyline-mark flex items-center justify-center" style="${cover}">
+            ${e.cover_image ? '' : `<span class="material-symbols-outlined text-white text-5xl opacity-60">event</span>`}
+          </div>
+          <div class="p-6">
+            <div class="flex items-center gap-2 mb-2">
+              <p class="font-sans text-label-sm text-secondary font-bold tracking-widest">${esc((e.type||'EVENT').toUpperCase())}</p>
+              ${e.invite_only ? `<span class="text-body-sm font-sans px-2 py-0.5 rounded-full" style="background:#ffffff;color:#1b1c1a;border:1px solid rgba(0,53,39,0.18)">Invite Only</span>` : ''}
+            </div>
+            <h3 class="font-display font-semibold text-headline-sm text-primary mb-2">${esc(e.title)}</h3>
+            <p class="font-sans text-body-sm text-on-surface-variant mb-1">${esc(e.location || 'Location TBD')}</p>
+            <p class="font-sans text-body-sm text-primary mb-2">${fmtDate(e.event_date)}</p>
+            <p class="font-sans text-headline-sm font-display text-primary mb-4">${priceLine}</p>
+            ${cta}
+          </div>
+        </div>`;
+    }
+
+    async function startCheckout(itemType, itemId, btn) {
+      const original = btn.textContent;
+      btn.disabled = true; btn.textContent = 'Redirecting to secure checkout…';
+      try {
+        await window.api.checkout(itemType, itemId);
+      } catch (err) {
+        alert(err.message || 'Could not start checkout. Please try again.');
+        btn.disabled = false; btn.textContent = original;
+      }
+    }
+
+    async function loadEvents() {
+      const grid = document.getElementById('events-grid');
+      try {
+        const res = await window.api.getEvents();
+        const events = (res && res.events) || [];
+        const published = events.filter(e => e.published !== false);
+
+        if (!published.length) {
+          grid.innerHTML = `<div class="col-span-full text-center py-16 text-on-surface-variant font-sans">No events published yet. Check back soon.</div>`;
+          return;
+        }
+
+        const featured = published.find(e => e.featured);
+        if (featured) renderFeatured(featured);
+
+        const rest = featured ? published.filter(e => e.id !== featured.id) : published;
+        grid.innerHTML = rest.length
+          ? rest.map(eventCard).join('')
+          : `<div class="col-span-full text-center py-10 text-on-surface-variant font-sans">More events coming soon.</div>`;
+      } catch (err) {
+        console.warn('loadEvents failed', err);
+        grid.innerHTML = `<div class="col-span-full text-center py-16 text-on-surface-variant font-sans">Could not load events right now.</div>`;
+      }
+    }
+
+    function sponsorshipCard(p) {
+      const priced = p.price_amount > 0;
+      const slotsFull = p.max_slots && (p.slots_taken || 0) >= p.max_slots;
+      const inclusions = (p.inclusions || []).slice(0, 4).map(i => `<li class="flex items-start gap-2"><span class="material-symbols-outlined text-primary text-[16px] mt-0.5">check</span><span>${esc(i)}</span></li>`).join('');
+      return `
+        <div class="rounded-xl border border-outline-variant bg-surface-container-lowest p-6 flex flex-col">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="text-body-sm font-sans font-bold px-2 py-0.5 rounded-full" style="background:rgba(0,53,39,0.08);color:#003527">${p.format==='virtual'?'Virtual':'In-Person'}</span>
+            <span class="text-body-sm font-sans text-on-surface-variant capitalize">${esc(p.category)}</span>
+          </div>
+          <h3 class="font-display font-semibold text-headline-sm text-primary mb-2">${esc(p.name)}</h3>
+          <p class="font-sans text-body-sm text-on-surface-variant mb-4">${esc(p.description || '')}</p>
+          <ul class="font-sans text-body-sm text-on-surface mb-5 space-y-1.5 flex-1">${inclusions}</ul>
+          <p class="font-sans text-headline-sm font-display text-primary mb-4">${priced ? `${esc(p.currency)} $${Number(p.price_amount).toLocaleString()}` : 'Contact for pricing'}</p>
+          ${slotsFull
+            ? `<button disabled class="w-full bg-outline-variant/40 text-on-surface-variant px-4 py-2.5 rounded font-sans font-semibold text-body-md cursor-not-allowed">Sold Out</button>`
+            : priced
+            ? `<button onclick="startSponsorshipCheckout('${p.id}',this)" class="w-full bg-primary text-on-primary px-4 py-2.5 rounded font-sans font-semibold text-body-md hover:bg-primary-container transition-colors">Sponsor — Pay Now</button>`
+            : `<a href="mailto:hello@banahub.com?subject=${encodeURIComponent('Sponsorship enquiry: '+p.name)}" class="block text-center border border-primary text-primary px-4 py-2.5 rounded font-sans font-semibold text-body-md hover:bg-primary hover:text-on-primary transition-colors">Enquire</a>`}
+        </div>`;
+    }
+
+    async function startSponsorshipCheckout(id, btn) {
+      const original = btn.textContent;
+      btn.disabled = true; btn.textContent = 'Redirecting to secure checkout…';
+      try { await window.api.checkout('sponsorship_package', id); }
+      catch (err) { alert(err.message || 'Could not start checkout. Please try again.'); btn.disabled = false; btn.textContent = original; }
+    }
+
+    async function loadSponsorshipPackages() {
+      try {
+        const res = await window.api.getSponsorshipPackages();
+        const packages = (res && res.packages) || [];
+        if (!packages.length) return;
+        document.getElementById('sponsorship-wrap').classList.remove('hidden');
+        document.getElementById('sponsorship-grid').innerHTML = packages.map(sponsorshipCard).join('');
+      } catch (err) { console.warn('loadSponsorshipPackages failed', err); }
+    }
+
+    loadEvents();
+    loadSponsorshipPackages();
+  </script>
+</body>
+</html>
