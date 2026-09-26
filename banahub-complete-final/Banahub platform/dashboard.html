@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="description" content="BANAHub Member Dashboard — Memberships, Compliance, Capital Flows"/>
+<title>Dashboard | BANAHub</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico"/>
+<link rel="icon" type="image/png" sizes="512x512" href="logo-icon-512.png"/>
+<link rel="apple-touch-icon" href="apple-touch-icon.png"/>
+<link rel="stylesheet" href="./output.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Manrope:wght@300;400;500;600;700&family=Material+Symbols+Outlined:wght,FILL@400,0&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Manrope',system-ui,sans-serif;overflow:hidden;}
+.font-display{font-family:'Newsreader',Georgia,serif;}
+.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;vertical-align:middle;line-height:1;}
+
+/* ── Glass design system ── */
+:root{
+  --glass-bg: rgba(255,255,255,0.60);
+  --glass-border: rgba(0,53,39,0.10);
+  --glass-blur: blur(20px) saturate(150%);
+  --glass-shadow: 0 4px 24px rgba(0,53,39,0.06), inset 0 1px 0 rgba(255,255,255,0.5);
+  --glass-hover-shadow: 0 8px 32px rgba(0,53,39,0.10), inset 0 1px 0 rgba(255,255,255,0.6);
+  --sidebar-w: 224px;
+  --topbar-h: 56px;
+}
+.glass-card{
+  background:var(--glass-bg);
+  backdrop-filter:var(--glass-blur);
+  -webkit-backdrop-filter:var(--glass-blur);
+  border:1px solid var(--glass-border);
+  box-shadow:var(--glass-shadow);
+  border-radius:16px;
+  transition:box-shadow .2s,border-color .2s;
+}
+.glass-card:hover{box-shadow:var(--glass-hover-shadow);border-color:rgba(0,53,39,0.16);}
+.glass-sidebar{
+  background:rgba(250,249,245,0.85);
+  backdrop-filter:blur(24px) saturate(160%);
+  -webkit-backdrop-filter:blur(24px) saturate(160%);
+  border-right:1px solid rgba(0,53,39,0.08);
+}
+.glass-topbar{
+  background:rgba(250,249,245,0.80);
+  backdrop-filter:blur(24px) saturate(150%);
+  -webkit-backdrop-filter:blur(24px) saturate(150%);
+  border-bottom:1px solid rgba(0,53,39,0.08);
+  box-shadow:0 1px 0 rgba(0,53,39,0.04);
+}
+
+/* ── Layout ── */
+body{background:linear-gradient(135deg,#f0f7f4 0%,#faf9f5 50%,#f7f5f0 100%);}
+body::before{
+  content:'';position:fixed;z-index:-1;
+  width:600px;height:600px;top:-15%;left:-8%;
+  background:radial-gradient(circle,rgba(0,53,39,0.07),transparent 70%);
+  border-radius:50%;filter:blur(80px);
+}
+body::after{
+  content:'';position:fixed;z-index:-1;
+  width:400px;height:400px;bottom:-10%;right:-5%;
+  background:radial-gradient(circle,rgba(0,53,39,0.05),transparent 70%);
+  border-radius:50%;filter:blur(80px);
+}
+
+/* ── Sidebar ── */
+.sidebar{
+  position:fixed;left:0;top:0;bottom:0;
+  width:var(--sidebar-w);z-index:30;
+  display:flex;flex-direction:column;
+}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 12px;border-radius:10px;
+  font-family:'Manrope',sans-serif;font-size:13px;font-weight:500;
+  color:rgba(27,28,26,0.55);cursor:pointer;
+  transition:all .15s;border:none;background:transparent;width:100%;text-align:left;
+}
+.nav-item:hover{background:rgba(0,53,39,0.06);color:#1b1c1a;}
+.nav-item.active{background:rgba(0,53,39,0.10);color:#003527;font-weight:600;}
+.nav-item.active .mat-ic{color:#003527;}
+.nav-item .mat-ic{font-size:17px;color:rgba(27,28,26,0.45);transition:color .15s;}
+.nav-item:hover .mat-ic,.nav-item.active .mat-ic{color:#003527;}
+
+/* ── Main content ── */
+.main-wrap{
+  margin-left:var(--sidebar-w);
+  padding-top:var(--topbar-h);
+  min-height:100vh;overflow-y:auto;
+}
+.topbar{
+  position:fixed;top:0;right:0;
+  left:var(--sidebar-w);
+  height:var(--topbar-h);z-index:20;
+  display:flex;align-items:center;padding:0 24px;gap:0;
+}
+.tab-btn{
+  padding:8px 16px;font-family:'Manrope',sans-serif;font-size:13px;font-weight:500;
+  color:rgba(27,28,26,0.50);border:none;background:none;cursor:pointer;
+  border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;
+}
+.tab-btn.active{color:#003527;font-weight:700;border-bottom-color:#003527;}
+.tab-btn:hover:not(.active){color:#1b1c1a;}
+.panel{display:none;padding:28px 28px 48px;}
+.panel.active{display:block;}
+
+/* ── Glass stat card ── */
+.stat-card{padding:20px 22px;}
+.stat-card .label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(27,28,26,0.45);margin-bottom:8px;}
+.stat-card .value{font-family:'Newsreader',Georgia,serif;font-size:28px;font-weight:600;color:#1b1c1a;line-height:1;}
+.stat-card .sub{font-size:12px;color:rgba(27,28,26,0.45);margin-top:4px;}
+
+/* ── Pills ── */
+.pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;}
+.pill-green{background:rgba(0,53,39,0.08);color:#003527;}
+.pill-amber{background:rgba(180,120,0,0.08);color:#7a5000;}
+.pill-red{background:rgba(186,26,26,0.08);color:#ba1a1a;}
+.pill-grey{background:rgba(27,28,26,0.06);color:rgba(27,28,26,0.55);}
+
+/* ── Table ── */
+.data-table{width:100%;border-collapse:collapse;font-size:13px;}
+.data-table th{padding:9px 12px;text-align:left;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:rgba(27,28,26,0.4);border-bottom:1px solid rgba(0,53,39,0.08);}
+.data-table td{padding:11px 12px;border-bottom:1px solid rgba(0,53,39,0.06);color:#1b1c1a;}
+.data-table tr:last-child td{border-bottom:none;}
+.data-table tr:hover td{background:rgba(0,53,39,0.02);}
+
+/* ── Skeleton loader ── */
+.skel{background:linear-gradient(90deg,rgba(0,53,39,0.06) 25%,rgba(0,53,39,0.10) 50%,rgba(0,53,39,0.06) 75%);background-size:400% 100%;animation:shimmer 1.4s infinite;border-radius:8px;height:18px;}
+@keyframes shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
+
+/* ── Transitions ── */
+.panel{animation:fadePanel .22s ease-out;}
+@keyframes fadePanel{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── Button ── */
+.btn-primary{background:#003527;color:#fff;border:none;padding:8px 18px;border-radius:8px;font-family:'Manrope',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s;}
+.btn-primary:hover{background:#004d37;}
+.btn-outline{background:transparent;color:#003527;border:1px solid rgba(0,53,39,0.25);padding:8px 18px;border-radius:8px;font-family:'Manrope',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;}
+.btn-outline:hover{background:rgba(0,53,39,0.06);}
+
+/* ── Responsive ── */
+@media(max-width:768px){
+  :root{--sidebar-w:0px;}
+  .sidebar{transform:translateX(-224px);transition:transform .2s;}
+  .sidebar.open{transform:translateX(0);width:224px;}
+  .mob-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.2);z-index:29;}
+  .mob-overlay.open{display:block;}
+}
+</style>
+</head>
+<body class="antialiased">
+
+<!-- Mobile overlay -->
+<div class="mob-overlay" id="mob-overlay" onclick="closeSidebar()"></div>
+
+<!-- Sidebar -->
+<aside class="sidebar glass-sidebar" id="sidebar">
+  <div style="padding:18px 16px 14px;border-bottom:1px solid rgba(0,53,39,0.08)">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:2px">
+      <img src="logo-icon-512.png" alt="BANAHub" style="width:28px;height:28px;border-radius:7px"/>
+      <span style="font-family:'Manrope',sans-serif;font-weight:800;font-size:12px;letter-spacing:.1em;color:#003527">BANAHUB</span>
+    </div>
+    <p style="font-family:'Newsreader',Georgia,serif;font-size:15px;font-weight:500;color:#1b1c1a;margin-top:6px;line-height:1.2">Member Portal</p>
+  </div>
+
+  <div style="padding:12px 10px 0;font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:rgba(27,28,26,0.38);padding:16px 14px 6px">Overview</div>
+  <nav style="padding:0 10px;display:flex;flex-direction:column;gap:2px;flex:1">
+    <button class="nav-item active" onclick="switchTab('overview',this)">
+      <span class="mat-ic material-symbols-outlined">grid_view</span>Dashboard
+    </button>
+    <button class="nav-item" onclick="switchTab('memberships',this)">
+      <span class="mat-ic material-symbols-outlined">verified</span>Memberships
+    </button>
+    <button class="nav-item" onclick="switchTab('compliance',this)">
+      <span class="mat-ic material-symbols-outlined">shield_check</span>Compliance
+    </button>
+    <button class="nav-item" onclick="switchTab('capital',this)">
+      <span class="mat-ic material-symbols-outlined">account_balance</span>Capital Flows
+    </button>
+    <div style="height:1px;background:rgba(0,53,39,0.07);margin:8px 4px"></div>
+    <a href="programs.html" class="nav-item" style="text-decoration:none">
+      <span class="mat-ic material-symbols-outlined">event</span>Events &amp; Programs
+    </a>
+    <a href="index.html#ecosystem" class="nav-item" style="text-decoration:none">
+      <span class="mat-ic material-symbols-outlined">hub</span>Network
+    </a>
+  </nav>
+
+  <div style="padding:12px 10px;border-top:1px solid rgba(0,53,39,0.08)">
+    <div id="sb-user" style="display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:10px;margin-bottom:6px">
+      <div style="width:30px;height:30px;border-radius:50%;background:rgba(0,53,39,0.10);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <span class="material-symbols-outlined" style="font-size:15px;color:#003527">person</span>
+      </div>
+      <div style="min-width:0">
+        <p id="sb-name" style="font-size:12px;font-weight:700;color:#1b1c1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Member</p>
+        <p id="sb-role" style="font-size:11px;color:rgba(27,28,26,0.45)">Loading…</p>
+      </div>
+    </div>
+    <button onclick="signOut()" style="width:100%;display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;background:none;border:none;cursor:pointer;font-family:'Manrope',sans-serif;font-size:12px;color:rgba(27,28,26,0.50);transition:all .15s" onmouseover="this.style.background='rgba(0,53,39,0.05)';this.style.color='#1b1c1a'" onmouseout="this.style.background='none';this.style.color='rgba(27,28,26,0.50)'">
+      <span class="material-symbols-outlined" style="font-size:15px">logout</span>Sign Out
+    </button>
+  </div>
+</aside>
+
+<!-- Topbar -->
+<div class="topbar glass-topbar">
+  <button class="nav-item" id="mob-toggle" onclick="toggleSidebar()" style="display:none;width:auto;margin-right:8px">
+    <span class="mat-ic material-symbols-outlined">menu</span>
+  </button>
+  <div style="display:flex;gap:0;flex:1">
+    <button class="tab-btn active" id="top-overview" onclick="switchTab('overview',null,'top-overview')">Dashboard</button>
+    <button class="tab-btn" id="top-memberships" onclick="switchTab('memberships',null,'top-memberships')">Memberships</button>
+    <button class="tab-btn" id="top-compliance" onclick="switchTab('compliance',null,'top-compliance')">Compliance</button>
+    <button class="tab-btn" id="top-capital" onclick="switchTab('capital',null,'top-capital')">Capital Flows</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <button onclick="switchTab('compliance',null,'top-compliance')" style="position:relative;background:none;border:none;cursor:pointer;padding:6px;border-radius:8px;color:rgba(27,28,26,0.45);transition:all .15s" onmouseover="this.style.background='rgba(0,53,39,0.06)'" onmouseout="this.style.background='none'">
+      <span class="material-symbols-outlined" style="font-size:18px">notifications</span>
+      <span id="notif-dot" style="display:none;position:absolute;top:4px;right:4px;width:7px;height:7px;background:#003527;border-radius:50%;border:2px solid white"></span>
+    </button>
+    <div style="width:30px;height:30px;border-radius:50%;background:rgba(0,53,39,0.10);display:flex;align-items:center;justify-content:center">
+      <span class="material-symbols-outlined" style="font-size:16px;color:#003527">person</span>
+    </div>
+  </div>
+</div>
+
+<!-- Main -->
+<div class="main-wrap">
+
+  <!-- ════ OVERVIEW PANEL ════════════════════════════════════ -->
+  <div class="panel active" id="panel-overview">
+    <div style="margin-bottom:28px">
+      <p style="font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:rgba(27,28,26,0.40);margin-bottom:4px">Welcome back</p>
+      <h1 id="dash-welcome" style="font-family:'Newsreader',Georgia,serif;font-size:34px;font-weight:600;color:#1b1c1a;line-height:1.15">Institutional Member</h1>
+      <p style="font-size:13px;color:rgba(27,28,26,0.50);margin-top:4px">Singapore HQ · BANAHub Platform</p>
+    </div>
+
+    <!-- Status notice (shown if pending) -->
+    <div id="status-notice" style="display:none;margin-bottom:20px;padding:14px 16px;background:rgba(180,120,0,0.07);border:1px solid rgba(180,120,0,0.20);border-radius:12px">
+      <div style="display:flex;gap:10px;align-items:start">
+        <span class="material-symbols-outlined" style="color:#7a5000;font-size:18px;flex-shrink:0;margin-top:1px">pending</span>
+        <div>
+          <p style="font-size:13px;font-weight:700;color:#7a5000;margin-bottom:2px">Account pending approval</p>
+          <p style="font-size:12px;color:#7a5000;opacity:.8">Your application is under review. You'll receive full member access once approved by the BANAHub team.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats grid -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;margin-bottom:24px">
+      <div class="glass-card stat-card">
+        <div class="label">Membership</div>
+        <div class="value" id="ov-membership"><div class="skel" style="width:70%;height:28px"></div></div>
+        <div class="sub" id="ov-membership-sub"></div>
+      </div>
+      <div class="glass-card stat-card">
+        <div class="label">KYC Status</div>
+        <div class="value" style="font-size:20px;margin-top:4px" id="ov-kyc"><div class="skel" style="width:80%;height:24px"></div></div>
+        <div class="sub" id="ov-kyc-sub"></div>
+      </div>
+      <div class="glass-card stat-card">
+        <div class="label">Open Deals</div>
+        <div class="value" id="ov-deals"><div class="skel" style="width:40%;height:28px"></div></div>
+        <div class="sub">Active capital opportunities</div>
+      </div>
+      <div class="glass-card stat-card">
+        <div class="label">Upcoming Events</div>
+        <div class="value" id="ov-events"><div class="skel" style="width:40%;height:28px"></div></div>
+        <div class="sub">Confirmed on calendar</div>
+      </div>
+    </div>
+
+    <!-- Quick actions -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px">
+      <div class="glass-card" style="padding:20px;cursor:pointer" onclick="switchTab('memberships',null,'top-memberships')" role="button" tabindex="0">
+        <span class="material-symbols-outlined" style="color:#003527;font-size:22px;margin-bottom:10px;display:block">verified</span>
+        <p style="font-family:'Newsreader',Georgia,serif;font-size:18px;font-weight:600;color:#1b1c1a;margin-bottom:4px">Memberships</p>
+        <p style="font-size:12px;color:rgba(27,28,26,0.50)">Your plan, active cohorts, and upcoming programs</p>
+        <div style="margin-top:12px;display:flex;align-items:center;gap:4px;font-size:12px;color:#003527;font-weight:600">View <span class="material-symbols-outlined" style="font-size:14px">arrow_forward</span></div>
+      </div>
+      <div class="glass-card" style="padding:20px;cursor:pointer" onclick="switchTab('compliance',null,'top-compliance')" role="button" tabindex="0">
+        <span class="material-symbols-outlined" style="color:#003527;font-size:22px;margin-bottom:10px;display:block">shield_check</span>
+        <p style="font-family:'Newsreader',Georgia,serif;font-size:18px;font-weight:600;color:#1b1c1a;margin-bottom:4px">Compliance</p>
+        <p style="font-size:12px;color:rgba(27,28,26,0.50)">KYC documents and access request status</p>
+        <div style="margin-top:12px;display:flex;align-items:center;gap:4px;font-size:12px;color:#003527;font-weight:600">View <span class="material-symbols-outlined" style="font-size:14px">arrow_forward</span></div>
+      </div>
+      <div class="glass-card" style="padding:20px;cursor:pointer" onclick="switchTab('capital',null,'top-capital')" role="button" tabindex="0">
+        <span class="material-symbols-outlined" style="color:#003527;font-size:22px;margin-bottom:10px;display:block">account_balance</span>
+        <p style="font-family:'Newsreader',Georgia,serif;font-size:18px;font-weight:600;color:#1b1c1a;margin-bottom:4px">Capital Flows</p>
+        <p style="font-size:12px;color:rgba(27,28,26,0.50)">Open deal mandates and upcoming events</p>
+        <div style="margin-top:12px;display:flex;align-items:center;gap:4px;font-size:12px;color:#003527;font-weight:600">View <span class="material-symbols-outlined" style="font-size:14px">arrow_forward</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ MEMBERSHIPS PANEL ════════════════════════════════= -->
+  <div class="panel" id="panel-memberships">
+    <div style="margin-bottom:24px">
+      <h2 style="font-family:'Newsreader',Georgia,serif;font-size:26px;font-weight:600;color:#1b1c1a">Memberships</h2>
+      <p style="font-size:13px;color:rgba(27,28,26,0.50);margin-top:2px">Your subscription plan and enrolled programs</p>
+    </div>
+
+    <!-- Current plan -->
+    <div class="glass-card" style="padding:22px;margin-bottom:20px" id="mem-plan-card">
+      <div style="display:flex;align-items:start;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div>
+          <p style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(27,28,26,0.40);margin-bottom:6px">Current Plan</p>
+          <p id="mem-plan-name" style="font-family:'Newsreader',Georgia,serif;font-size:22px;font-weight:600;color:#1b1c1a"><div class="skel" style="width:140px;height:26px"></div></p>
+          <p id="mem-plan-status" style="font-size:13px;color:rgba(27,28,26,0.50);margin-top:4px"></p>
+        </div>
+        <div style="text-align:right">
+          <a href="programs.html" class="btn-primary" style="text-decoration:none;display:inline-block">Explore Programs</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Programs -->
+    <p style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(27,28,26,0.40);margin-bottom:12px">Available Programs &amp; Cohorts</p>
+    <div id="mem-programs" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px">
+      <div class="glass-card" style="padding:18px"><div class="skel" style="height:16px;margin-bottom:8px"></div><div class="skel" style="height:12px;width:60%"></div></div>
+      <div class="glass-card" style="padding:18px"><div class="skel" style="height:16px;margin-bottom:8px"></div><div class="skel" style="height:12px;width:60%"></div></div>
+    </div>
+  </div>
+
+  <!-- ════ COMPLIANCE PANEL ══════════════════════════════════ -->
+  <div class="panel" id="panel-compliance">
+    <div style="margin-bottom:24px">
+      <h2 style="font-family:'Newsreader',Georgia,serif;font-size:26px;font-weight:600;color:#1b1c1a">Compliance</h2>
+      <p style="font-size:13px;color:rgba(27,28,26,0.50);margin-top:2px">KYC documents and access requests</p>
+    </div>
+
+    <!-- KYC -->
+    <p style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(27,28,26,0.40);margin-bottom:12px">KYC Documents</p>
+    <div class="glass-card" style="margin-bottom:20px">
+      <div id="kyc-table" style="overflow-x:auto">
+        <div style="padding:48px;text-align:center;color:rgba(27,28,26,0.40)"><div class="skel" style="width:200px;height:14px;margin:0 auto"></div></div>
+      </div>
+    </div>
+
+    <!-- Access requests -->
+    <p style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(27,28,26,0.40);margin-bottom:12px">Access Requests</p>
+    <div class="glass-card">
+      <div id="access-table" style="overflow-x:auto">
+        <div style="padding:48px;text-align:center;color:rgba(27,28,26,0.40)"><div class="skel" style="width:200px;height:14px;margin:0 auto"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ CAPITAL FLOWS PANEL ═══════════════════════════════ -->
+  <div class="panel" id="panel-capital">
+    <div style="margin-bottom:24px">
+      <h2 style="font-family:'Newsreader',Georgia,serif;font-size:26px;font-weight:600;color:#1b1c1a">Capital Flows</h2>
+      <p style="font-size:13px;color:rgba(27,28,26,0.50);margin-top:2px">Open deal mandates and upcoming events with capital access</p>
+    </div>
+
+    <!-- Deal mandates -->
+    <p style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(27,28,26,0.40);margin-bottom:12px">Open Deal Mandates</p>
+    <div id="cap-deals" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-bottom:24px">
+      <div class="glass-card" style="padding:18px"><div class="skel" style="height:16px;margin-bottom:8px"></div><div class="skel" style="height:12px;width:60%"></div></div>
+    </div>
+
+    <!-- Events -->
+    <p style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(27,28,26,0.40);margin-bottom:12px">Upcoming Events</p>
+    <div class="glass-card">
+      <div id="cap-events" style="overflow-x:auto">
+        <div style="padding:32px;text-align:center;color:rgba(27,28,26,0.40)"><div class="skel" style="width:160px;height:14px;margin:0 auto"></div></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end main-wrap -->
+
+<script src="config.js"></script>
+<script src="api.js"></script>
+<script>
+function esc(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function fmtDate(d){if(!d)return 'TBD';return new Date(d).toLocaleDateString('en-SG',{day:'numeric',month:'short',year:'numeric'});}
+function fmtCurrency(n,c){if(!n)return '—';return (c||'USD')+' '+Number(n).toLocaleString();}
+
+// ── Tab switching ────────────────────────────────────────────────
+let _activeTab = 'overview';
+const _tabLoaded = {};
+
+function switchTab(id, sidebarBtn, topBtnId) {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item[onclick*="switchTab"]').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+
+  const panel = document.getElementById('panel-'+id);
+  if(panel) panel.classList.add('active');
+
+  if(sidebarBtn) sidebarBtn.classList.add('active');
+  const topBtn = topBtnId ? document.getElementById(topBtnId) : document.getElementById('top-'+id);
+  if(topBtn) topBtn.classList.add('active');
+
+  _activeTab = id;
+  closeSidebar();
+
+  if(!_tabLoaded[id]) {
+    _tabLoaded[id] = true;
+    if(id==='memberships') loadMemberships();
+    if(id==='compliance') loadCompliance();
+    if(id==='capital') loadCapital();
+  }
+}
+
+// ── Sidebar mobile ───────────────────────────────────────────────
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('mob-overlay').classList.toggle('open');}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('mob-overlay').classList.remove('open');}
+
+// ── Auth guard ───────────────────────────────────────────────────
+let _dashUser = null;
+(async function boot() {
+  try {
+    const sb = await window.getBanaSupabaseClient();
+    if(!sb){window.location.href='login.html';return;}
+    const { data: { session } } = await sb.auth.getSession();
+    if(!session){window.location.href='login.html';return;}
+
+    const res = await fetch('/api/auth/me',{credentials:'include'});
+    if(!res.ok){window.location.href='login.html';return;}
+    const {user} = await res.json();
+    if(!user){window.location.href='login.html';return;}
+    if(user.role==='admin'){window.location.href='admin.html';return;}
+
+    _dashUser = user;
+    const name = user.full_name || user.email?.split('@')[0] || 'Member';
+    document.getElementById('dash-welcome').textContent = 'Welcome, '+name;
+    document.getElementById('sb-name').textContent = name;
+    document.getElementById('sb-role').textContent = (user.role||'member').charAt(0).toUpperCase()+(user.role||'member').slice(1);
+
+    if(user.blocked){
+      document.body.innerHTML='<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#faf9f5;font-family:Manrope,sans-serif"><div style="max-width:380px;text-align:center;padding:40px"><p style="font-size:40px;margin-bottom:16px">🔒</p><h2 style="font-family:Newsreader,Georgia,serif;font-size:24px;color:#1b1c1a;margin-bottom:8px">Account Suspended</h2><p style="font-size:14px;color:rgba(27,28,26,0.55)">This account has been suspended. Contact <a href="mailto:hello@banahub.com" style="color:#003527">hello@banahub.com</a> for assistance.</p></div></div>';
+      return;
+    }
+
+    if(user.status && !['approved','active'].includes(user.status)){
+      document.getElementById('status-notice').style.display='block';
+      document.getElementById('notif-dot').style.display='block';
+    }
+
+    // Preload overview stats
+    loadOverviewStats();
+
+    // Responsive toggle
+    if(window.innerWidth<768) document.getElementById('mob-toggle').style.display='flex';
+    window.addEventListener('resize',()=>{
+      document.getElementById('mob-toggle').style.display = window.innerWidth<768?'flex':'none';
+    });
+
+  } catch(e) { window.location.href='login.html'; }
+})();
+
+// ── Overview stats ────────────────────────────────────────────────
+async function loadOverviewStats() {
+  try {
+    const [memRes, compRes, capRes] = await Promise.all([
+      fetch('/api/dashboard/memberships',{credentials:'include'}).then(r=>r.json()),
+      fetch('/api/dashboard/compliance',{credentials:'include'}).then(r=>r.json()),
+      fetch('/api/dashboard/capital',{credentials:'include'}).then(r=>r.json()),
+    ]);
+    // Plan
+    const plan = memRes.subscription?.plan || 'Standard';
+    const planStatus = memRes.subscription?.status || 'active';
+    document.getElementById('ov-membership').textContent = plan;
+    // KYC
+    const kycDocs = compRes.kyc||[];
+    const kycVerified = kycDocs.filter(d=>d.status==='verified').length;
+    const kycPending = kycDocs.filter(d=>d.status==='pending').length;
+    document.getElementById('ov-kyc').innerHTML = kycVerified>0 ? '<span class="pill pill-green">Verified</span>' : kycPending>0 ? '<span class="pill pill-amber">Pending</span>' : '<span class="pill pill-grey">Not Submitted</span>';
+    // Deals + events
+    document.getElementById('ov-deals').textContent = (capRes.deals||[]).length;
+    document.getElementById('ov-events').textContent = (capRes.events||[]).length;
+  } catch(e) { console.warn('overview stats failed',e); }
+}
+
+// ── Memberships ───────────────────────────────────────────────────
+async function loadMemberships() {
+  try {
+    const d = await fetch('/api/dashboard/memberships',{credentials:'include'}).then(r=>r.json());
+    const sub = d.subscription;
+    const planCard = document.getElementById('mem-plan-card');
+    document.getElementById('mem-plan-name').textContent = sub ? (sub.plan||'Standard') : 'No active plan';
+    document.getElementById('mem-plan-status').innerHTML = sub
+      ? `<span class="pill pill-${sub.status==='active'?'green':'amber'}">${sub.status}</span>`
+      : '<span class="pill pill-grey">Free access</span>';
+
+    const progs = d.programs||[];
+    const progEl = document.getElementById('mem-programs');
+    progEl.innerHTML = progs.length ? progs.map(p=>`
+      <div class="glass-card" style="padding:18px">
+        <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px">
+          <span class="pill pill-${p.status==='active'?'green':p.status==='upcoming'?'amber':'grey'}">${esc(p.status||'draft')}</span>
+          <span style="font-size:11px;color:rgba(27,28,26,0.40)">${esc(p.type||'Program')}</span>
+        </div>
+        <p style="font-family:'Newsreader',Georgia,serif;font-size:16px;font-weight:600;color:#1b1c1a;margin-bottom:4px">${esc(p.title)}</p>
+        <p style="font-size:12px;color:rgba(27,28,26,0.50);margin-bottom:10px">${esc(p.description?p.description.slice(0,90)+'…':'')}</p>
+        <p style="font-size:11px;color:rgba(27,28,26,0.40)">${fmtDate(p.start_date)}${p.end_date?' – '+fmtDate(p.end_date):''}</p>
+        ${p.price_amount>0?`<a href="programs.html" class="btn-outline" style="display:inline-block;margin-top:12px;font-size:12px;text-decoration:none">Apply →</a>`:''}
+      </div>`).join('')
+    : '<div style="padding:32px;text-align:center;color:rgba(27,28,26,0.40);font-size:13px">No programs published yet.</div>';
+  } catch(e) {
+    document.getElementById('mem-programs').innerHTML='<div style="padding:32px;text-align:center;color:rgba(27,28,26,0.40);font-size:13px">Could not load programs.</div>';
+  }
+}
+
+// ── Compliance ────────────────────────────────────────────────────
+async function loadCompliance() {
+  try {
+    const d = await fetch('/api/dashboard/compliance',{credentials:'include'}).then(r=>r.json());
+
+    // KYC
+    const kycRows = d.kyc||[];
+    const kycEl = document.getElementById('kyc-table');
+    kycEl.innerHTML = kycRows.length ? `
+      <table class="data-table">
+        <thead><tr><th>Document</th><th>Status</th><th>Submitted</th></tr></thead>
+        <tbody>${kycRows.map(k=>`
+          <tr>
+            <td>${esc(k.document_type||'Document')}</td>
+            <td><span class="pill pill-${k.status==='verified'?'green':k.status==='pending'?'amber':'red'}">${esc(k.status)}</span></td>
+            <td style="color:rgba(27,28,26,0.50)">${fmtDate(k.created_at)}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>`
+    : '<div style="padding:32px;text-align:center;font-size:13px;color:rgba(27,28,26,0.40)">No KYC documents submitted yet. Contact <a href="mailto:hello@banahub.com" style="color:#003527">hello@banahub.com</a> to begin your verification.</div>';
+
+    // Access requests
+    const accRows = d.access_requests||[];
+    const accEl = document.getElementById('access-table');
+    accEl.innerHTML = accRows.length ? `
+      <table class="data-table">
+        <thead><tr><th>Request</th><th>Status</th><th>Date</th><th>Notes</th></tr></thead>
+        <tbody>${accRows.map(r=>`
+          <tr>
+            <td>${esc(r.target_label||r.target_type||'Access Request')}</td>
+            <td><span class="pill pill-${r.status==='approved'?'green':r.status==='pending'?'amber':'red'}">${esc(r.status)}</span></td>
+            <td style="color:rgba(27,28,26,0.50)">${fmtDate(r.created_at)}</td>
+            <td style="color:rgba(27,28,26,0.50);font-size:12px">${esc(r.review_notes||'—')}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>`
+    : '<div style="padding:32px;text-align:center;font-size:13px;color:rgba(27,28,26,0.40)">No access requests on record.</div>';
+  } catch(e) {
+    document.getElementById('kyc-table').innerHTML='<div style="padding:32px;text-align:center;font-size:13px;color:rgba(27,28,26,0.40)">Could not load compliance data.</div>';
+    document.getElementById('access-table').innerHTML='';
+  }
+}
+
+// ── Capital Flows ─────────────────────────────────────────────────
+async function loadCapital() {
+  try {
+    const d = await fetch('/api/dashboard/capital',{credentials:'include'}).then(r=>r.json());
+
+    // Deal mandates
+    const deals = d.deals||[];
+    const dealsEl = document.getElementById('cap-deals');
+    dealsEl.innerHTML = deals.length ? deals.map(deal=>`
+      <div class="glass-card" style="padding:18px">
+        <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px">
+          <span class="pill pill-green">Open</span>
+          <span style="font-size:11px;color:rgba(27,28,26,0.40);text-transform:capitalize">${esc(deal.investment_type||'Equity')}</span>
+        </div>
+        <p style="font-family:'Newsreader',Georgia,serif;font-size:16px;font-weight:600;color:#1b1c1a;margin-bottom:4px">${esc(deal.name||'Untitled Deal')}</p>
+        <p style="font-size:12px;color:rgba(27,28,26,0.50);margin-bottom:8px">${esc(deal.industry||'—')} · ${esc((deal.stage||'').replace('-',' '))}</p>
+        <p style="font-size:16px;font-weight:700;color:#003527">${fmtCurrency(deal.target_raise,deal.currency)}</p>
+        <div style="margin-top:12px">
+          <a href="mailto:hello@banahub.com?subject=${encodeURIComponent('Interest: '+deal.name)}" class="btn-outline" style="display:inline-block;font-size:12px;text-decoration:none">Express Interest →</a>
+        </div>
+      </div>`).join('')
+    : '<div style="padding:32px;text-align:center;font-size:13px;color:rgba(27,28,26,0.40);grid-column:1/-1">No open deal mandates at this time. Check back soon or contact <a href="mailto:hello@banahub.com" style="color:#003527">hello@banahub.com</a>.</div>';
+
+    // Events
+    const events = d.events||[];
+    const evEl = document.getElementById('cap-events');
+    evEl.innerHTML = events.length ? `
+      <table class="data-table">
+        <thead><tr><th>Event</th><th>Date</th><th>Location</th><th>Ticket</th><th></th></tr></thead>
+        <tbody>${events.map(e=>`
+          <tr>
+            <td style="font-weight:600">${esc(e.title)}</td>
+            <td style="color:rgba(27,28,26,0.50)">${fmtDate(e.event_date)}</td>
+            <td style="color:rgba(27,28,26,0.50)">${esc(e.location||'TBD')}</td>
+            <td>${e.price_amount>0?`${esc(e.currency||'SGD')} ${Number(e.price_amount).toLocaleString()}`:'<span class="pill pill-green">Free</span>'}</td>
+            <td>${e.luma_url?`<a href="${esc(e.luma_url)}" target="_blank" class="btn-primary" style="text-decoration:none;font-size:12px;padding:6px 14px">RSVP on Luma</a>`:e.registration_url?`<a href="${esc(e.registration_url)}" target="_blank" class="btn-outline" style="text-decoration:none;font-size:12px;padding:6px 14px">Register</a>`:'<span style="font-size:12px;color:rgba(27,28,26,0.40)">Invitation only</span>'}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>`
+    : '<div style="padding:32px;text-align:center;font-size:13px;color:rgba(27,28,26,0.40)">No upcoming events scheduled. <a href="events.html" style="color:#003527">View all events →</a></div>';
+  } catch(e) {
+    document.getElementById('cap-deals').innerHTML='<div style="padding:32px;text-align:center;font-size:13px;color:rgba(27,28,26,0.40)">Could not load capital data.</div>';
+  }
+}
+
+// ── Sign out ──────────────────────────────────────────────────────
+async function signOut() {
+  try {
+    const sb = await window.getBanaSupabaseClient();
+    await sb.auth.signOut();
+  } catch(e){}
+  localStorage.removeItem('bana_user');
+  localStorage.removeItem('bana_access_token');
+  window.location.href='login.html';
+}
+</script>
+</body>
+</html>
