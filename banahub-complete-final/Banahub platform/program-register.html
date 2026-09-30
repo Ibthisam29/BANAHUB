@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Program Registration | BANAHub</title>
+<title>Program Registration | BANAHUB</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico"/>
 <link rel="icon" type="image/png" sizes="512x512" href="logo-icon-512.png"/>
 <link rel="apple-touch-icon" href="apple-touch-icon.png"/>
@@ -25,7 +25,7 @@ body{font-family:'Manrope',system-ui,sans-serif;}
 <body class="min-h-screen bg-background ivory-texture antialiased">
 
 <header class="px-10 py-5 flex items-center justify-between border-b border-outline-variant/20 bg-surface/80 backdrop-blur-md sticky top-0 z-10">
-  <a href="index.html" class="font-display font-semibold text-xl text-primary">BANAHub</a>
+  <a href="index.html" class="font-display font-semibold text-xl text-primary">BANAHUB</a>
   <a href="programs.html" class="font-sans text-sm text-on-surface-variant hover:text-primary transition-colors">← Back to Programs</a>
 </header>
 
@@ -33,7 +33,7 @@ body{font-family:'Manrope',system-ui,sans-serif;}
   <div id="form-view">
     <span class="block font-sans font-bold text-xs text-on-surface-variant tracking-[0.15em] uppercase mb-3">Application</span>
     <h1 class="font-display font-semibold text-4xl text-primary mb-2">Program Registration</h1>
-    <p class="font-sans text-sm text-on-surface-variant mb-10" id="prog-sub">Complete this form to request a place on this program. The BANAHub team will be in touch within 2 business days.</p>
+    <p class="font-sans text-sm text-on-surface-variant mb-10" id="prog-sub">Complete this form to request a place on this program. The BANAHUB team will be in touch within 2 business days.</p>
 
     <div id="error-box" class="hidden mb-5 px-4 py-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700"></div>
 
@@ -60,7 +60,7 @@ body{font-family:'Manrope',system-ui,sans-serif;}
         Submit Registration Request
       </button>
     </div>
-    <p class="text-center font-sans text-xs text-on-surface-variant mt-5">Not a member yet? <a href="membership.html" class="text-primary font-semibold hover:underline">Join BANAHub →</a></p>
+    <p class="text-center font-sans text-xs text-on-surface-variant mt-5">Not a member yet? <a href="membership.html" class="text-primary font-semibold hover:underline">Join BANAHUB →</a></p>
   </div>
 
   <div id="success-view" class="hidden text-center py-16">
@@ -82,7 +82,7 @@ body{font-family:'Manrope',system-ui,sans-serif;}
   const prog = params.get('program');
   if (prog) {
     document.getElementById('prog-title-hidden').value = prog;
-    document.getElementById('prog-sub').textContent = `Applying for: ${prog}. Complete this form and the BANAHub team will be in touch within 2 business days.`;
+    document.getElementById('prog-sub').textContent = `Applying for: ${prog}. Complete this form and the BANAHUB team will be in touch within 2 business days.`;
   }
 })();
 
