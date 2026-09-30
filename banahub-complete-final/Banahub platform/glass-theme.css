@@ -1,0 +1,95 @@
+/* BANAHub — Semi-Glassmorphism Theme (public site)
+   Modern, tech-forward: frosted panels over soft blurred gradient blobs,
+   thin light borders, subtle depth on hover. Brand colors unchanged:
+   primary emerald #003527, gold accent now white. */
+
+/* ── Ambient background blobs — creates the "tech depth" the flat
+   ivory background was missing. Fixed so it doesn't scroll/repeat. ── */
+.glass-bg-layer {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+.glass-bg-layer::before,
+.glass-bg-layer::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.35;
+}
+.glass-bg-layer::before {
+  width: 520px; height: 520px;
+  background: radial-gradient(circle, #003527, transparent 70%);
+  top: -10%; left: -8%;
+}
+.glass-bg-layer::after {
+  width: 460px; height: 460px;
+  background: radial-gradient(circle, #ffffff, transparent 70%);
+  bottom: -12%; right: -6%;
+  opacity: 0.25;
+}
+
+/* ── Frosted nav — stronger blur, subtle depth border ── */
+.glass {
+  background: rgba(250, 249, 245, 0.6) !important;
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 1px 24px rgba(0, 53, 39, 0.05);
+}
+
+/* ── Glass panel utility — apply to cards, feature blocks, forms ── */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 8px 32px rgba(0, 53, 39, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  border-radius: 20px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.glass-panel:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 48px rgba(0, 53, 39, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  border-color: rgba(0, 53, 39, 0.15);
+}
+
+/* Retrofit existing card-like elements to glass without markup changes */
+.ev-card, .pg-card, #events-grid > div, #programs-grid > div {
+  background: rgba(255, 255, 255, 0.55) !important;
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.6) !important;
+  box-shadow: 0 8px 32px rgba(0, 53, 39, 0.08);
+}
+
+/* ── Buttons — glass sheen on outline/ghost, keep solid CTAs solid ── */
+.badge-glass {
+  background: rgba(255, 255, 255, 0.6) !important;
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+}
+
+/* ── Logo image sizing (used in nav in place of text wordmark) ── */
+.brand-logo-img {
+  height: 34px;
+  width: auto;
+  display: block;
+}
+
+/* ── Hero skyline / featured blocks get a glass frame too ── */
+.skyline-mark {
+  border-radius: 20px;
+  box-shadow: 0 16px 48px rgba(0, 53, 39, 0.18);
+}
+
+/* ── Footer gets a subtle frost to sit above the blobs cleanly ── */
+footer {
+  background: rgba(250, 249, 245, 0.75) !important;
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+}

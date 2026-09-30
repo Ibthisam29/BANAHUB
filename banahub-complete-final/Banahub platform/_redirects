@@ -1,0 +1,12 @@
+/login           /login.html           200
+/register        /register.html        200
+/apply           /register.html        200
+/dashboard       /dashboard.html       200
+/admin           /admin.html           200
+/platform        /platform.html        200
+/about           /about.html           200
+/pricing         /pricing.html         200
+/contact         /contact.html         200
+/privacy         /privacy.html         200
+/terms           /terms.html           200
+/*               /index.html           200

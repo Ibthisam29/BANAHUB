@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="description" content="BANAHub helps growth-stage companies build commercial traction, enter new markets, and prepare for strategic capital conversations — across Southeast Asia, the Gulf, and North Asia."/>
+<meta name="robots" content="index, follow"/>
+<link rel="canonical" href="https://www.banahub.com/"/>
+<title>BANAHub — GTM Advisory, Market Expansion &amp; Capital Readiness</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico"/>
+<link rel="icon" type="image/png" sizes="512x512" href="logo-icon-512.png"/>
+<link rel="apple-touch-icon" href="apple-touch-icon.png"/>
+<link rel="stylesheet" href="./output.css"/>
+<link rel="stylesheet" href="./site.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Manrope:wght@300;400;500;600;700;800&family=Material+Symbols+Outlined:wght,FILL@400,0&display=swap" rel="stylesheet"/>
+<style>
+/* ── Hero ─────────────────────────────────────────────────────── */
+.hero {
+  background: var(--emerald);
+  padding: clamp(4rem,10vw,8rem) 0 clamp(3rem,8vw,6rem);
+  position: relative; overflow: hidden;
+}
+.hero::before {
+  content:''; position:absolute; inset:0; z-index:0;
+  background: radial-gradient(ellipse at 80% 50%, rgba(201,168,76,0.08) 0%, transparent 60%),
+              radial-gradient(ellipse at 20% 80%, rgba(255,255,255,0.04) 0%, transparent 50%);
+}
+.hero .container { position: relative; z-index: 1; }
+.hero-label { color: var(--gold); font-size:0.6875rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; }
+.hero-headline { color:#fff; margin:1rem 0 1.5rem; }
+.hero-sub { color:rgba(255,255,255,0.72); font-size:1.125rem; max-width:560px; line-height:1.65; }
+.hero-cta { margin-top:2.25rem; display:flex; gap:1rem; flex-wrap:wrap; align-items:center; }
+.hero-cta .btn-primary { background:#fff; color:var(--emerald); border-color:#fff; }
+.hero-cta .btn-primary:hover { background:rgba(255,255,255,0.9); }
+.hero-cta .btn-outline { border-color:rgba(255,255,255,0.4); color:#fff; }
+.hero-cta .btn-outline:hover { background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.7); }
+
+/* ── Audience pathways ───────────────────────────────────────── */
+.path-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1.5rem; }
+.path-card {
+  border:2px solid var(--border);
+  border-radius:var(--r-lg); padding:2rem;
+  background:#fff; position:relative; overflow:hidden;
+  transition:all .2s;
+}
+.path-card:hover { border-color:var(--emerald); box-shadow:var(--shadow-md); transform:translateY(-2px); }
+.path-card::after {
+  content:''; position:absolute; bottom:0; left:0; right:0;
+  height:3px; background:var(--emerald); opacity:0; transition:opacity .2s;
+}
+.path-card:hover::after { opacity:1; }
+.path-icon { width:44px; height:44px; border-radius:10px; background:var(--emerald-light); display:flex; align-items:center; justify-content:center; margin-bottom:1.25rem; }
+.path-icon .material-symbols-outlined { color:var(--emerald); font-size:22px; }
+.path-cta { margin-top:1.5rem; display:flex; align-items:center; gap:0.375rem; font-size:0.875rem; font-weight:700; color:var(--emerald); }
+.path-cta .material-symbols-outlined { font-size:16px; transition:transform .15s; }
+.path-card:hover .path-cta .material-symbols-outlined { transform:translateX(3px); }
+@media(max-width:760px){ .path-grid { grid-template-columns:1fr; } }
+
+/* ── Services grid ───────────────────────────────────────────── */
+.service-card { border-radius:var(--r-md); padding:1.75rem; border:1px solid var(--border); background:#fff; transition:all .2s; }
+.service-card:hover { border-color:var(--emerald); box-shadow:var(--shadow-md); }
+.service-num { font-family:'Newsreader',Georgia,serif; font-size:2rem; font-weight:500; color:var(--border-mid); line-height:1; margin-bottom:0.75rem; }
+.service-card h3 { font-size:1.125rem; margin-bottom:0.5rem; }
+.service-card p { font-size:0.875rem; }
+
+/* ── Process steps ───────────────────────────────────────────── */
+.process-wrap { display:grid; grid-template-columns:repeat(4,1fr); gap:1.5rem; position:relative; }
+.process-wrap::before {
+  content:''; position:absolute; top:22px; left:calc(12.5% + 22px); right:calc(12.5% + 22px);
+  height:1px; background:var(--border-mid); z-index:0;
+}
+.process-step { text-align:center; position:relative; z-index:1; }
+.process-num {
+  width:44px; height:44px; border-radius:50%;
+  background:var(--emerald); color:#fff;
+  font-family:'Newsreader',Georgia,serif; font-size:1.125rem; font-weight:500;
+  display:flex; align-items:center; justify-content:center; margin:0 auto 1rem;
+}
+.process-step h3 { font-size:1rem; margin-bottom:0.375rem; }
+.process-step p { font-size:0.8125rem; }
+@media(max-width:760px){
+  .process-wrap { grid-template-columns:1fr 1fr; }
+  .process-wrap::before { display:none; }
+}
+@media(max-width:480px){ .process-wrap { grid-template-columns:1fr; } }
+
+/* ── Events section ──────────────────────────────────────────── */
+.event-row { display:flex; gap:1rem; align-items:start; padding:1.25rem 0; border-bottom:1px solid var(--border); }
+.event-row:last-child { border-bottom:none; }
+.event-date-block { flex-shrink:0; width:52px; text-align:center; padding:0.5rem; background:var(--emerald-light); border-radius:var(--r-sm); }
+.event-date-block .month { font-size:0.625rem; font-weight:800; text-transform:uppercase; letter-spacing:.08em; color:var(--emerald); }
+.event-date-block .day { font-family:'Newsreader',Georgia,serif; font-size:1.5rem; font-weight:500; color:var(--emerald); line-height:1.1; }
+.event-body { flex:1; min-width:0; }
+.event-body h4 { font-size:0.9375rem; font-weight:700; margin-bottom:0.25rem; color:var(--ink); }
+.event-body p { font-size:0.8125rem; }
+</style>
+</head>
+<body class="ivory-texture">
+
+<div id="site-nav"></div>
+
+<!-- ════ HERO ════════════════════════════════════════════════ -->
+<section class="hero" aria-labelledby="hero-headline">
+  <div class="container">
+    <div style="max-width:680px">
+      <span class="hero-label anim-up">GTM · Market Entry · Capital Readiness</span>
+      <h1 class="hero-headline font-display anim-up anim-up-1" id="hero-headline">
+        We help growth-stage companies build commercial traction, enter new markets, and prepare for strategic capital conversations.
+      </h1>
+      <p class="hero-sub anim-up anim-up-2">
+        BANAHub is a Singapore-based advisory practice working with companies expanding across Southeast Asia, the Gulf, and North Asia. We provide structured GTM programmes, market entry support, and investor readiness work — not promises of funding or introductions we cannot verify.
+      </p>
+      <div class="hero-cta anim-up anim-up-3">
+        <a href="contact.html" class="btn btn-primary btn-lg">Book a Discovery Call</a>
+        <a href="services.html" class="btn btn-outline btn-lg">Explore Services</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════ AUDIENCE PATHWAYS ══════════════════════════════════ -->
+<section class="section ivory-texture" aria-labelledby="pathways-heading" style="background:var(--cream)">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:2.5rem">
+      <span class="eyebrow">Who we work with</span>
+      <h2 id="pathways-heading">Three distinct paths.<br/>One shared standard.</h2>
+    </div>
+    <div class="path-grid">
+
+      <article class="path-card anim-up">
+        <div class="path-icon" aria-hidden="true">
+          <span class="material-symbols-outlined">rocket_launch</span>
+        </div>
+        <span class="eyebrow">For Companies</span>
+        <h3>Growth-stage companies seeking GTM traction and cross-border expansion</h3>
+        <p style="margin-top:0.625rem">We work with founders and leadership teams who need structured market entry, commercial pipeline development, and preparation for capital conversations — not generic consulting.</p>
+        <ul style="margin-top:1rem;display:flex;flex-direction:column;gap:0.4rem">
+          <li style="font-size:0.875rem;color:var(--ink-mid);display:flex;align-items:center;gap:0.5rem"><span class="material-symbols-outlined" style="font-size:14px;color:var(--emerald)">check</span>GTM &amp; Market Entry Sprint</li>
+          <li style="font-size:0.875rem;color:var(--ink-mid);display:flex;align-items:center;gap:0.5rem"><span class="material-symbols-outlined" style="font-size:14px;color:var(--emerald)">check</span>Cross-Border Expansion</li>
+          <li style="font-size:0.875rem;color:var(--ink-mid);display:flex;align-items:center;gap:0.5rem"><span class="material-symbols-outlined" style="font-size:14px;color:var(--emerald)">check</span>Investor Readiness</li>
+        </ul>
+        <a href="services.html" class="path-cta" aria-label="Services for companies">
+          Explore company services <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+        </a>
+      </article>
+
+      <article class="path-card anim-up anim-up-1">
+        <div class="path-icon" aria-hidden="true">
+          <span class="material-symbols-outlined">account_balance</span>
+        </div>
+        <span class="eyebrow">For Investors</span>
+        <h3>Investors seeking curated company introductions and portfolio support</h3>
+        <p style="margin-top:0.625rem">Family offices, VCs, and institutional investors partner with BANAHub to access company introductions that match their stated mandate — and to support portfolio companies entering new markets.</p>
+        <ul style="margin-top:1rem;display:flex;flex-direction:column;gap:0.4rem">
+          <li style="font-size:0.875rem;color:var(--ink-mid);display:flex;align-items:center;gap:0.5rem"><span class="material-symbols-outlined" style="font-size:14px;color:var(--emerald)">check</span>Investor Introductions</li>
+          <li style="font-size:0.875rem;color:var(--ink-mid);display:flex;align-items:center;gap:0.5rem"><span class="material-symbols-outlined" style="font-size:14px;color:var(--emerald)">check</span>Portfolio Growth Advisory</li>
+          <li style="font-size:0.875rem;color:var(--ink-mid);display:flex;align-items:center;gap:0.5rem"><span class="material-symbols-outlined" style="font-size:14px;color:var(--emerald)">check</span>Co-investment Deal Flow</li>
+        </ul>
+        <a href="service-introductions.html" class="path-cta" aria-label="Services for investors">
+          Investor participation <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+        </a>
+      </article>
+
+      <article class="path-card anim-up anim-up-2">
+        <div class="path-icon" aria-hidden="true">
+          <span class="material-symbols-outlined">handshake</span>
+        </div>
+        <span class="eyebrow">For Partners</span>
+        <h3>Corporate and ecosystem partners seeking structured programmes and events</h3>
+        <p style="margin-top:0.625rem">Corporates, chambers, and development organisations work with BANAHub to design and deliver acceleration programmes, market entry events, and ecosystem engagement initiatives.</p>
+        <ul style="margin-top:1rem;display:flex;flex-direction:column;gap:0.4rem">
+          <li style="font-size:0.875rem;color:var(--ink-mid);display:flex;align-items:center;gap:0.5rem"><span class="material-symbols-outlined" style="font-size:14px;color:var(--emerald)">check</span>Programme Design</li>
+          <li style="font-size:0.875rem;color:var(--ink-mid);display:flex;align-items:center;gap:0.5rem"><span class="material-symbols-outlined" style="font-size:14px;color:var(--emerald)">check</span>Events &amp; Summits</li>
+          <li style="font-size:0.875rem;color:var(--ink-mid);display:flex;align-items:center;gap:0.5rem"><span class="material-symbols-outlined" style="font-size:14px;color:var(--emerald)">check</span>Ecosystem Sponsorship</li>
+        </ul>
+        <a href="events.html" class="path-cta" aria-label="Partner programmes and events">
+          View programmes &amp; events <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+        </a>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ════ SERVICES ════════════════════════════════════════════ -->
+<section class="section" style="background:#fff" aria-labelledby="services-heading">
+  <div class="container">
+    <div style="display:flex;align-items:end;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:2.5rem">
+      <div>
+        <span class="eyebrow">What we do</span>
+        <h2 id="services-heading">Six core services.<br/>Each with a defined scope.</h2>
+      </div>
+      <a href="services.html" class="btn btn-outline">Full service details</a>
+    </div>
+    <div class="grid-3" style="gap:1.25rem">
+      <article class="service-card anim-up">
+        <div class="service-num" aria-hidden="true">01</div>
+        <h3>Growth Diagnostic</h3>
+        <p>A structured assessment of your commercial model, market positioning, and readiness for expansion — delivered as a written report with prioritised recommendations.</p>
+        <a href="service-gtm.html" style="display:inline-flex;align-items:center;gap:0.3rem;font-size:0.8125rem;font-weight:700;color:var(--emerald);margin-top:1rem">Details <span class="material-symbols-outlined" style="font-size:14px">arrow_forward</span></a>
+      </article>
+      <article class="service-card anim-up anim-up-1">
+        <div class="service-num" aria-hidden="true">02</div>
+        <h3>90-Day GTM Sprint</h3>
+        <p>An intensive advisory engagement to define your go-to-market strategy, identify priority channels, and build a qualified commercial pipeline in a target market.</p>
+        <a href="service-gtm.html" style="display:inline-flex;align-items:center;gap:0.3rem;font-size:0.8125rem;font-weight:700;color:var(--emerald);margin-top:1rem">Details <span class="material-symbols-outlined" style="font-size:14px">arrow_forward</span></a>
+      </article>
+      <article class="service-card anim-up anim-up-2">
+        <div class="service-num" aria-hidden="true">03</div>
+        <h3>Cross-Border Expansion</h3>
+        <p>Sustained advisory support for companies entering Southeast Asia, the Gulf, or North Asia — covering regulatory navigation, partner identification, and commercial launch.</p>
+        <a href="service-gtm.html" style="display:inline-flex;align-items:center;gap:0.3rem;font-size:0.8125rem;font-weight:700;color:var(--emerald);margin-top:1rem">Details <span class="material-symbols-outlined" style="font-size:14px">arrow_forward</span></a>
+      </article>
+      <article class="service-card anim-up">
+        <div class="service-num" aria-hidden="true">04</div>
+        <h3>Investor Readiness</h3>
+        <p>Preparation of investment narrative, financial model review, pitch materials, and due diligence readiness — designed for companies approaching a capital raise process.</p>
+        <a href="service-readiness.html" style="display:inline-flex;align-items:center;gap:0.3rem;font-size:0.8125rem;font-weight:700;color:var(--emerald);margin-top:1rem">Details <span class="material-symbols-outlined" style="font-size:14px">arrow_forward</span></a>
+      </article>
+      <article class="service-card anim-up anim-up-1">
+        <div class="service-num" aria-hidden="true">05</div>
+        <h3>Investor Introductions</h3>
+        <p>Where eligibility criteria are met and mandate alignment exists, BANAHub facilitates introductions between companies and investors in our network. Introductions are not guaranteed.</p>
+        <a href="service-introductions.html" style="display:inline-flex;align-items:center;gap:0.3rem;font-size:0.8125rem;font-weight:700;color:var(--emerald);margin-top:1rem">Details <span class="material-symbols-outlined" style="font-size:14px">arrow_forward</span></a>
+      </article>
+      <article class="service-card anim-up anim-up-2">
+        <div class="service-num" aria-hidden="true">06</div>
+        <h3>Portfolio Growth Advisory</h3>
+        <p>Ongoing commercial and market expansion advisory for investors' portfolio companies — supporting GTM execution, regional partnerships, and growth-stage operations.</p>
+        <a href="service-portfolio.html" style="display:inline-flex;align-items:center;gap:0.3rem;font-size:0.8125rem;font-weight:700;color:var(--emerald);margin-top:1rem">Details <span class="material-symbols-outlined" style="font-size:14px">arrow_forward</span></a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ════ PROCESS ═════════════════════════════════════════════ -->
+<section class="section ivory-texture" style="background:var(--cream)" aria-labelledby="process-heading">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:3rem">
+      <span class="eyebrow">How we engage</span>
+      <h2 id="process-heading">Four steps from first call to active engagement</h2>
+    </div>
+    <div class="process-wrap">
+      <div class="process-step anim-up">
+        <div class="process-num" aria-label="Step 1">1</div>
+        <h3>Discovery Call</h3>
+        <p>30–45 minutes. We understand your business, your market, and what you're trying to achieve. No obligation.</p>
+      </div>
+      <div class="process-step anim-up anim-up-1">
+        <div class="process-num" aria-label="Step 2">2</div>
+        <h3>Diagnostic &amp; Fit</h3>
+        <p>We assess whether your goals, stage, and timeline match what BANAHub can genuinely deliver. If there's no fit, we'll say so.</p>
+      </div>
+      <div class="process-step anim-up anim-up-2">
+        <div class="process-num" aria-label="Step 3">3</div>
+        <h3>Scoped Engagement</h3>
+        <p>A written engagement letter with defined deliverables, timeline, responsibilities, and fees — before any work begins.</p>
+      </div>
+      <div class="process-step anim-up anim-up-3">
+        <div class="process-num" aria-label="Step 4">4</div>
+        <h3>Execution &amp; Review</h3>
+        <p>We deliver against scope. Fortnightly progress check-ins. End-of-engagement review with next-step recommendations.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════ UPCOMING EVENTS (live from DB) ══════════════════════ -->
+<section class="section" style="background:#fff" aria-labelledby="events-heading">
+  <div class="container">
+    <div style="display:flex;align-items:end;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:2rem">
+      <div>
+        <span class="eyebrow">On the calendar</span>
+        <h2 id="events-heading">Upcoming events</h2>
+      </div>
+      <a href="events.html" class="btn btn-outline btn-sm">All events</a>
+    </div>
+    <div id="home-events">
+      <p style="color:var(--ink-muted);font-size:0.9375rem">Loading events…</p>
+    </div>
+  </div>
+</section>
+
+<!-- ════ DISCOVERY CTA ═══════════════════════════════════════ -->
+<section class="section" style="background:var(--emerald)" aria-labelledby="cta-heading">
+  <div class="container" style="text-align:center;max-width:600px">
+    <span class="eyebrow gold-eyebrow">Get started</span>
+    <h2 id="cta-heading" style="color:#fff;margin:0.75rem 0 1rem">Ready to have a direct conversation?</h2>
+    <p style="color:rgba(255,255,255,0.70);margin-bottom:2rem">Book a 30-minute discovery call. Tell us what you're working on. We'll tell you honestly whether and how BANAHub can help.</p>
+    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+      <a href="contact.html" class="btn btn-lg" style="background:#fff;color:var(--emerald);border-color:#fff">Book a Discovery Call</a>
+      <a href="about.html" class="btn btn-lg btn-outline" style="border-color:rgba(255,255,255,0.4);color:#fff">About BANAHub</a>
+    </div>
+    <p style="margin-top:1.5rem;font-size:0.8125rem;color:rgba(255,255,255,0.40)">BANAHub is not a licensed financial adviser. Nothing on this page constitutes financial advice or a guarantee of commercial outcomes.</p>
+  </div>
+</section>
+
+<div id="site-footer"></div>
+
+<script src="config.js"></script>
+<script src="api.js"></script>
+<script src="nav.js"></script>
+<script>
+// ── Homepage: load upcoming events from the same API as events.html ──
+(async function loadHomeEvents() {
+  const el = document.getElementById('home-events');
+  if (!el) return;
+  try {
+    const res = await apiFetch('/api/events');
+    const data = await res.json();
+    const now = new Date();
+    const upcoming = (data.events || [])
+      .filter(e => e.published && e.event_date && new Date(e.event_date) >= now)
+      .sort((a,b) => new Date(a.event_date) - new Date(b.event_date))
+      .slice(0,4);
+
+    if (!upcoming.length) {
+      el.innerHTML = `<p style="color:var(--ink-muted);font-size:0.9375rem">No events currently scheduled. <a href="events.html" style="color:var(--emerald)">View all past events →</a></p>`;
+      return;
+    }
+
+    el.innerHTML = upcoming.map(e => {
+      const d = new Date(e.event_date);
+      const month = d.toLocaleDateString('en-SG',{month:'short'}).toUpperCase();
+      const day   = d.getDate();
+      const href  = e.luma_url || e.registration_url || 'events.html';
+      const label = e.luma_url ? 'RSVP on Luma' : e.registration_url ? 'Register' : 'View details';
+      return `
+        <div class="event-row">
+          <div class="event-date-block" aria-hidden="true">
+            <div class="month">${month}</div>
+            <div class="day">${day}</div>
+          </div>
+          <div class="event-body">
+            <h4>${e.title.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</h4>
+            <p>${[e.type, e.location||'Location TBC'].filter(Boolean).join(' · ')}</p>
+          </div>
+          <div style="flex-shrink:0;align-self:center">
+            <a href="${href}" ${href.startsWith('http')?'target="_blank" rel="noopener"':''} class="btn btn-outline btn-sm">${label}</a>
+          </div>
+        </div>`;
+    }).join('');
+  } catch(e) {
+    el.innerHTML = `<p style="color:var(--ink-muted)">Could not load events. <a href="events.html" style="color:var(--emerald)">View events page →</a></p>`;
+  }
+})();
+</script>
+</body>
+</html>
