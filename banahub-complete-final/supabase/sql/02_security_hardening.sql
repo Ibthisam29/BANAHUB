@@ -1,5 +1,5 @@
 -- BANAHub — Security hardening
--- Run in Supabase SQL Editor (project: ositmmczozefrdzcgxrp)
+-- Run in Supabase SQL Editor (project: mfqdqisbryoepdpqebkb)
 
 -- ══════════════════════════════════════════════════════════════════
 -- PAYMENTS — transactions table (idempotent; same table used across
@@ -307,7 +307,7 @@ begin
 
   if is_admin_email then
     perform net.http_post(
-      url := 'https://ositmmczozefrdzcgxrp.supabase.co/functions/v1/notify-admin-login-attempt',
+      url := 'https://mfqdqisbryoepdpqebkb.supabase.co/functions/v1/notify-admin-login-attempt',
       headers := jsonb_build_object('Content-Type', 'application/json'),
       body := jsonb_build_object(
         'email', new.email,
