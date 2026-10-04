@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BANAHUB Capital &amp; Growth Exchange — Singapore 2026</title>
+<meta name="description" content="An invitation-led capital and market-access forum connecting investible SMEs and startups with investors, corporate buyers, strategic partners and global markets. Singapore, November 2026.">
+<link rel="stylesheet" href="site.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #fed65b;
+    --gold-dark: #c9a84c;
+    --emerald: #003527;
+    --emerald-mid: #1a5c43;
+    --cream: #faf9f5;
+    --ink: #1a1a1a;
+    --muted: #555;
+    --border: rgba(0,53,39,.12);
+    --r: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Inter', sans-serif; background: var(--cream); color: var(--ink); line-height: 1.65; }
+
+  /* ── NAV ─────────────────────────────────────────────────── */
+  .site-nav { position: sticky; top: 0; z-index: 100; background: var(--emerald); padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+  .site-nav .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .site-nav .logo img { height: 32px; }
+  .site-nav .logo span { color: #fff; font-weight: 700; font-size: 15px; }
+  .nav-cta { background: var(--gold); color: var(--emerald); font-weight: 700; border: none; border-radius: var(--r); padding: 9px 20px; font-size: 13px; cursor: pointer; text-decoration: none; white-space: nowrap; }
+  .nav-cta:hover { background: #fce94d; }
+
+  /* ── HERO ────────────────────────────────────────────────── */
+  .hero {
+    background: var(--emerald);
+    padding: 80px 24px 72px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 60% 40%, rgba(254,214,91,.08) 0%, transparent 70%);
+  }
+  .hero-eyebrow { display: inline-block; background: rgba(254,214,91,.15); border: 1px solid rgba(254,214,91,.35); color: var(--gold); border-radius: 20px; padding: 5px 16px; font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 24px; }
+  .hero h1 { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 700; color: #fff; line-height: 1.15; max-width: 780px; margin: 0 auto 16px; }
+  .hero h1 span { color: var(--gold); }
+  .hero-sub { font-size: 17px; color: rgba(255,255,255,.75); max-width: 560px; margin: 0 auto 36px; }
+  .hero-meta { display: flex; align-items: center; justify-content: center; gap: 24px; flex-wrap: wrap; margin-bottom: 40px; }
+  .hero-meta-item { display: flex; align-items: center; gap: 8px; color: rgba(255,255,255,.8); font-size: 13px; }
+  .hero-meta-item svg { opacity: .7; flex-shrink: 0; }
+  .hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn-gold { background: var(--gold); color: var(--emerald); font-weight: 700; border: none; border-radius: var(--r); padding: 13px 28px; font-size: 14px; cursor: pointer; text-decoration: none; display: inline-block; transition: background .15s; }
+  .btn-gold:hover { background: #fce94d; }
+  .btn-outline-gold { background: transparent; color: var(--gold); border: 1.5px solid rgba(254,214,91,.5); font-weight: 600; border-radius: var(--r); padding: 12px 24px; font-size: 14px; cursor: pointer; text-decoration: none; display: inline-block; transition: border-color .15s, color .15s; }
+  .btn-outline-gold:hover { border-color: var(--gold); color: #fce94d; }
+
+  /* ── SECTION WRAPPER ─────────────────────────────────────── */
+  .section { padding: 72px 24px; max-width: 1100px; margin: 0 auto; }
+  .section-label { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--gold-dark); margin-bottom: 10px; }
+  .section-title { font-size: clamp(1.5rem, 3vw, 2.2rem); font-weight: 700; color: var(--emerald); margin-bottom: 14px; line-height: 1.2; }
+  .section-sub { font-size: 16px; color: var(--muted); max-width: 620px; }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 0; }
+
+  /* ── AUDIENCE CARDS ──────────────────────────────────────── */
+  .audience-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-top: 40px; }
+  .audience-card { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 28px 24px; }
+  .audience-card .icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 16px; }
+  .audience-card h3 { font-size: 16px; font-weight: 700; color: var(--emerald); margin-bottom: 10px; }
+  .audience-card ul { list-style: none; padding: 0; }
+  .audience-card ul li { font-size: 13px; color: var(--muted); padding: 4px 0; border-bottom: 1px solid var(--border); }
+  .audience-card ul li:last-child { border-bottom: none; }
+  .audience-card .card-cta { margin-top: 20px; }
+  .btn-sm-emerald { background: var(--emerald); color: #fff; border: none; border-radius: var(--r); padding: 9px 18px; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block; }
+  .btn-sm-emerald:hover { background: var(--emerald-mid); }
+
+  /* ── EXPERIENCE CARDS ────────────────────────────────────── */
+  .exp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 36px; }
+  .exp-card { border-left: 3px solid var(--gold); background: #fff; border-radius: 0 12px 12px 0; padding: 24px 22px; }
+  .exp-card h3 { font-size: 15px; font-weight: 700; color: var(--emerald); margin-bottom: 8px; }
+  .exp-card p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+  /* ── PROGRAMME TABLE ─────────────────────────────────────── */
+  .prog-section { background: var(--emerald); padding: 72px 24px; }
+  .prog-inner { max-width: 860px; margin: 0 auto; }
+  .prog-inner .section-label { color: var(--gold); }
+  .prog-inner .section-title { color: #fff; }
+  .prog-inner .section-sub { color: rgba(255,255,255,.65); }
+  .prog-table { width: 100%; border-collapse: collapse; margin-top: 32px; }
+  .prog-table tr { border-bottom: 1px solid rgba(255,255,255,.1); }
+  .prog-table td { padding: 14px 4px; font-size: 14px; vertical-align: top; }
+  .prog-table td:first-child { color: var(--gold); font-weight: 600; width: 110px; white-space: nowrap; }
+  .prog-table td:last-child { color: rgba(255,255,255,.85); }
+  .prog-note { margin-top: 16px; font-size: 12px; color: rgba(255,255,255,.45); font-style: italic; }
+
+  /* ── SECTORS ─────────────────────────────────────────────── */
+  .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
+  .tag { background: rgba(0,53,39,.07); color: var(--emerald); border-radius: 20px; padding: 5px 14px; font-size: 12px; font-weight: 600; }
+
+  /* ── WHY CARDS ───────────────────────────────────────────── */
+  .why-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-top: 36px; }
+  .why-card { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 24px; }
+  .why-card h4 { font-size: 13px; font-weight: 700; color: var(--gold-dark); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 12px; }
+  .why-card ul { list-style: none; }
+  .why-card ul li { font-size: 13px; color: var(--muted); padding: 4px 0 4px 14px; position: relative; }
+  .why-card ul li::before { content: '→'; position: absolute; left: 0; color: var(--gold-dark); font-size: 11px; top: 5px; }
+
+  /* ── APPLY FORMS ─────────────────────────────────────────── */
+  .apply-section { background: #f4f3ef; padding: 72px 24px; }
+  .apply-inner { max-width: 1100px; margin: 0 auto; }
+  .apply-tabs { display: flex; gap: 8px; margin-bottom: 32px; flex-wrap: wrap; }
+  .apply-tab { padding: 10px 22px; border-radius: 24px; border: 1.5px solid var(--border); font-size: 13px; font-weight: 600; cursor: pointer; background: #fff; color: var(--muted); transition: all .15s; }
+  .apply-tab.active { background: var(--emerald); color: #fff; border-color: var(--emerald); }
+  .apply-form-wrap { display: none; }
+  .apply-form-wrap.active { display: block; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media(max-width:640px) { .form-grid { grid-template-columns: 1fr; } }
+  .form-full { grid-column: 1 / -1; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-label { font-size: 12px; font-weight: 600; color: var(--emerald); text-transform: uppercase; letter-spacing: .05em; }
+  .form-input, .form-select, .form-textarea { background: #fff; border: 1.5px solid var(--border); border-radius: var(--r); padding: 10px 14px; font-size: 14px; font-family: inherit; color: var(--ink); outline: none; transition: border-color .15s; }
+  .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--emerald); }
+  .form-textarea { resize: vertical; min-height: 90px; }
+  .form-card { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 36px 32px; }
+  @media(max-width:640px) { .form-card { padding: 24px 16px; } }
+  .form-disclaimer { font-size: 11px; color: var(--muted); margin-top: 16px; line-height: 1.5; }
+  .form-success { display: none; text-align: center; padding: 48px 24px; }
+  .form-success svg { color: var(--emerald); margin-bottom: 12px; }
+  .form-success h3 { font-size: 20px; font-weight: 700; color: var(--emerald); margin-bottom: 8px; }
+  .form-success p { color: var(--muted); font-size: 14px; }
+
+  /* ── PARTNERS ─────────────────────────────────────────────── */
+  .partner-tiers { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 32px; }
+  .partner-tier { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+  .partner-tier h4 { font-size: 14px; font-weight: 700; color: var(--emerald); margin-bottom: 8px; }
+  .partner-tier p { font-size: 12px; color: var(--muted); }
+
+  /* ── NOTICE ──────────────────────────────────────────────── */
+  .notice { background: rgba(0,53,39,.05); border: 1px solid var(--border); border-radius: var(--r); padding: 20px 24px; font-size: 13px; color: var(--muted); line-height: 1.7; margin-top: 48px; }
+
+  /* ── FOOTER CTA ──────────────────────────────────────────── */
+  .footer-cta { background: var(--emerald); padding: 80px 24px; text-align: center; }
+  .footer-cta h2 { font-size: clamp(1.6rem, 3.5vw, 2.4rem); font-weight: 700; color: #fff; margin-bottom: 12px; }
+  .footer-cta p { color: rgba(255,255,255,.7); max-width: 520px; margin: 0 auto 36px; font-size: 16px; }
+  .footer-cta-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .footer-bar { background: #001e14; padding: 20px 24px; text-align: center; font-size: 12px; color: rgba(255,255,255,.4); }
+  .footer-bar a { color: rgba(255,255,255,.5); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<!-- ── NAV ──────────────────────────────────────────────── -->
+<nav class="site-nav">
+  <a href="/" class="logo">
+    <img src="logo.png" alt="BANAHUB" onerror="this.style.display='none'">
+    <span>BANAHUB</span>
+  </a>
+  <a href="#apply" class="nav-cta">Apply Now</a>
+</nav>
+
+<!-- ── HERO ─────────────────────────────────────────────── -->
+<section class="hero" id="top">
+  <div class="hero-eyebrow">Applications Open · Singapore 2026</div>
+  <h1>BANAHUB<br><span>Capital &amp; Growth Exchange</span></h1>
+  <p class="hero-sub">An invitation-led forum connecting investible businesses with investors, corporate buyers, strategic partners and global markets.</p>
+  <div class="hero-meta">
+    <div class="hero-meta-item">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      November 2026
+    </div>
+    <div class="hero-meta-item">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+      Singapore
+    </div>
+    <div class="hero-meta-item">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      Invitation-Led
+    </div>
+    <div class="hero-meta-item">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
+      Capital, Commerce &amp; Market Access
+    </div>
+  </div>
+  <div class="hero-actions">
+    <a href="#apply" class="btn-gold">Apply to Participate</a>
+    <a href="#investors" class="btn-outline-gold">Investor Invitation</a>
+    <a href="#partner" class="btn-outline-gold">Become a Partner</a>
+  </div>
+</section>
+
+<!-- ── INTRO ─────────────────────────────────────────────── -->
+<div style="background:#fff; padding: 56px 24px;">
+  <div style="max-width:760px; margin:0 auto; text-align:center;">
+    <p style="font-size:17px; color:var(--muted); line-height:1.8;">BANAHUB Capital &amp; Growth Exchange is not a conventional networking conference. It is a <strong style="color:var(--ink)">curated capital-and-commerce platform</strong> designed to generate meaningful conversations, qualified introductions, commercial partnerships and clearly defined next steps.</p>
+    <div style="margin-top:36px; display:flex; flex-wrap:wrap; justify-content:center; gap:32px;">
+      <div style="text-align:center;">
+        <div style="font-size:28px; font-weight:700; color:var(--emerald)">12</div>
+        <div style="font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em">Investor-Ready Showcases</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-size:28px; font-weight:700; color:var(--emerald)">6+</div>
+        <div style="font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em">Cross-Border Markets</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-size:28px; font-weight:700; color:var(--emerald)">8</div>
+        <div style="font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em">Sector Capital Tables</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-size:28px; font-weight:700; color:var(--emerald)">1 Day</div>
+        <div style="font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em">Curated, Structured</div>
+      </div>
+    </div>
+  </div>
+</div>
+<hr class="divider">
+
+<!-- ── WHO ATTENDS ──────────────────────────────────────── -->
+<section class="section" id="who">
+  <div class="section-label">Who Attends</div>
+  <div class="section-title">Four Distinct Participant Groups</div>
+  <p class="section-sub">Every participant is selected or vetted. Meetings are curated around specific commercial objectives.</p>
+  <div class="audience-grid">
+    <div class="audience-card">
+      <div class="icon" style="background:rgba(0,53,39,.08)">💼</div>
+      <h3>Investors &amp; Capital Partners</h3>
+      <ul>
+        <li>Family offices</li>
+        <li>Venture capital &amp; private equity</li>
+        <li>Corporate venture teams</li>
+        <li>Angel investors &amp; syndicates</li>
+        <li>Private-credit providers</li>
+        <li>Impact investors</li>
+      </ul>
+      <div class="card-cta"><a href="#investors" class="btn-sm-emerald">Request Invitation</a></div>
+    </div>
+    <div class="audience-card">
+      <div class="icon" style="background:rgba(254,214,91,.15)">🏭</div>
+      <h3>SMEs &amp; Growth Enterprises</h3>
+      <ul>
+        <li>Raising growth capital</li>
+        <li>Regional expansion</li>
+        <li>Strategic investors</li>
+        <li>Corporate partnerships</li>
+        <li>Distribution &amp; market access</li>
+        <li>Business succession</li>
+      </ul>
+      <div class="card-cta"><a href="#apply" class="btn-sm-emerald">Apply as SME</a></div>
+    </div>
+    <div class="audience-card">
+      <div class="icon" style="background:rgba(26,92,67,.1)">🚀</div>
+      <h3>Investible Startups</h3>
+      <ul>
+        <li>Validated product or service</li>
+        <li>Paying customers or pilots</li>
+        <li>Clearly defined market</li>
+        <li>Commercially viable model</li>
+        <li>Credible management team</li>
+        <li>Structured use of funds</li>
+      </ul>
+      <div class="card-cta"><a href="#apply" class="btn-sm-emerald">Apply as Startup</a></div>
+    </div>
+    <div class="audience-card">
+      <div class="icon" style="background:rgba(201,168,76,.12)">🤝</div>
+      <h3>Corporate &amp; Ecosystem Partners</h3>
+      <ul>
+        <li>Corporate buyers &amp; procurement</li>
+        <li>Distributors &amp; trade bodies</li>
+        <li>Government &amp; investment agencies</li>
+        <li>Professional advisers</li>
+        <li>Technology providers</li>
+        <li>Universities &amp; innovation orgs</li>
+      </ul>
+      <div class="card-cta"><a href="#partner" class="btn-sm-emerald">Explore Partnership</a></div>
+    </div>
+  </div>
+</section>
+<hr class="divider">
+
+<!-- ── EXPERIENCE ───────────────────────────────────────── -->
+<section class="section" id="experience">
+  <div class="section-label">The Exchange Experience</div>
+  <div class="section-title">Structured for Outcomes, Not Attendance</div>
+  <p class="section-sub">Every session is designed around a specific commercial objective — investment, partnership, pilot or market entry.</p>
+  <div class="exp-grid">
+    <div class="exp-card">
+      <h3>Curated Deal Rooms</h3>
+      <p>Selected businesses receive scheduled meetings with relevant investors, corporate buyers and strategic partners. Each meeting has a declared objective: investment, due diligence, corporate pilot, distribution or market entry.</p>
+    </div>
+    <div class="exp-card">
+      <h3>Investor-Ready Showcase</h3>
+      <p>Twelve selected businesses present concise investment cases to a curated audience — 7-minute presentation, 3-minute investor Q&amp;A, 2-minute next-step declaration. The objective is progression, not applause.</p>
+    </div>
+    <div class="exp-card">
+      <h3>SME Growth Forum</h3>
+      <p>Practical discussions on growth capital, AI and digital transformation, corporate governance, strategic investment, succession and cross-border growth.</p>
+    </div>
+    <div class="exp-card">
+      <h3>Startup Innovation Forum</h3>
+      <p>Focused sessions on seed and Series A readiness, revenue validation, pilot-to-procurement conversion, capital-efficient growth and scalable market entry.</p>
+    </div>
+    <div class="exp-card">
+      <h3>Sector Capital Tables</h3>
+      <p>Hosted roundtables across AI &amp; enterprise tech, healthcare, consumer, hospitality, sustainability, manufacturing, real assets and women-led enterprises.</p>
+    </div>
+    <div class="exp-card">
+      <h3>Private Capital Dinner</h3>
+      <p>A limited invitation-only evening for qualified investors, selected business leaders, speakers and strategic partners. By invitation only.</p>
+    </div>
+  </div>
+
+  <div style="margin-top:40px;">
+    <div class="section-label" style="margin-top:0">Cross-Border Markets</div>
+    <p style="font-size:14px; color:var(--muted); margin-bottom:12px">Explore commercial pathways across:</p>
+    <div class="tags">
+      <span class="tag">Singapore</span>
+      <span class="tag">ASEAN</span>
+      <span class="tag">India</span>
+      <span class="tag">Saudi Arabia &amp; Gulf</span>
+      <span class="tag">Australia</span>
+      <span class="tag">Europe</span>
+    </div>
+  </div>
+</section>
+<hr class="divider">
+
+<!-- ── PROGRAMME ────────────────────────────────────────── -->
+<section class="prog-section" id="programme">
+  <div class="prog-inner">
+    <div class="section-label">Proposed Programme</div>
+    <div class="section-title">One Full Day. Capital to Commerce.</div>
+    <p class="section-sub">Singapore, November 2026 · Venue to be announced</p>
+    <table class="prog-table">
+      <tr><td>8:00 AM</td><td>Investor &amp; Strategic-Partner Breakfast</td></tr>
+      <tr><td>9:00 AM</td><td>Opening Address</td></tr>
+      <tr><td>9:20 AM</td><td>Capital Outlook</td></tr>
+      <tr><td>10:00 AM</td><td>Investor-Readiness Masterclass</td></tr>
+      <tr><td>11:00 AM</td><td>SME Growth &amp; Startup Innovation Forums (parallel)</td></tr>
+      <tr><td>12:00 PM</td><td>Hosted Sector Lunch Tables</td></tr>
+      <tr><td>1:15 PM</td><td>Cross-Border Gateway Forum</td></tr>
+      <tr><td>2:00 PM</td><td>Investor-Ready Showcase (12 selected businesses)</td></tr>
+      <tr><td>3:30 PM</td><td>Curated Deal Rooms</td></tr>
+      <tr><td>5:00 PM</td><td>Partnership &amp; Pilot Announcements</td></tr>
+      <tr><td>5:30 PM</td><td>Closing Reception</td></tr>
+      <tr><td>7:00 PM</td><td>Private Capital Dinner (invitation only)</td></tr>
+    </table>
+    <p class="prog-note">Programme and speakers are subject to confirmation. Times are indicative.</p>
+  </div>
+</section>
+
+<!-- ── WHY PARTICIPATE ──────────────────────────────────── -->
+<section class="section" id="why">
+  <div class="section-label">Why Participate</div>
+  <div class="section-title">Clear Objectives for Every Participant</div>
+  <div class="why-grid">
+    <div class="why-card">
+      <h4>For Investors</h4>
+      <ul>
+        <li>Access screened opportunities</li>
+        <li>Meet founders &amp; SME leaders</li>
+        <li>Explore co-investment</li>
+        <li>Mandate-aligned meetings</li>
+        <li>Cross-border deal flow</li>
+      </ul>
+    </div>
+    <div class="why-card">
+      <h4>For SMEs</h4>
+      <ul>
+        <li>Meet relevant capital providers</li>
+        <li>Connect with buyers &amp; distributors</li>
+        <li>Explore regional expansion</li>
+        <li>Investor-readiness feedback</li>
+        <li>Build strategic relationships</li>
+      </ul>
+    </div>
+    <div class="why-card">
+      <h4>For Startups</h4>
+      <ul>
+        <li>Present to qualified stakeholders</li>
+        <li>Meet prospective investors</li>
+        <li>Access corporate-pilot opportunities</li>
+        <li>Improve investment positioning</li>
+        <li>Cross-border connections</li>
+      </ul>
+    </div>
+    <div class="why-card">
+      <h4>For Partners</h4>
+      <ul>
+        <li>Brand within capital ecosystem</li>
+        <li>Reach business owners &amp; investors</li>
+        <li>Lead a sector conversation</li>
+        <li>Develop qualified relationships</li>
+        <li>Support high-potential enterprises</li>
+      </ul>
+    </div>
+  </div>
+</section>
+<hr class="divider">
+
+<!-- ── APPLY ─────────────────────────────────────────────── -->
+<section class="apply-section" id="apply">
+  <div class="apply-inner">
+    <div class="section-label">Apply to Participate</div>
+    <div class="section-title">Tell Us About Your Company or Interest</div>
+    <p class="section-sub" style="margin-bottom:28px">Applications are reviewed. Submitting does not guarantee selection. All participation is subject to review and confirmation by BANAHUB.</p>
+
+    <div class="apply-tabs">
+      <button class="apply-tab active" onclick="switchTab('business',this)">Business Application</button>
+      <button class="apply-tab" onclick="switchTab('investor',this)" id="investors">Investor Invitation</button>
+      <button class="apply-tab" onclick="switchTab('partner',this)" id="partner">Partnership Enquiry</button>
+    </div>
+
+    <!-- Business Application -->
+    <div class="apply-form-wrap active" id="form-business">
+      <div class="form-card">
+        <div id="form-business-success" class="form-success">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <h3>Application Received</h3>
+          <p>Thank you. We will review your application and be in touch.</p>
+        </div>
+        <div id="form-business-body">
+          <h3 style="font-size:16px; font-weight:700; color:var(--emerald); margin-bottom:24px">Business Application</h3>
+          <form id="biz-form">
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Full Name *</label>
+                <input class="form-input" name="name" required placeholder="Your name">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Email Address *</label>
+                <input class="form-input" name="email" type="email" required placeholder="you@company.com">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Company Name *</label>
+                <input class="form-input" name="company" required placeholder="Company name">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Business Type *</label>
+                <select class="form-select" name="business_type" required>
+                  <option value="">Select…</option>
+                  <option>SME / Established Business</option>
+                  <option>Startup</option>
+                  <option>Social Enterprise</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Industry / Sector</label>
+                <input class="form-input" name="industry" placeholder="e.g. Healthcare, Tech, F&amp;B">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Country of Incorporation</label>
+                <input class="form-input" name="country" placeholder="e.g. Singapore">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Primary Objective *</label>
+                <select class="form-select" name="objective" required>
+                  <option value="">Select…</option>
+                  <option>Raising capital</option>
+                  <option>Finding corporate customers</option>
+                  <option>Market expansion</option>
+                  <option>Distribution partnerships</option>
+                  <option>Strategic investment / M&amp;A</option>
+                  <option>Cross-border expansion</option>
+                  <option>Multiple</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Funding Requirement (if applicable)</label>
+                <input class="form-input" name="funding" placeholder="e.g. USD 2M seed round">
+              </div>
+              <div class="form-group form-full">
+                <label class="form-label">Tell us about your business and why you want to participate *</label>
+                <textarea class="form-textarea" name="message" required placeholder="Brief description: what your company does, your traction, and what you're looking for at the Exchange…"></textarea>
+              </div>
+            </div>
+            <div style="margin-top:24px;">
+              <button type="submit" class="btn-gold" style="width:100%; padding:14px;">Submit Business Application</button>
+            </div>
+            <p class="form-disclaimer">By submitting, you consent to BANAHUB using your information for event-selection purposes. Submission does not guarantee participation. BANAHUB does not guarantee investment, financing or commercial outcomes. See our <a href="privacy.html" style="color:var(--emerald)">Privacy Policy</a>.</p>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Investor Invitation -->
+    <div class="apply-form-wrap" id="form-investor">
+      <div class="form-card">
+        <div id="form-investor-success" class="form-success">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <h3>Request Received</h3>
+          <p>Thank you. We will review your information and follow up shortly.</p>
+        </div>
+        <div id="form-investor-body">
+          <h3 style="font-size:16px; font-weight:700; color:var(--emerald); margin-bottom:24px">Request Investor Invitation</h3>
+          <form id="inv-form">
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Full Name *</label>
+                <input class="form-input" name="name" required placeholder="Your name">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Email Address *</label>
+                <input class="form-input" name="email" type="email" required placeholder="you@firm.com">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Organisation</label>
+                <input class="form-input" name="company" placeholder="Family office, VC firm, etc.">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Investment Role *</label>
+                <select class="form-select" name="investor_type" required>
+                  <option value="">Select…</option>
+                  <option>Family Office</option>
+                  <option>Venture Capital</option>
+                  <option>Private Equity</option>
+                  <option>Angel / Syndicate</option>
+                  <option>Corporate Venture</option>
+                  <option>Private Credit</option>
+                  <option>Impact Investor</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Typical Ticket Size</label>
+                <input class="form-input" name="ticket_size" placeholder="e.g. USD 500K – 2M">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Geographic Mandate</label>
+                <input class="form-input" name="geography" placeholder="e.g. SEA, global, APAC">
+              </div>
+              <div class="form-group form-full">
+                <label class="form-label">Sector Preferences &amp; Strategic Interests</label>
+                <textarea class="form-textarea" name="message" placeholder="Sectors, stages and any specific interests for the Exchange…" style="min-height:70px"></textarea>
+              </div>
+            </div>
+            <div style="margin-top:24px;">
+              <button type="submit" class="btn-gold" style="width:100%; padding:14px;">Request Invitation</button>
+            </div>
+            <p class="form-disclaimer">Investor invitations are complimentary and subject to qualification. BANAHUB reserves the right to decline or defer any invitation request.</p>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Partnership -->
+    <div class="apply-form-wrap" id="form-partner">
+      <div class="form-card">
+        <div id="form-partner-success" class="form-success">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <h3>Partnership Enquiry Received</h3>
+          <p>We will send you our partnership prospectus and follow up shortly.</p>
+        </div>
+        <div id="form-partner-body">
+          <h3 style="font-size:16px; font-weight:700; color:var(--emerald); margin-bottom:8px">Partnership &amp; Sponsorship Enquiry</h3>
+          <p style="font-size:13px; color:var(--muted); margin-bottom:24px">Partnership opportunities include: Presenting Partner, Strategic Partner, Sector Partner, Cross-Border Gateway Partner, Investor Lounge Partner, Private Capital Dinner Partner, Technology Partner, Media Partner and Ecosystem Partner.</p>
+          <form id="par-form">
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Full Name *</label>
+                <input class="form-input" name="name" required placeholder="Your name">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Email Address *</label>
+                <input class="form-input" name="email" type="email" required placeholder="you@org.com">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Organisation *</label>
+                <input class="form-input" name="company" required placeholder="Organisation name">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Partnership Interest</label>
+                <select class="form-select" name="partner_tier">
+                  <option value="">Select…</option>
+                  <option>Presenting Partner</option>
+                  <option>Strategic Partner</option>
+                  <option>Sector Partner</option>
+                  <option>Cross-Border Gateway Partner</option>
+                  <option>Investor Lounge Partner</option>
+                  <option>Private Capital Dinner Partner</option>
+                  <option>Technology Partner</option>
+                  <option>Media Partner</option>
+                  <option>Ecosystem Partner</option>
+                  <option>Not sure — send me the prospectus</option>
+                </select>
+              </div>
+              <div class="form-group form-full">
+                <label class="form-label">Tell us about your organisation and partnership goals</label>
+                <textarea class="form-textarea" name="message" placeholder="Brief background on your organisation and what you hope to achieve through the Exchange…"></textarea>
+              </div>
+            </div>
+            <div style="margin-top:24px;">
+              <button type="submit" class="btn-gold" style="width:100%; padding:14px;">Submit Partnership Enquiry</button>
+            </div>
+            <p class="form-disclaimer">We will follow up with a full partnership prospectus outlining benefits, brand visibility and commercial-engagement opportunities.</p>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="notice">
+      <strong>Important Notice</strong><br>
+      BANAHUB Capital &amp; Growth Exchange facilitates business engagement, strategic introductions, market-access discussions and investor-readiness activities. Participation does not constitute an offer, recommendation, solicitation or guarantee of investment. All investment and commercial decisions remain subject to independent assessment, due diligence, negotiation, legal documentation and applicable regulatory requirements. Participant information will only be shared in accordance with applicable consent, privacy and event-participation terms.
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER CTA ────────────────────────────────────────── -->
+<section class="footer-cta">
+  <h2>Capital. Commerce. Global Growth.</h2>
+  <p>Join investors, business leaders, founders and strategic partners building the next generation of cross-border opportunities.</p>
+  <div class="footer-cta-actions">
+    <a href="#apply" class="btn-gold" onclick="switchTabByName('business')">Apply as a Business</a>
+    <a href="#apply" class="btn-outline-gold" onclick="switchTabByName('investor')">Request Investor Invitation</a>
+    <a href="#apply" class="btn-outline-gold" onclick="switchTabByName('partner')">Become a Partner</a>
+  </div>
+</section>
+
+<div class="footer-bar">
+  &copy; 2026 BANAHUB &nbsp;·&nbsp; <a href="privacy.html">Privacy</a> &nbsp;·&nbsp; <a href="terms.html">Terms</a> &nbsp;·&nbsp; <a href="disclosures.html">Disclosures</a> &nbsp;·&nbsp; hello@banahub.com
+</div>
+
+<script src="config.js"></script>
+<script>
+// ── Tab switching ──────────────────────────────────────────
+function switchTab(id, btn) {
+  document.querySelectorAll('.apply-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.apply-form-wrap').forEach(f => f.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  document.getElementById('form-'+id).classList.add('active');
+}
+function switchTabByName(id) {
+  const btn = document.querySelector(`.apply-tab[onclick*="${id}"]`);
+  switchTab(id, btn);
+}
+// Deep-link from hero CTA anchors
+window.addEventListener('DOMContentLoaded', () => {
+  const hash = location.hash;
+  if (hash === '#investors') { setTimeout(() => switchTab('investor', document.querySelectorAll('.apply-tab')[1]), 100); }
+  if (hash === '#partner')   { setTimeout(() => switchTab('partner',  document.querySelectorAll('.apply-tab')[2]), 100); }
+});
+
+// ── Form submit ────────────────────────────────────────────
+function submitForm(formId, source, bodyId, successId) {
+  const form = document.getElementById(formId);
+  if (!form) return;
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = form.querySelector('button[type=submit]');
+    btn.disabled = true;
+    btn.textContent = 'Submitting…';
+    const fd = new FormData(form);
+    const body = {};
+    fd.forEach((v, k) => body[k] = v);
+    body.source = source;
+    body.status = 'pending';
+    try {
+      await apiFetch('/api/enquiries', { method: 'POST', body: JSON.stringify(body) });
+      document.getElementById(bodyId).style.display = 'none';
+      document.getElementById(successId).style.display = 'block';
+    } catch(err) {
+      btn.disabled = false;
+      btn.textContent = 'Submit';
+      alert('Something went wrong. Please try again or email hello@banahub.com.');
+    }
+  });
+}
+submitForm('biz-form',  'event_interest', 'form-business-body', 'form-business-success');
+submitForm('inv-form',  'investor_enquiry', 'form-investor-body', 'form-investor-success');
+submitForm('par-form',  'partner_enquiry',  'form-partner-body',  'form-partner-success');
+</script>
+</body>
+</html>
