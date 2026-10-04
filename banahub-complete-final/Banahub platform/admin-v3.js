@@ -61,7 +61,8 @@ function previewDevice(w, btn) {
   btn && btn.classList.add('active');
 }
 function closePreview() { $('pv-frame').src = 'about:blank'; closeModal('modal-preview'); }
-const eventPageUrl = e => e.page_url || `/event?id=${encodeURIComponent(e.id)}`;
+const eventPageUrl = e => (e.page_url && /^\/[a-z0-9\-\/?=&]*$/i.test(e.page_url)) ? e.page_url : `/event?id=${encodeURIComponent(e.id)}`;
+function previewEvent(id) { const e = (events_db || []).find(x => x.id === id); if (e) openPreview(eventPageUrl(e), e.title); }
 
 // ═════════════════════════════════════════════════════════════════════════
 // 2. VISUAL PAGE EDITOR
@@ -210,7 +211,7 @@ async function loadEvents() {
   const rows = events_db || [];
   const card = e => `
     <div style="background:var(--bg-3);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden">
-      <div onclick="openPreview('${esc(eventPageUrl(e))}','${esc(e.title).replace(/'/g, '&#39;')}')" title="Open event page"
+      <div onclick="previewEvent('${esc(e.id)}')" title="Open event page"
         style="cursor:pointer;height:120px;background:${e.cover_image ? `url('${esc(e.cover_image)}') center/cover` : 'linear-gradient(135deg,var(--emerald-deep),var(--bg-2))'};position:relative;display:flex;align-items:center;justify-content:center">
         ${e.cover_image ? '' : `<span class="material-symbols-outlined" style="font-size:40px;color:#fff;opacity:.7">event</span>`}
         <div style="position:absolute;top:10px;right:10px;display:flex;gap:6px">
@@ -220,12 +221,12 @@ async function loadEvents() {
         </div>
       </div>
       <div style="padding:16px">
-        <div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:4px;cursor:pointer" onclick="openPreview('${esc(eventPageUrl(e))}','${esc(e.title).replace(/'/g, '&#39;')}')">${esc(e.title)}</div>
+        <div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:4px;cursor:pointer" onclick="previewEvent('${esc(e.id)}')">${esc(e.title)}</div>
         <div style="font-size:12px;color:var(--white-muted);margin-bottom:4px">${esc(e.type || '')} · ${esc(e.location || 'TBD')}</div>
         <div style="font-size:12px;color:var(--emerald)">${e.event_date ? fmtD(e.event_date) : 'Date TBD'}${e.price_amount > 0 ? ` · ${esc(e.currency || 'SGD')} ${Number(e.price_amount).toLocaleString()}` : ' · Free'}</div>
         <div style="font-size:11px;color:var(--white-muted);margin-top:4px;font-family:var(--font-mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(eventPageUrl(e))}</div>
         <div style="display:flex;gap:6px;margin-top:12px;flex-wrap:wrap">
-          <button class="btn btn-primary btn-sm" onclick="openPreview('${esc(eventPageUrl(e))}','${esc(e.title).replace(/'/g, '&#39;')}')"><span class="material-symbols-outlined" style="font-size:14px">visibility</span>View page</button>
+          <button class="btn btn-primary btn-sm" onclick="previewEvent('${esc(e.id)}')"><span class="material-symbols-outlined" style="font-size:14px">visibility</span>View page</button>
           <button class="btn btn-ghost btn-sm" onclick="editEvent('${e.id}')">Edit</button>
           <button class="btn btn-ghost btn-sm" onclick="toggleEvent('${e.id}',${!e.published})">${e.published ? 'Unpublish' : 'Publish'}</button>
           <button class="btn btn-danger btn-sm" onclick="deleteEvent('${e.id}')">Delete</button>
@@ -966,4 +967,233 @@ function renderActivity(items) {
       <div style="flex:1;min-width:0"><div style="font-size:13px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(l.description || l.action)}</div>
         <div style="font-size:11px;color:var(--white-muted)">${esc(l.actor_email || '')} · ${new Date(l.created_at).toLocaleString()}</div></div>
     </div>`).join('');
+}
+
+// ═════════════════════════════════════════════════════════════════════════
+// 10. MEMBERS & APPROVALS
+// ═════════════════════════════════════════════════════════════════════════
+const PROVIDERS = { google: ['Google', '#4285F4'], linkedin_oidc: ['LinkedIn', '#0A66C2'], linkedin: ['LinkedIn', '#0A66C2'], email: ['Email', '#5f6b66'] };
+const provBadge = p => { const [l, c] = PROVIDERS[p] || PROVIDERS.email; return `<span style="font-size:11px;font-weight:600;color:${c};border:1px solid ${c}40;background:${c}10;border-radius:20px;padding:1px 8px">${l}</span>`; };
+const U_STATUS_PILL = { approved: 'live', pending: 'pending', vetting: 'pending', rejected: 'rejected', blocked: 'rejected', invited: 'draft' };
+let users_db = [], uTab = 'pending';
+async function loadUsers() {
+  $('users-table').innerHTML = emptyRow('Loading…');
+  const d = await api('/api/admin/users').catch(() => ({}));
+  users_db = (d && d.users) || [];
+  renderUsers();
+}
+function renderUsers() {
+  const cnt = st => users_db.filter(u => st === 'pending' ? ['pending', 'vetting'].includes(u.status) : u.status === st).length;
+  $('u-tabs').innerHTML = [['pending', `Pending approval (${cnt('pending')})`], ['approved', `Approved (${cnt('approved')})`], ['rejected', `Rejected (${cnt('rejected')})`], ['blocked', `Blocked (${cnt('blocked')})`], ['all', `All (${users_db.length})`]]
+    .map(([k, l]) => `<button class="s-tab${uTab === k ? ' active' : ''}" onclick="uTab='${k}';renderUsers()">${l}</button>`).join('');
+  setBadge('nb-users', cnt('pending'));
+  const q = ($('u-search').value || '').toLowerCase(), r = $('u-role-f').value, pv = $('u-prov-f').value;
+  const rows = users_db.filter(u => (uTab === 'all' || (uTab === 'pending' ? ['pending', 'vetting'].includes(u.status) : u.status === uTab)) &&
+    (!r || u.role === r) && (!pv || (u.auth_provider || 'email') === pv) &&
+    (!q || [u.full_name, u.email, u.company_name, u.title, u.country].join(' ').toLowerCase().includes(q)));
+  $('u-count').textContent = `${rows.length} shown`;
+  $('users-table').innerHTML = rows.length ? `<table class="data-table"><thead><tr><th>Member</th><th>Signed up with</th><th>Company</th><th>Type</th><th>Status</th><th>Joined</th><th></th></tr></thead><tbody>
+    ${rows.map(u => `<tr style="cursor:pointer" onclick="openUserModal('${esc(u.id)}')">
+      <td><div style="display:flex;align-items:center;gap:10px">${u.avatar_url ? `<img src="${esc(u.avatar_url)}" alt="" style="width:28px;height:28px;border-radius:50%;object-fit:cover"/>` : `<div style="width:28px;height:28px;border-radius:50%;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">${esc(((u.full_name || u.email || '?')[0] || '?').toUpperCase())}</div>`}
+        <div><div style="font-weight:600;color:var(--ink)">${esc(u.full_name || '—')}</div><div style="font-size:11px;font-family:var(--font-mono);color:var(--white-muted)">${esc(u.email)}</div></div></div></td>
+      <td>${provBadge(u.auth_provider)}</td>
+      <td style="font-size:12px">${esc(u.company_name || '—')}${u.title ? `<div style="color:var(--white-muted)">${esc(u.title)}</div>` : ''}</td>
+      <td style="font-size:12px;text-transform:capitalize">${esc(u.role || '—')}</td>
+      <td><span class="pill pill-${U_STATUS_PILL[u.status] || 'draft'}">${esc(u.status || '—')}</span></td>
+      <td style="font-size:12px;color:var(--white-muted)">${fmtD(u.created_at)}</td>
+      <td style="white-space:nowrap" onclick="event.stopPropagation()">${u.status !== 'approved' && u.role !== 'admin' ? `<button class="btn btn-approve btn-sm" onclick="quickApprove('${esc(u.id)}')">Approve</button>` : ''}
+        <button class="btn btn-ghost btn-sm" onclick="openUserModal('${esc(u.id)}')">Review</button></td></tr>`).join('')}</tbody></table>`
+    : emptyRow(uTab === 'pending' ? 'No sign-ups waiting for approval.' : 'No members in this view.');
+}
+async function quickApprove(id) {
+  const r = await api(`/api/admin/members/${id}`, 'PATCH', { status: 'approved' });
+  if (!r || r.error) { toast('Approve failed: ' + ((r && r.error) || ''), 'warn'); return; }
+  const u = users_db.find(x => x.id === id); logActivity('admin.member_approve', 'admin', `Approved ${u ? u.email : id}`);
+  toast('Member approved — portal unlocked', 'success');
+  if (currentPanel === 'dashboard') loadDashboard(); else loadUsers();
+}
+async function rejectUser(id) { const r = await api(`/api/admin/members/${id}`, 'PATCH', { status: 'rejected' }); if (r && !r.error) { toast('Rejected', 'warn'); loadUsers(); } }
+let _uModal = null;
+async function openUserModal(id) {
+  $('u-id').value = id; $('modal-user').style.display = 'flex';
+  $('u-profile').innerHTML = '<tr><td>Loading…</td></tr>'; $('u-apps').textContent = ''; $('u-kyc').textContent = '';
+  const d = await api(`/api/admin/members/${id}`).catch(() => ({}));
+  const u = d.user || users_db.find(x => x.id === id) || {}; _uModal = d;
+  $('u-modal-title').textContent = u.full_name || u.email || 'Member';
+  $('u-modal-sub').innerHTML = `${esc(u.email || '')} · ${provBadge(u.auth_provider)}`;
+  $('u-avatar').src = u.avatar_url || ''; $('u-avatar').style.display = u.avatar_url ? '' : 'none';
+  const link = v => v ? `<a href="${esc(v)}" target="_blank" rel="noopener noreferrer" style="color:var(--emerald)">${esc(v)}</a>` : '';
+  $('u-profile').innerHTML = [['Title', esc(u.title || '')], ['Company', esc(u.company_name || '')], ['Phone', esc(u.phone || '')], ['Country', esc(u.country || '')],
+    ['LinkedIn', link(u.linkedin_url)], ['Website', link(u.website)], ['Bio', esc(u.bio || '')]].filter(r => r[1])
+    .map(([k, v]) => `<tr><td style="width:100px;font-size:12px;color:var(--white-muted)">${k}</td><td style="font-size:12px">${v}</td></tr>`).join('') || '<tr><td style="font-size:12px;color:var(--white-muted)">Profile not completed yet</td></tr>';
+  $('u-apps').innerHTML = (d.applications || []).length ? d.applications.map(a => `<div style="background:var(--surface);border-radius:8px;padding:10px;margin-bottom:6px">
+      <b style="text-transform:capitalize">${esc((a.type || '').replace(/_/g, ' '))}</b> · <span class="pill pill-${U_STATUS_PILL[a.status] || 'draft'}">${esc(a.status)}</span> · ${fmtD(a.created_at)}
+      <div style="margin-top:6px;color:var(--white-dim)">${Object.entries(a.data || {}).filter(([k, v]) => v && !['type', 'csrf_token'].includes(k)).map(([k, v]) => `<div><span style="color:var(--white-muted)">${esc(k.replace(/_/g, ' '))}:</span> ${esc(Array.isArray(v) ? v.join(', ') : typeof v === 'object' ? JSON.stringify(v) : v)}</div>`).join('')}</div></div>`).join('')
+    : '<span style="color:var(--white-muted)">No application submitted (OAuth sign-ups complete their profile in the portal).</span>';
+  $('u-kyc').innerHTML = (d.kyc || []).length ? d.kyc.map(k => `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+      <span class="material-symbols-outlined" style="font-size:16px">description</span><span>${esc(k.file_name || k.document_type || 'Document')}</span>
+      <span class="pill pill-${['approved', 'verified'].includes(k.status) ? 'live' : k.status === 'pending' ? 'pending' : 'rejected'}">${esc(k.status)}</span>
+      <button class="btn btn-ghost btn-sm" onclick="viewKyc('${esc(k.id)}')">View</button></div>`).join('') : '<span style="color:var(--white-muted)">None uploaded</span>';
+  $('u-status-edit').value = u.status || 'pending'; $('u-role-edit').value = u.role || 'applicant'; $('u-note').value = u.blocked_reason || '';
+  $('u-timeline').innerHTML = [`Joined ${new Date(u.created_at || Date.now()).toLocaleString()}`, u.approved_at && `Approved ${new Date(u.approved_at).toLocaleString()}`, u.updated_at && `Profile updated ${new Date(u.updated_at).toLocaleString()}`].filter(Boolean).join('<br/>');
+}
+async function saveUserEdit(force) {
+  const id = $('u-id').value, status = force || $('u-status-edit').value;
+  const patch = { status, role: $('u-role-edit').value, blocked: status === 'blocked', blocked_reason: ['blocked', 'rejected'].includes(status) ? ($('u-note').value.trim() || null) : null };
+  if (patch.role === 'admin' && !confirm('Grant FULL ADMIN access to this account?')) return;
+  const r = await api(`/api/admin/members/${id}`, 'PATCH', patch);
+  if (!r || r.error) { toast('Save failed: ' + ((r && r.error) || ''), 'warn'); return; }
+  logActivity('admin.member_update', 'admin', `${(r.user && r.user.email) || id} → ${status}/${patch.role}`);
+  toast(status === 'approved' ? 'Member approved' : 'Member updated', 'success'); closeModal('modal-user'); loadUsers();
+}
+async function viewKyc(id) {
+  const r = await api(`/api/kyc/admin/${id}/url`).catch(() => ({}));
+  if (r && r.url) window.open(r.url, '_blank', 'noopener'); else toast('Could not open document: ' + ((r && r.error) || 'no file'), 'warn');
+}
+function exportMembers() {
+  downloadFile(`banahub-members-${new Date().toISOString().slice(0, 10)}.csv`, toCSV(users_db, [['full_name', 'name'], ['email', 'email'], ['auth_provider', 'sign_in'], ['company_name', 'company'], ['title', 'title'],
+    ['role', 'type'], ['status', 'status'], ['country', 'country'], ['phone', 'phone'], ['linkedin_url', 'linkedin'], [u => u.created_at, 'joined'], ['approved_at', 'approved_at']]));
+}
+
+// ── KYC panel ─────────────────────────────────────────────────────────────
+async function loadKYC() {
+  const d = await api('/api/kyc/admin/all').catch(() => ({}));
+  const rows = (d && d.uploads) || [];
+  $('kyc-table').innerHTML = rows.length ? `<table class="data-table"><thead><tr><th>Uploaded</th><th>Member</th><th>Document</th><th>Status</th><th></th></tr></thead><tbody>
+    ${rows.map(k => `<tr><td style="font-size:12px;color:var(--white-muted)">${fmtD(k.created_at)}</td>
+      <td style="font-size:13px">${esc((k.users && (k.users.full_name || k.users.email)) || '—')}<div style="font-size:11px;color:var(--white-muted)">${esc((k.users && k.users.company_name) || '')}</div></td>
+      <td style="font-size:12px">${esc(k.file_name || k.document_type || '—')}</td>
+      <td><span class="pill pill-${['approved', 'verified'].includes(k.status) ? 'live' : k.status === 'pending' ? 'pending' : 'rejected'}">${esc(k.status)}</span></td>
+      <td style="white-space:nowrap"><button class="btn btn-ghost btn-sm" onclick="viewKyc('${esc(k.id)}')">View</button>
+        ${k.status !== 'approved' ? `<button class="btn btn-approve btn-sm" onclick="approveKYC('${esc(k.id)}')">Approve</button>` : ''}
+        ${k.status !== 'rejected' ? `<button class="btn btn-danger btn-sm" onclick="rejectKYC('${esc(k.id)}')">Reject</button>` : ''}</td></tr>`).join('')}</tbody></table>`
+    : emptyRow('No KYC documents');
+  setBadge('nb-kyc', rows.filter(k => k.status === 'pending').length);
+}
+async function setKyc(id, status) { const r = await api(`/api/kyc/admin/${id}/status`, 'PATCH', { status }); if (!r || r.error) { toast('Failed: ' + ((r && r.error) || ''), 'warn'); return; } toast(`KYC ${status}`, 'success'); logActivity('admin.kyc_' + status, 'admin', id); loadKYC(); }
+function approveKYC(id) { return setKyc(id, 'approved'); }
+function rejectKYC(id) { return setKyc(id, 'rejected'); }
+
+// ═════════════════════════════════════════════════════════════════════════
+// 11. CRM
+// ═════════════════════════════════════════════════════════════════════════
+const CRM_STAGES = [['new', 'New', '#5f6b66'], ['contacted', 'Contacted', '#1a4d7a'], ['qualified', 'Qualified', '#735c00'], ['proposal', 'Proposal', '#5a3e7a'],
+  ['negotiation', 'Negotiation', '#8a4a1a'], ['won', 'Won', '#0a5c40'], ['lost', 'Lost', '#8a1a1a']];
+let crm_db = [], crmView = 'board';
+const today = () => new Date().toISOString().slice(0, 10);
+async function loadCrm() {
+  $('crm-body').innerHTML = emptyRow('Loading…');
+  const d = await api('/api/admin/crm').catch(() => ({}));
+  if (d && d.error) { $('crm-body').innerHTML = emptyRow('Could not load CRM: ' + esc(d.error) + '<br/>Run SQL migration 11.'); return; }
+  crm_db = (d && d.contacts) || [];
+  renderCrm();
+}
+function crmRows() {
+  const q = ($('crm-search').value || '').toLowerCase(), t = $('crm-type-f').value, due = $('crm-due-f').checked;
+  return crm_db.filter(c => (!t || c.contact_type === t) && (!due || (c.next_action_date && c.next_action_date <= today() && !['won', 'lost'].includes(c.pipeline_stage))) &&
+    (!q || [c.name, c.email, c.company, c.title, c.notes, arr(c.tags).join(' ')].join(' ').toLowerCase().includes(q)));
+}
+function renderCrm() {
+  const rows = crmRows(), open = crm_db.filter(c => !['won', 'lost'].includes(c.pipeline_stage));
+  const sum = list => { const o = {}; list.forEach(c => { if (c.deal_value) o[c.currency || 'SGD'] = (o[c.currency || 'SGD'] || 0) + Number(c.deal_value); }); return Object.keys(o).map(k => money(o[k], k)).join(' · ') || '—'; };
+  const dueN = open.filter(c => c.next_action_date && c.next_action_date <= today()).length;
+  setBadge('nb-crm', dueN);
+  $('crm-kpis').innerHTML = [['Contacts', crm_db.length], ['Open pipeline', sum(open)], ['Won', sum(crm_db.filter(c => c.pipeline_stage === 'won'))], ['Follow-ups due', dueN]]
+    .map(([l, v]) => `<div class="card" style="padding:14px"><div style="color:var(--white-muted);font-size:12px">${l}</div><div style="font-size:20px;font-weight:700;color:var(--ink);margin-top:4px">${esc(v)}</div></div>`).join('');
+  $('crm-count').textContent = `${rows.length} shown`;
+  const card = c => { const late = c.next_action_date && c.next_action_date <= today() && !['won', 'lost'].includes(c.pipeline_stage); return `
+    <div onclick="openCrm('${esc(c.id)}')" style="background:var(--bg-3);border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:8px;cursor:pointer">
+      <div style="font-weight:600;font-size:13px;color:var(--ink)">${esc(c.name || c.email || '—')}</div>
+      <div style="font-size:11px;color:var(--white-muted)">${esc(c.company || '')}${c.contact_type ? ' · ' + esc(c.contact_type) : ''}</div>
+      ${c.deal_value ? `<div style="font-size:12px;font-weight:600;margin-top:4px">${money(c.deal_value, c.currency)}</div>` : ''}
+      ${c.next_action ? `<div style="font-size:11px;margin-top:4px;color:${late ? '#b3261e' : 'var(--white-dim)'}">→ ${esc(c.next_action)}${c.next_action_date ? ' · ' + fmtD(c.next_action_date) : ''}</div>` : ''}
+      <select class="f-input f-select" style="margin-top:6px;padding:2px 6px;font-size:11px" onclick="event.stopPropagation()" onchange="moveCrm('${esc(c.id)}',this.value)">${CRM_STAGES.map(([k, l]) => `<option value="${k}" ${k === c.pipeline_stage ? 'selected' : ''}>${l}</option>`).join('')}</select>
+    </div>`; };
+  if (crmView === 'board') {
+    $('crm-body').innerHTML = `<div style="display:grid;grid-template-columns:repeat(${CRM_STAGES.length},minmax(190px,1fr));gap:10px;overflow-x:auto;padding-bottom:8px">
+      ${CRM_STAGES.map(([k, l, col]) => { const list = rows.filter(c => (c.pipeline_stage || 'new') === k); return `<div style="background:var(--surface);border-radius:12px;padding:10px;min-height:200px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:700;color:${col};margin-bottom:8px"><span>${l}</span><span>${list.length}</span></div>${list.map(card).join('')}</div>`; }).join('')}</div>`;
+  } else {
+    $('crm-body').innerHTML = `<div class="card" style="overflow:auto">${rows.length ? `<table class="data-table"><thead><tr><th>Name</th><th>Company</th><th>Type</th><th>Stage</th><th>Value</th><th>Next action</th><th>Owner</th><th>Updated</th></tr></thead><tbody>
+      ${rows.map(c => `<tr style="cursor:pointer" onclick="openCrm('${esc(c.id)}')"><td><b>${esc(c.name || '—')}</b><div style="font-size:11px;color:var(--white-muted)">${esc(c.email || '')}</div></td><td style="font-size:12px">${esc(c.company || '')}</td>
+        <td style="font-size:12px;text-transform:capitalize">${esc(c.contact_type || '')}</td><td style="font-size:12px">${esc((CRM_STAGES.find(s => s[0] === c.pipeline_stage) || ['', c.pipeline_stage || 'New'])[1])}</td>
+        <td style="font-size:12px">${c.deal_value ? money(c.deal_value, c.currency) : '—'}</td><td style="font-size:12px">${esc(c.next_action || '')}${c.next_action_date ? ' · ' + fmtD(c.next_action_date) : ''}</td>
+        <td style="font-size:12px">${esc(c.owner || '')}</td><td style="font-size:12px;color:var(--white-muted)">${fmtD(c.updated_at || c.created_at)}</td></tr>`).join('')}</tbody></table>` : emptyRow('No contacts')}</div>`;
+  }
+}
+async function moveCrm(id, stage) {
+  const r = await api(`/api/admin/crm/${id}`, 'PATCH', { pipeline_stage: stage });
+  if (!r || r.error) { toast('Failed: ' + ((r && r.error) || ''), 'warn'); return; }
+  await api(`/api/admin/crm/${id}/activities`, 'POST', { kind: 'stage', body: `Moved to ${stage}` });
+  const c = crm_db.find(x => x.id === id); if (c) c.pipeline_stage = stage; renderCrm();
+}
+async function openCrm(id, prefill) {
+  const c = id ? crm_db.find(x => x.id === id) || {} : (prefill || {});
+  $('crm-id').value = id || '';
+  $('crm-title').textContent = id ? (c.name || 'Contact') : 'New Contact';
+  $('crm-sub').textContent = id ? `Added ${fmtD(c.created_at)}${c.source ? ' · from ' + c.source : ''}` : '';
+  $('crm-stage').innerHTML = CRM_STAGES.map(([k, l]) => `<option value="${k}">${l}</option>`).join('');
+  [['crm-name', 'name'], ['crm-email', 'email'], ['crm-company', 'company'], ['crm-ttl', 'title'], ['crm-phone', 'phone'], ['crm-li', 'linkedin_url'],
+   ['crm-value', 'deal_value'], ['crm-owner', 'owner'], ['crm-source', 'source'], ['crm-next', 'next_action'], ['crm-due', 'next_action_date'], ['crm-notes', 'notes']]
+    .forEach(([el, k]) => $(el).value = c[k] == null ? '' : c[k]);
+  $('crm-type').value = c.contact_type || 'company'; $('crm-stage').value = c.pipeline_stage || 'new'; $('crm-cur').value = c.currency || 'SGD';
+  $('crm-tags').value = arr(c.tags).join(', ');
+  $('crm-del').style.display = id ? '' : 'none';
+  $('crm-activity').innerHTML = id ? 'Loading…' : '<span style="color:var(--white-muted)">Save the contact to start logging activity.</span>';
+  $('modal-crm').style.display = 'flex';
+  if (id) loadCrmActivity(id);
+}
+async function loadCrmActivity(id) {
+  {
+    const d = await api(`/api/admin/crm/${id}/activities`).catch(() => ({}));
+    const icon = { note: 'sticky_note_2', call: 'call', email: 'mail', meeting: 'groups', stage: 'swap_horiz' };
+    $('crm-activity').innerHTML = (d.activities || []).map(a => `<div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
+      <span class="material-symbols-outlined" style="font-size:16px;color:var(--white-muted)">${icon[a.kind] || 'notes'}</span>
+      <div><div>${esc(a.body || '')}</div><div style="font-size:10px;color:var(--white-muted)">${esc(a.created_by || '')} · ${new Date(a.created_at).toLocaleString()}</div></div></div>`).join('') || '<span style="color:var(--white-muted)">No activity yet.</span>';
+  }
+}
+async function saveCrm() {
+  const id = $('crm-id').value;
+  const p = { name: $('crm-name').value.trim(), email: $('crm-email').value.trim().toLowerCase() || null, company: $('crm-company').value.trim() || null,
+    title: $('crm-ttl').value.trim() || null, phone: $('crm-phone').value.trim() || null, linkedin_url: $('crm-li').value.trim() || null,
+    contact_type: $('crm-type').value, pipeline_stage: $('crm-stage').value, deal_value: parseMoney($('crm-value').value), currency: $('crm-cur').value,
+    owner: $('crm-owner').value.trim() || null, source: $('crm-source').value.trim() || null, next_action: $('crm-next').value.trim() || null,
+    next_action_date: $('crm-due').value || null, tags: arr($('crm-tags').value), notes: $('crm-notes').value.trim() || null };
+  if (!p.name) { toast('Name required', 'warn'); return; }
+  const r = id ? await api(`/api/admin/crm/${id}`, 'PATCH', p) : await api('/api/admin/crm', 'POST', p);
+  if (!r || r.error) { toast('Save failed: ' + ((r && r.error) || ''), 'warn'); return; }
+  toast(r.existing ? 'Contact already in CRM — opened it' : id ? 'Contact saved' : 'Contact added', 'success');
+  closeModal('modal-crm'); await loadCrm(); if (r.existing && r.contact) openCrm(r.contact.id);
+}
+async function addCrmActivity() {
+  const id = $('crm-id').value, body = $('crm-act-body').value.trim();
+  if (!id) { toast('Save the contact first', 'warn'); return; } if (!body) return;
+  const r = await api(`/api/admin/crm/${id}/activities`, 'POST', { kind: $('crm-act-kind').value, body });
+  if (!r || r.error) { toast('Failed: ' + ((r && r.error) || ''), 'warn'); return; }
+  $('crm-act-body').value = ''; loadCrmActivity(id);
+}
+async function deleteCrm() {
+  const id = $('crm-id').value; if (!id || !confirm('Delete this contact and its activity history?')) return;
+  const r = await api(`/api/admin/crm/${id}`, 'DELETE'); if (r && r.error) { toast(r.error, 'warn'); return; }
+  closeModal('modal-crm'); loadCrm();
+}
+function exportCrm() {
+  downloadFile(`banahub-crm-${today()}.csv`, toCSV(crmRows(), [['name', 'name'], ['email', 'email'], ['company', 'company'], ['title', 'title'], ['phone', 'phone'], ['contact_type', 'type'],
+    ['pipeline_stage', 'stage'], ['deal_value', 'value'], ['currency', 'currency'], ['owner', 'owner'], ['next_action', 'next_action'], ['next_action_date', 'due'], ['tags', 'tags'], ['source', 'source'], ['notes', 'notes']]));
+}
+async function crmCreateFrom(prefill) {
+  const r = await api('/api/admin/crm', 'POST', prefill);
+  if (!r || r.error) { toast('Could not add to CRM: ' + ((r && r.error) || ''), 'warn'); return; }
+  toast(r.existing ? 'Already in CRM' : 'Added to CRM', 'success');
+  if (!r.existing) await api(`/api/admin/crm/${r.contact.id}/activities`, 'POST', { kind: 'note', body: `Created from ${prefill.source}` });
+}
+function enquiryToCrm() {
+  const e = enquiries_db.find(x => x.id === $('eq-id').value); if (!e) return;
+  crmCreateFrom({ name: e.name || e.email, email: e.email, company: e.company, title: e.title, phone: e.phone, contact_type: ['investor', 'partner'].includes(enqTypeOf(e)) ? enqTypeOf(e) : 'company',
+    pipeline_stage: 'new', source: 'enquiry', source_id: e.id, notes: (e.message || '').slice(0, 2000) });
+}
+function memberToCrm() {
+  const u = (_uModal && _uModal.user) || {}; if (!u.id) return;
+  crmCreateFrom({ name: u.full_name || u.email, email: u.email, company: u.company_name, title: u.title, phone: u.phone, linkedin_url: u.linkedin_url,
+    contact_type: u.role === 'investor' ? 'investor' : u.role === 'partner' ? 'partner' : 'member', pipeline_stage: 'qualified', source: 'member', source_id: u.id });
 }

@@ -36,6 +36,14 @@ body{font-family:'Manrope',system-ui,sans-serif;}
     Institutional access is by application only. Applications are reviewed within 2 business days.
   </p>
 
+  <div id="oauth-err" class="hidden mb-5 px-4 py-3 bg-red-50 border border-red-200 rounded text-sm font-sans text-red-700"></div>
+      <div class="flex flex-col gap-3 mb-6" id="oauth-block">
+        <button type="button" class="w-full flex items-center justify-center gap-3 border border-outline-variant rounded py-2.5 font-sans font-semibold text-sm text-on-surface bg-white hover:bg-surface-container transition-colors" onclick="oauth('google',this)"><svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.6 5.4 2.7 13.3l7.9 6.1C12.5 13.6 17.8 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.7 6c4.5-4.2 6.9-10.3 6.9-17.7z"/><path fill="#FBBC05" d="M10.5 28.6c-.5-1.4-.8-3-.8-4.6s.3-3.2.8-4.6l-7.9-6.1C1 16.6 0 20.2 0 24s1 7.4 2.7 10.7l7.8-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.7-6c-2.1 1.4-4.9 2.3-8.2 2.3-6.2 0-11.5-4.1-13.4-9.8l-7.9 6.1C6.6 42.6 14.6 48 24 48z"/></svg><span>Apply with Google</span></button>
+        <button type="button" class="w-full flex items-center justify-center gap-3 border border-outline-variant rounded py-2.5 font-sans font-semibold text-sm text-on-surface bg-white hover:bg-surface-container transition-colors" onclick="oauth('linkedin',this)"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#0A66C2" d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/></svg><span>Apply with LinkedIn</span></button>
+        <div class="flex items-center gap-3 mt-2"><div class="flex-1 h-px bg-outline-variant/50"></div><span class="font-sans text-xs text-on-surface-variant uppercase tracking-widest">or with email</span><div class="flex-1 h-px bg-outline-variant/50"></div></div>
+      </div>
+  <p class="font-sans text-xs text-on-surface-variant -mt-3 mb-8">Signing up with Google or LinkedIn creates your account instantly; you'll complete your profile in the member portal. Every account is reviewed and approved by the BANAHub team before full access.</p>
+
   <!-- Step indicator -->
   <div class="flex items-center gap-3 mb-10">
     <div id="step-dot-1" class="w-2.5 h-2.5 rounded-full bg-primary"></div>
@@ -268,6 +276,12 @@ async function handleSubmit() {
     const res = await apiFetch('/api/auth/register', { method: 'POST', body: JSON.stringify(payload) });
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || 'Registration failed.');
+    if (data.confirm_email) {
+      [1,2,3].forEach(i => document.getElementById('step-'+i).classList.add('hidden'));
+      document.getElementById('step-success').classList.remove('hidden');
+      document.getElementById('step-label').textContent = 'Check your email to confirm your account, then sign in to complete your application.';
+      return;
+    }
 
     // 2. Save application details
     await apiFetch('/api/applications/submit', {
@@ -288,15 +302,18 @@ async function handleSubmit() {
     if (kycInput?.files?.length) {
       try {
         const sb = await window.getBanaSupabaseClient();
+        const { data: { user: me } } = await sb.auth.getUser();
         const file = kycInput.files[0];
-        const path = `kyc/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;
-        const { error: upErr } = await sb.storage.from('media').upload(path, file, { upsert: false });
-        if (!upErr) {
-          const { data: pub } = sb.storage.from('media').getPublicUrl(path);
-          await apiFetch('/api/kyc/upload', {
-            method: 'POST',
-            body: JSON.stringify({ document_type: 'identity', file_url: pub.publicUrl }),
-          });
+        if (me && file.size <= 10 * 1024 * 1024) {
+          // Private bucket: only the member and BANAHub admins can read it
+          const path = `${me.id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;
+          const { error: upErr } = await sb.storage.from('kyc').upload(path, file, { upsert: false, contentType: file.type });
+          if (!upErr) {
+            await apiFetch('/api/kyc/upload', {
+              method: 'POST',
+              body: JSON.stringify({ document_type: 'identity', storage_path: path, file_name: file.name }),
+            });
+          }
         }
       } catch(e) { /* non-fatal — can upload KYC later */ }
     }
@@ -309,6 +326,17 @@ async function handleSubmit() {
   } catch (ex) {
     showErr(ex.message || 'Submission failed. Please try again.');
     if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Submit Application'; }
+  }
+}
+
+async function oauth(provider, btn) {
+  const label = btn.querySelector('span').textContent;
+  btn.disabled = true; btn.querySelector('span').textContent = 'Redirecting…';
+  try { await window.banaOAuth(provider, '/dashboard'); }
+  catch (ex) {
+    btn.disabled = false; btn.querySelector('span').textContent = label;
+    const err = document.getElementById('error-msg') || document.getElementById('oauth-err');
+    if (err) { err.textContent = (ex && ex.message) || 'Sign-in with ' + provider + ' is not available yet.'; err.classList.remove('hidden'); err.style.display = 'block'; }
   }
 }
 </script>

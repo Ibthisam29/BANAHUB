@@ -5,7 +5,7 @@
 const CONFIG = {
   SUPABASE_URL: 'https://mfqdqisbryoepdpqebkb.supabase.co',
   SUPABASE_ANON_KEY: 'sb_publishable_GfOFDZkHqJKEuKTIS_iU_A_9ttmG7HS',
-  VERSION: '3.0.0',
+  VERSION: '3.2.0',
 };
 window.CONFIG = CONFIG;
 const API_BASE = '';
@@ -155,6 +155,35 @@ async function _insertEnquiry(sb, b) {
   return _resp({ success: true }, 201);
 }
 
+
+// Member-editable profile fields only (role/status/email are DB-protected anyway)
+const _PROFILE_FIELDS = ['full_name', 'company_name', 'title', 'phone', 'country', 'linkedin_url', 'website', 'bio', 'avatar_url', 'preferences', 'role'];
+const _MEMBER_ROLES = ['member', 'founder', 'business', 'investor', 'advisor', 'partner', 'provider'];
+function _profilePatch(b) {
+  const out = {};
+  _PROFILE_FIELDS.forEach(k => {
+    if (!(k in (b || {}))) return;
+    let v = b[k];
+    if (k === 'role') { if (_MEMBER_ROLES.includes(v)) out.role = v; return; }
+    if (k === 'preferences') { if (v && typeof v === 'object') out.preferences = v; return; }
+    if (typeof v === 'string') v = v.trim().slice(0, k === 'bio' ? 2000 : 300);
+    if (['linkedin_url', 'website', 'avatar_url'].includes(k) && v && !/^https:\/\//i.test(v)) v = 'https://' + String(v).replace(/^[a-z]+:\/\//i, '');
+    out[k] = v === '' ? null : v;
+  });
+  if (b && b.company && !out.company_name) out.company_name = String(b.company).slice(0, 300);
+  return out;
+}
+
+// Google / LinkedIn sign-in (configure both providers in Supabase → Auth → Providers)
+window.banaOAuth = async function (provider, next) {
+  const sb = await _getSB();
+  if (!sb) throw new Error('Auth unavailable');
+  const p = provider === 'linkedin' ? 'linkedin_oidc' : provider;
+  const dest = location.origin + (next && /^\/[a-z0-9\-\/]*$/i.test(next) ? next : '/dashboard');
+  const { error } = await sb.auth.signInWithOAuth({ provider: p, options: { redirectTo: dest } });
+  if (error) throw error;
+};
+
 // ── Fetch interceptor ─────────────────────────────────────────────────────────
 const _nativeFetch = window.fetch.bind(window);
 window.fetch = async function(input, opts) {
@@ -165,6 +194,8 @@ window.fetch = async function(input, opts) {
   const route  = url.replace(/^\/api/, '') || '/';
   const method = ((opts.method) || 'GET').toUpperCase();
   const body   = _body(opts);
+  // Transport-only fields must never reach a table (PostgREST rejects unknown columns)
+  delete body.csrf_token;
 
   const sb = await _getSB();
   if (!sb) return _resp({ detail: 'Backend unavailable', error: 'Backend unavailable' }, 503);
@@ -185,6 +216,92 @@ window.fetch = async function(input, opts) {
     // ═══════════════════════════════════════════════════════════════════════
     const _q = new URLSearchParams(route.includes('?') ? route.split('?')[1] : '');
     const _path = route.split('?')[0];
+
+    // ── CRM (admin) ───────────────────────────────────────────────────────────
+    if (_path === '/admin/crm' && method === 'GET') {
+      const { data, error } = await sb.from('crm_contacts').select('*').order('updated_at', { ascending: false, nullsFirst: false }).limit(5000);
+      if (error) return _resp({ error: error.message, contacts: [] }, 400);
+      return _resp({ contacts: data || [], total: (data || []).length });
+    }
+    if (_path === '/admin/crm' && method === 'POST') {
+      const row = _clean(body);
+      if (row.email) {
+        row.email = String(row.email).toLowerCase();
+        const { data: ex } = await sb.from('crm_contacts').select('*').eq('email', row.email).limit(1);
+        if (ex && ex[0]) return _resp({ success: true, contact: ex[0], existing: true });
+      }
+      const { data, error } = await sb.from('crm_contacts').insert(row).select().single();
+      if (error) return _resp({ error: error.message }, 400);
+      return _resp({ success: true, contact: data }, 201);
+    }
+    const crmAct = _path.match(/^\/admin\/crm\/([^/]+)\/activities$/);
+    if (crmAct && method === 'GET') {
+      const { data } = await sb.from('crm_activities').select('*').eq('contact_id', crmAct[1]).order('created_at', { ascending: false });
+      return _resp({ activities: data || [] });
+    }
+    if (crmAct && method === 'POST') {
+      const { data: { user } } = await sb.auth.getUser();
+      const { data, error } = await sb.from('crm_activities').insert({ contact_id: crmAct[1], kind: body.kind || 'note', body: String(body.body || '').slice(0, 5000), created_by: user && user.email }).select().single();
+      if (error) return _resp({ error: error.message }, 400);
+      await sb.from('crm_contacts').update({ last_contacted_at: ['call', 'email', 'meeting'].includes(body.kind) ? new Date().toISOString() : undefined, updated_at: new Date().toISOString() }).eq('id', crmAct[1]);
+      return _resp({ success: true, activity: data }, 201);
+    }
+    const crmOne = _path.match(/^\/admin\/crm\/([^/]+)$/);
+    if (crmOne && (method === 'PATCH' || method === 'PUT')) {
+      const { data, error } = await sb.from('crm_contacts').update(Object.assign(_clean(body), { updated_at: new Date().toISOString() })).eq('id', crmOne[1]).select().single();
+      if (error) return _resp({ error: error.message }, 400);
+      return _resp({ success: true, contact: data });
+    }
+    if (crmOne && method === 'DELETE') {
+      const { error } = await sb.from('crm_contacts').delete().eq('id', crmOne[1]);
+      if (error) return _resp({ error: error.message }, 400);
+      return _resp({ success: true });
+    }
+
+    // ── Members (admin): full profile + application + KYC for review ────────
+    const memOne = _path.match(/^\/admin\/members\/([^/]+)$/);
+    if (memOne && method === 'GET') {
+      const id = memOne[1];
+      const [u, a, k, sub] = await Promise.all([
+        sb.from('users').select('*').eq('id', id).maybeSingle(),
+        sb.from('applications').select('*').eq('user_id', id).order('created_at', { ascending: false }),
+        sb.from('kyc_uploads').select('*').eq('user_id', id).order('created_at', { ascending: false }),
+        sb.from('subscriptions').select('*').eq('user_id', id).maybeSingle(),
+      ]);
+      return _resp({ user: u.data, applications: a.data || [], kyc: k.data || [], subscription: sub.data });
+    }
+    if (memOne && (method === 'PATCH' || method === 'PUT')) {
+      const patch = {};
+      ['role', 'status', 'blocked', 'blocked_reason', 'full_name', 'company_name', 'title', 'phone', 'country', 'linkedin_url', 'website', 'bio'].forEach(k => { if (k in body) patch[k] = body[k]; });
+      if ('blocked' in patch) patch.blocked_at = patch.blocked ? new Date().toISOString() : null;
+      const { data, error } = await sb.from('users').update(patch).eq('id', memOne[1]).select().single();
+      if (error) return _resp({ error: error.message }, 400);
+      return _resp({ success: true, user: data });
+    }
+
+    // ── KYC review (admin): list with member + signed links to private files ─
+    if (_path === '/kyc/admin/all' && method === 'GET') {
+      const { data, error } = await sb.from('kyc_uploads').select('*, users(full_name, email, company_name)').order('created_at', { ascending: false });
+      if (error) return _resp({ error: error.message, uploads: [] }, 400);
+      return _resp({ uploads: data || [] });
+    }
+    const kycStatus = _path.match(/^\/kyc\/admin\/([^/]+)\/status$/);
+    if (kycStatus && (method === 'PATCH' || method === 'PUT')) {
+      const st = ['approved', 'verified', 'rejected', 'pending'].includes(body.status) ? body.status : null;
+      if (!st) return _resp({ error: 'invalid status' }, 400);
+      const { data, error } = await sb.from('kyc_uploads').update({ status: st, review_notes: body.review_notes || null, reviewed_at: new Date().toISOString() }).eq('id', kycStatus[1]).select().single();
+      if (error) return _resp({ error: error.message }, 400);
+      return _resp({ success: true, kyc: data });
+    }
+    const kycUrl = _path.match(/^\/kyc\/admin\/([^/]+)\/url$/);
+    if (kycUrl && method === 'GET') {
+      const { data: row } = await sb.from('kyc_uploads').select('storage_path, file_url').eq('id', kycUrl[1]).maybeSingle();
+      if (!row) return _resp({ error: 'not found' }, 404);
+      if (!row.storage_path) return _resp({ url: row.file_url || null });
+      const { data, error } = await sb.storage.from('kyc').createSignedUrl(row.storage_path, 300);
+      if (error) return _resp({ error: error.message }, 400);
+      return _resp({ url: data.signedUrl });
+    }
 
     // ── Pricing catalog + Stripe Payment Links ──────────────────────────────
     if (_path.startsWith('/admin/pricing')) {
@@ -435,28 +552,34 @@ window.fetch = async function(input, opts) {
     if (route.startsWith('/auth/register') && method === 'POST') {
       const { data, error } = await sb.auth.signUp({
         email: body.email, password: body.password,
-        options: { data: { full_name: body.full_name || '', role: body.role || 'applicant' } },
+        options: { data: { full_name: body.full_name || '' }, emailRedirectTo: location.origin + '/dashboard' },
       });
       if (error) return _resp({ success: false, detail: error.message, error: error.message }, 400);
-      if (data && data.user) {
-        // Upsert into users table
-        await sb.from('users').upsert({
-          id: data.user.id,
-          email: body.email,
-          full_name: body.full_name || '',
-          role: body.role || 'applicant',
-          company_name: body.company_name || null,
-          country: body.country || null,
-          phone: body.phone || null,
-          status: 'pending',
-        }, { onConflict: 'email' });
-        // Auto sign in
-        const { data: loginData } = await sb.auth.signInWithPassword({ email: body.email, password: body.password });
-        const { data: userRow } = await sb.from('users').select('*').eq('email', body.email).single();
-        const user = Object.assign({}, { id: data.user.id, email: body.email }, userRow || {});
-        return _resp({ success: true, user, access_token: loginData?.session?.access_token, refresh_token: loginData?.session?.refresh_token }, 201);
+      // The pending users row is created by the on_auth_user_created DB trigger.
+      // Here we only fill in profile fields the member is allowed to edit.
+      if (data && data.session && data.user) {
+        await sb.from('users').update(_profilePatch(body)).eq('id', data.user.id);
+        return _resp({ success: true, user: { id: data.user.id, email: data.user.email, role: 'applicant', status: 'pending' },
+                       access_token: data.session.access_token, refresh_token: data.session.refresh_token }, 201);
       }
-      return _resp({ success: true, user_id: data.user && data.user.id }, 201);
+      // Email confirmation required: no session yet
+      return _resp({ success: true, confirm_email: true, user_id: data.user && data.user.id }, 201);
+    }
+
+    // ── Member: own profile ─────────────────────────────────────────────────
+    if (route === '/me' && method === 'GET') {
+      const { data: { user } } = await sb.auth.getUser();
+      if (!user) return _resp({ error: 'Not authenticated' }, 401);
+      const { data: p } = await sb.from('users').select('*').eq('id', user.id).maybeSingle();
+      const ids = (user.identities || []).map(i => i.provider);
+      return _resp({ user: Object.assign({ id: user.id, email: user.email }, p || {}), identities: ids, provider: user.app_metadata && user.app_metadata.provider });
+    }
+    if (route === '/me' && (method === 'PATCH' || method === 'PUT')) {
+      const { data: { user } } = await sb.auth.getUser();
+      if (!user) return _resp({ error: 'Not authenticated' }, 401);
+      const { data, error } = await sb.from('users').update(_profilePatch(body)).eq('id', user.id).select().single();
+      if (error) return _resp({ error: error.message }, 400);
+      return _resp({ success: true, user: data });
     }
 
     // ── Applications: submit (called after register, saves institution details) ─
@@ -514,24 +637,14 @@ window.fetch = async function(input, opts) {
       const { data, error } = await sb.auth.signInWithPassword({ email: body.email, password: body.password });
       await _logLoginAttempt(sb, body.email, !error);
       if (error) return _resp({ success: false, detail: error.message, error: error.message }, 401);
-      // Get from users table (has role, status)
-      const { data: p } = await sb.from('users').select('*').eq('email', body.email).single();
+      // users row is created server-side by the on_auth_user_created trigger
+      const { data: p } = await sb.from('users').select('*').eq('id', data.user.id).maybeSingle();
 
       // Blocked accounts: valid password still gets rejected. Sign the
       // session back out immediately so no token lingers client-side.
-      if (p && p.blocked) {
+      if (p && (p.blocked || p.status === 'blocked')) {
         await sb.auth.signOut();
         return _resp({ success: false, detail: 'This account has been suspended. Contact support.', error: 'blocked' }, 403);
-      }
-
-      // If user not in users table yet, create record
-      if (!p) {
-        await sb.from('users').upsert({
-          id: data.user.id, email: body.email,
-          full_name: data.user.user_metadata?.full_name || '',
-          role: data.user.user_metadata?.role || 'applicant',
-          status: 'pending',
-        }, { onConflict: 'email' });
       }
       const user = Object.assign({}, { id: data.user.id, email: data.user.email }, p || { role: 'applicant', status: 'pending' });
       return _resp({ success: true, user, access_token: data.session.access_token, refresh_token: data.session.refresh_token });
@@ -554,8 +667,8 @@ window.fetch = async function(input, opts) {
     if (route.startsWith('/auth/me') && method === 'GET') {
       const { data: { user }, error } = await sb.auth.getUser();
       if (error || !user) return _resp({ success: false, detail: 'Not authenticated', error: 'Not authenticated' }, 401);
-      const { data: p } = await sb.from('users').select('*').eq('email', user.email).single();
-      const merged = Object.assign({}, { id: user.id, email: user.email }, p || {});
+      const { data: p } = await sb.from('users').select('*').eq('id', user.id).maybeSingle();
+      const merged = Object.assign({}, { id: user.id, email: user.email, auth_provider: user.app_metadata && user.app_metadata.provider }, p || { role: 'applicant', status: 'pending' });
       return _resp({ success: true, user: merged });
     }
 
@@ -652,7 +765,11 @@ window.fetch = async function(input, opts) {
     if (route.startsWith('/kyc') && method === 'POST') {
       const { data: { user } } = await sb.auth.getUser();
       if (!user) return _resp({ detail: 'Not authenticated' }, 401);
-      const { data } = await sb.from('kyc_uploads').insert(Object.assign({}, body, { user_id: user.id })).select().single();
+      const { data, error } = await sb.from('kyc_uploads').insert({
+        user_id: user.id, document_type: body.document_type || 'identity',
+        storage_path: body.storage_path || null, file_name: body.file_name || null, file_url: null, status: 'pending',
+      }).select().single();
+      if (error) return _resp({ error: error.message }, 400);
       return _resp({ success: true, kyc: data }, 201);
     }
 

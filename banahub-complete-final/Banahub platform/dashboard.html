@@ -104,6 +104,25 @@ body::after{
 }
 .tab-btn.active{color:#003527;font-weight:700;border-bottom-color:#003527;}
 .tab-btn:hover:not(.active){color:#1b1c1a;}
+
+/* ── Profile / settings ── */
+.f-lab{display:block;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(27,28,26,0.45);margin-bottom:6px}
+.f-in{width:100%;border:1px solid rgba(0,53,39,0.15);border-radius:10px;padding:10px 12px;font:500 14px 'Manrope',sans-serif;color:#1b1c1a;background:rgba(255,255,255,0.75);outline:none;transition:border .15s}
+.f-in:focus{border-color:#003527;box-shadow:0 0 0 3px rgba(0,53,39,0.08)}
+.f-in[disabled]{background:rgba(27,28,26,0.04);color:rgba(27,28,26,0.5)}
+.f-grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:700px){.f-grid2{grid-template-columns:1fr}}
+.btn-p{background:#003527;color:#fff;border:none;border-radius:10px;padding:10px 18px;font:700 13px 'Manrope',sans-serif;cursor:pointer}
+.btn-p:disabled{opacity:.5;cursor:wait}
+.btn-o{background:none;color:#003527;border:1px solid rgba(0,53,39,0.25);border-radius:10px;padding:9px 16px;font:700 13px 'Manrope',sans-serif;cursor:pointer}
+.btn-d{background:none;color:#ba1a1a;border:1px solid rgba(186,26,26,0.3);border-radius:10px;padding:9px 16px;font:700 13px 'Manrope',sans-serif;cursor:pointer}
+.sect{padding:22px;margin-bottom:18px}
+.sect h3{font-family:'Newsreader',Georgia,serif;font-size:19px;font-weight:600;color:#1b1c1a;margin-bottom:4px}
+.sect p.d{font-size:12px;color:rgba(27,28,26,0.5);margin-bottom:16px}
+.tgl{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid rgba(0,53,39,0.07);font-size:13px}
+.prov{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;border-radius:20px;padding:3px 10px;border:1px solid rgba(0,53,39,0.15)}
+body.is-pending [data-members-only]{display:none!important}
+#save-msg{font-size:12px;margin-left:10px}
 .panel{display:none;padding:28px 28px 48px;}
 .panel.active{display:block;}
 
@@ -171,14 +190,22 @@ body::after{
     <button class="nav-item active" onclick="switchTab('overview',this)">
       <span class="mat-ic material-symbols-outlined">grid_view</span>Dashboard
     </button>
-    <button class="nav-item" onclick="switchTab('memberships',this)">
+    <button class="nav-item" data-members-only onclick="switchTab('memberships',this)">
       <span class="mat-ic material-symbols-outlined">verified</span>Memberships
     </button>
-    <button class="nav-item" onclick="switchTab('compliance',this)">
+    <button class="nav-item" data-members-only onclick="switchTab('compliance',this)">
       <span class="mat-ic material-symbols-outlined">shield_check</span>Compliance
     </button>
-    <button class="nav-item" onclick="switchTab('capital',this)">
+    <button class="nav-item" data-members-only onclick="switchTab('capital',this)">
       <span class="mat-ic material-symbols-outlined">account_balance</span>Capital Flows
+    </button>
+    <div style="height:1px;background:rgba(0,53,39,0.07);margin:8px 4px"></div>
+    <div style="font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:rgba(27,28,26,0.38);padding:12px 4px 4px">Account</div>
+    <button class="nav-item" onclick="switchTab('profile',this)">
+      <span class="mat-ic material-symbols-outlined">person</span>My Profile
+    </button>
+    <button class="nav-item" onclick="switchTab('settings',this)">
+      <span class="mat-ic material-symbols-outlined">settings</span>Settings
     </button>
     <div style="height:1px;background:rgba(0,53,39,0.07);margin:8px 4px"></div>
     <a href="programs.html" class="nav-item" style="text-decoration:none">
@@ -212,18 +239,20 @@ body::after{
   </button>
   <div style="display:flex;gap:0;flex:1">
     <button class="tab-btn active" id="top-overview" onclick="switchTab('overview',null,'top-overview')">Dashboard</button>
-    <button class="tab-btn" id="top-memberships" onclick="switchTab('memberships',null,'top-memberships')">Memberships</button>
-    <button class="tab-btn" id="top-compliance" onclick="switchTab('compliance',null,'top-compliance')">Compliance</button>
-    <button class="tab-btn" id="top-capital" onclick="switchTab('capital',null,'top-capital')">Capital Flows</button>
+    <button class="tab-btn" data-members-only id="top-memberships" onclick="switchTab('memberships',null,'top-memberships')">Memberships</button>
+    <button class="tab-btn" data-members-only id="top-compliance" onclick="switchTab('compliance',null,'top-compliance')">Compliance</button>
+    <button class="tab-btn" data-members-only id="top-capital" onclick="switchTab('capital',null,'top-capital')">Capital Flows</button>
+    <button class="tab-btn" id="top-profile" onclick="switchTab('profile',null,'top-profile')">Profile</button>
+    <button class="tab-btn" id="top-settings" onclick="switchTab('settings',null,'top-settings')">Settings</button>
   </div>
   <div style="display:flex;align-items:center;gap:10px">
-    <button onclick="switchTab('compliance',null,'top-compliance')" style="position:relative;background:none;border:none;cursor:pointer;padding:6px;border-radius:8px;color:rgba(27,28,26,0.45);transition:all .15s" onmouseover="this.style.background='rgba(0,53,39,0.06)'" onmouseout="this.style.background='none'">
+    <button onclick="switchTab(document.body.classList.contains('is-pending')?'profile':'compliance',null,document.body.classList.contains('is-pending')?'top-profile':'top-compliance')" style="position:relative;background:none;border:none;cursor:pointer;padding:6px;border-radius:8px;color:rgba(27,28,26,0.45);transition:all .15s" onmouseover="this.style.background='rgba(0,53,39,0.06)'" onmouseout="this.style.background='none'">
       <span class="material-symbols-outlined" style="font-size:18px">notifications</span>
       <span id="notif-dot" style="display:none;position:absolute;top:4px;right:4px;width:7px;height:7px;background:#003527;border-radius:50%;border:2px solid white"></span>
     </button>
-    <div style="width:30px;height:30px;border-radius:50%;background:rgba(0,53,39,0.10);display:flex;align-items:center;justify-content:center">
+    <button id="top-avatar" onclick="switchTab('profile',null,'top-profile')" title="My profile" style="width:30px;height:30px;border-radius:50%;background:rgba(0,53,39,0.10);display:flex;align-items:center;justify-content:center;border:none;cursor:pointer;overflow:hidden;padding:0">
       <span class="material-symbols-outlined" style="font-size:16px;color:#003527">person</span>
-    </div>
+    </button>
   </div>
 </div>
 
@@ -244,7 +273,8 @@ body::after{
         <span class="material-symbols-outlined" style="color:#7a5000;font-size:18px;flex-shrink:0;margin-top:1px">pending</span>
         <div>
           <p style="font-size:13px;font-weight:700;color:#7a5000;margin-bottom:2px">Account pending approval</p>
-          <p style="font-size:12px;color:#7a5000;opacity:.8">Your application is under review. You'll receive full member access once approved by the BANAHub team.</p>
+          <p id="status-notice-text" style="font-size:12px;color:#7a5000;opacity:.8">Your application is under review. You'll receive full member access once approved by the BANAHub team.</p>
+          <div id="profile-progress" style="margin-top:10px"></div>
         </div>
       </div>
     </div>
@@ -275,19 +305,19 @@ body::after{
 
     <!-- Quick actions -->
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px">
-      <div class="glass-card" style="padding:20px;cursor:pointer" onclick="switchTab('memberships',null,'top-memberships')" role="button" tabindex="0">
+      <div class="glass-card" data-members-only style="padding:20px;cursor:pointer" onclick="switchTab('memberships',null,'top-memberships')" role="button" tabindex="0">
         <span class="material-symbols-outlined" style="color:#003527;font-size:22px;margin-bottom:10px;display:block">verified</span>
         <p style="font-family:'Newsreader',Georgia,serif;font-size:18px;font-weight:600;color:#1b1c1a;margin-bottom:4px">Memberships</p>
         <p style="font-size:12px;color:rgba(27,28,26,0.50)">Your plan, active cohorts, and upcoming programs</p>
         <div style="margin-top:12px;display:flex;align-items:center;gap:4px;font-size:12px;color:#003527;font-weight:600">View <span class="material-symbols-outlined" style="font-size:14px">arrow_forward</span></div>
       </div>
-      <div class="glass-card" style="padding:20px;cursor:pointer" onclick="switchTab('compliance',null,'top-compliance')" role="button" tabindex="0">
+      <div class="glass-card" data-members-only style="padding:20px;cursor:pointer" onclick="switchTab('compliance',null,'top-compliance')" role="button" tabindex="0">
         <span class="material-symbols-outlined" style="color:#003527;font-size:22px;margin-bottom:10px;display:block">shield_check</span>
         <p style="font-family:'Newsreader',Georgia,serif;font-size:18px;font-weight:600;color:#1b1c1a;margin-bottom:4px">Compliance</p>
         <p style="font-size:12px;color:rgba(27,28,26,0.50)">KYC documents and access request status</p>
         <div style="margin-top:12px;display:flex;align-items:center;gap:4px;font-size:12px;color:#003527;font-weight:600">View <span class="material-symbols-outlined" style="font-size:14px">arrow_forward</span></div>
       </div>
-      <div class="glass-card" style="padding:20px;cursor:pointer" onclick="switchTab('capital',null,'top-capital')" role="button" tabindex="0">
+      <div class="glass-card" data-members-only style="padding:20px;cursor:pointer" onclick="switchTab('capital',null,'top-capital')" role="button" tabindex="0">
         <span class="material-symbols-outlined" style="color:#003527;font-size:22px;margin-bottom:10px;display:block">account_balance</span>
         <p style="font-family:'Newsreader',Georgia,serif;font-size:18px;font-weight:600;color:#1b1c1a;margin-bottom:4px">Capital Flows</p>
         <p style="font-size:12px;color:rgba(27,28,26,0.50)">Open deal mandates and upcoming events</p>
@@ -371,12 +401,73 @@ body::after{
     </div>
   </div>
 
+  <!-- ════ PROFILE PANEL ═══════════════════════════════════════ -->
+  <div class="panel" id="panel-profile">
+    <div style="margin-bottom:22px"><h2 style="font-family:'Newsreader',Georgia,serif;font-size:26px;font-weight:600;color:#1b1c1a">My Profile</h2>
+      <p style="font-size:13px;color:rgba(27,28,26,0.5)">This is what the BANAHub team reviews when approving your membership and making introductions.</p></div>
+    <form id="profile-form" onsubmit="saveProfile(event)">
+      <div class="glass-card sect">
+        <div style="display:flex;align-items:center;gap:18px;margin-bottom:20px">
+          <div id="pf-avatar" style="width:72px;height:72px;border-radius:50%;background:rgba(0,53,39,0.08);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0"><span class="material-symbols-outlined" style="font-size:32px;color:#003527">person</span></div>
+          <div><label class="btn-o" style="display:inline-block">Upload photo<input type="file" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="uploadAvatar(this.files[0])"/></label>
+            <p style="font-size:11px;color:rgba(27,28,26,0.45);margin-top:6px">PNG, JPG or WEBP · max 2 MB</p></div>
+        </div>
+        <div class="f-grid2">
+          <div><label class="f-lab" for="pf-name">Full name *</label><input id="pf-name" class="f-in" required maxlength="200" autocomplete="name"/></div>
+          <div><label class="f-lab" for="pf-title">Title / role</label><input id="pf-title" class="f-in" maxlength="200" placeholder="Founder & CEO"/></div>
+          <div><label class="f-lab" for="pf-company">Company / organisation *</label><input id="pf-company" class="f-in" required maxlength="300" autocomplete="organization"/></div>
+          <div><label class="f-lab" for="pf-role">I am a…</label><select id="pf-role" class="f-in"><option value="">Select</option><option value="founder">Founder / company</option><option value="investor">Investor</option><option value="advisor">Advisor</option><option value="partner">Partner / sponsor</option><option value="provider">Solution provider</option><option value="member">Other member</option></select></div>
+          <div><label class="f-lab" for="pf-phone">Phone</label><input id="pf-phone" class="f-in" maxlength="40" autocomplete="tel" placeholder="+65 …"/></div>
+          <div><label class="f-lab" for="pf-country">Country</label><input id="pf-country" class="f-in" maxlength="80" autocomplete="country-name"/></div>
+          <div><label class="f-lab" for="pf-linkedin">LinkedIn URL</label><input id="pf-linkedin" class="f-in" maxlength="300" placeholder="linkedin.com/in/…"/></div>
+          <div><label class="f-lab" for="pf-website">Website</label><input id="pf-website" class="f-in" maxlength="300" placeholder="yourcompany.com"/></div>
+        </div>
+        <div style="margin-top:16px"><label class="f-lab" for="pf-bio">About you / your mandate</label><textarea id="pf-bio" class="f-in" rows="4" maxlength="2000" placeholder="What you're building or investing in, markets of interest, what you're looking for from BANAHub."></textarea></div>
+        <div style="margin-top:18px;display:flex;align-items:center"><button class="btn-p" id="pf-save" type="submit">Save profile</button><span id="save-msg"></span></div>
+      </div>
+    </form>
+  </div>
+
+  <!-- ════ SETTINGS PANEL ══════════════════════════════════════ -->
+  <div class="panel" id="panel-settings">
+    <div style="margin-bottom:22px"><h2 style="font-family:'Newsreader',Georgia,serif;font-size:26px;font-weight:600;color:#1b1c1a">Settings</h2></div>
+    <div class="glass-card sect">
+      <h3>Account</h3><p class="d">Your sign-in email and connected accounts.</p>
+      <div class="f-grid2">
+        <div><label class="f-lab">Email</label><input id="st-email" class="f-in" disabled/></div>
+        <div><label class="f-lab">Membership status</label><div id="st-status" style="padding-top:8px"></div></div>
+      </div>
+      <div style="margin-top:14px"><label class="f-lab">Signed in with</label><div id="st-providers" style="display:flex;gap:8px;flex-wrap:wrap"></div></div>
+    </div>
+    <div class="glass-card sect" id="pw-section">
+      <h3>Password</h3><p class="d" id="pw-desc">Change the password you use with your email address.</p>
+      <form onsubmit="changePassword(event)" class="f-grid2">
+        <div><label class="f-lab" for="st-pw1">New password</label><input id="st-pw1" type="password" class="f-in" minlength="10" autocomplete="new-password" required/></div>
+        <div><label class="f-lab" for="st-pw2">Confirm new password</label><input id="st-pw2" type="password" class="f-in" minlength="10" autocomplete="new-password" required/></div>
+        <div style="grid-column:1/-1;display:flex;align-items:center"><button class="btn-p" type="submit">Update password</button><span id="pw-msg" style="font-size:12px;margin-left:10px"></span></div>
+      </form>
+    </div>
+    <div class="glass-card sect">
+      <h3>Notifications</h3><p class="d">Choose what BANAHub emails you about.</p>
+      <div class="tgl"><span>Event invitations &amp; programme updates</span><input type="checkbox" id="pref-events"/></div>
+      <div class="tgl"><span>New capital raises &amp; deal flow (approved members)</span><input type="checkbox" id="pref-capital"/></div>
+      <div class="tgl"><span>Insights newsletter</span><input type="checkbox" id="pref-newsletter"/></div>
+      <div class="tgl" style="border:none"><span>Make my profile visible to other approved members</span><input type="checkbox" id="pref-directory"/></div>
+      <div style="margin-top:14px;display:flex;align-items:center"><button class="btn-p" onclick="savePrefs()">Save preferences</button><span id="pref-msg" style="font-size:12px;margin-left:10px"></span></div>
+    </div>
+    <div class="glass-card sect">
+      <h3>Sessions &amp; data</h3><p class="d">Sign out of every device, or ask us to delete your account and data.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn-o" onclick="signOutEverywhere()">Sign out of all devices</button><button class="btn-d" onclick="requestDeletion()">Request account deletion</button></div>
+      <p id="del-msg" style="font-size:12px;margin-top:10px;color:rgba(27,28,26,0.6)"></p>
+    </div>
+  </div>
+
 </div><!-- end main-wrap -->
 
 <script src="config.js"></script>
 <script src="api.js"></script>
 <script>
-function esc(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function esc(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function fmtDate(d){if(!d)return 'TBD';return new Date(d).toLocaleDateString('en-SG',{day:'numeric',month:'short',year:'numeric'});}
 function fmtCurrency(n,c){if(!n)return '—';return (c||'USD')+' '+Number(n).toLocaleString();}
 
@@ -405,6 +496,7 @@ function switchTab(id, sidebarBtn, topBtnId) {
     if(id==='compliance') loadCompliance();
     if(id==='capital') loadCapital();
   }
+  if(id==='profile' || id==='settings') loadProfile();
 }
 
 // ── Sidebar mobile ───────────────────────────────────────────────
@@ -438,9 +530,13 @@ let _dashUser = null;
     }
 
     if(user.status && !['approved','active'].includes(user.status)){
+      document.body.classList.add('is-pending');
       document.getElementById('status-notice').style.display='block';
       document.getElementById('notif-dot').style.display='block';
+      if(user.status==='rejected') document.getElementById('status-notice-text').textContent='Your membership application was not approved. Contact hello@banahub.com if you think this is a mistake.';
+      else document.getElementById('status-notice-text').textContent='Thanks for signing up. The BANAHub team reviews every account. Complete your profile below so we can approve you faster — member features unlock automatically once approved.';
     }
+    loadProfile(true);
 
     // Preload overview stats
     loadOverviewStats();
@@ -597,6 +693,105 @@ async function loadCapital() {
   } catch(e) {
     document.getElementById('cap-deals').innerHTML='<div style="padding:32px;text-align:center;font-size:13px;color:rgba(27,28,26,0.40)">Could not load capital data.</div>';
   }
+}
+
+
+// ── Profile & settings ────────────────────────────────────────────
+let _me = null;
+const PROFILE_REQUIRED = [['full_name','Name'],['company_name','Company'],['title','Title'],['role','Member type'],['country','Country'],['linkedin_url','LinkedIn']];
+function setAvatar(url){
+  ['pf-avatar','top-avatar'].forEach(id=>{const el=document.getElementById(id); if(!el) return;
+    if(url){el.innerHTML=''; const img=document.createElement('img'); img.src=url; img.alt=''; img.style.cssText='width:100%;height:100%;object-fit:cover'; el.appendChild(img);} });
+}
+async function loadProfile(quiet){
+  try{
+    const r = await fetch('/api/me'); if(!r.ok) return;
+    const d = await r.json(); _me = d.user || {};
+    const v=(id,val)=>{const el=document.getElementById(id); if(el) el.value = val==null?'':val;};
+    v('pf-name',_me.full_name); v('pf-title',_me.title); v('pf-company',_me.company_name); v('pf-phone',_me.phone); v('pf-country',_me.country);
+    v('pf-linkedin',_me.linkedin_url); v('pf-website',_me.website); v('pf-bio',_me.bio);
+    const roleSel=document.getElementById('pf-role');
+    roleSel.value = ['founder','investor','advisor','partner','provider','member'].includes(_me.role)?_me.role:'';
+    roleSel.disabled = _me.role && _me.role!=='applicant';
+    roleSel.title = roleSel.disabled ? 'Contact BANAHub to change your member type' : '';
+    if(_me.avatar_url) setAvatar(_me.avatar_url);
+    document.getElementById('st-email').value = _me.email||'';
+    const st=_me.status||'pending';
+    document.getElementById('st-status').innerHTML = `<span class="pill pill-${st==='approved'?'green':st==='rejected'||st==='blocked'?'red':'amber'}">${esc(st==='approved'?'Approved member':st==='pending'?'Pending approval':st)}</span>`;
+    const provs=[...new Set([...(d.identities||[]), d.provider].filter(Boolean))];
+    const label={google:'Google',linkedin_oidc:'LinkedIn',email:'Email & password'};
+    document.getElementById('st-providers').innerHTML = provs.map(p=>`<span class="prov">${esc(label[p]||p)}</span>`).join('') || '<span class="prov">Email & password</span>';
+    const hasPw = provs.includes('email');
+    document.getElementById('pw-section').style.display = hasPw ? '' : 'none';
+    const pr=_me.preferences||{};
+    document.getElementById('pref-events').checked = pr.event_updates!==false;
+    document.getElementById('pref-capital').checked = pr.capital_alerts!==false;
+    document.getElementById('pref-newsletter').checked = !!pr.newsletter;
+    document.getElementById('pref-directory').checked = !!pr.directory_visible;
+    // completeness (shown in pending notice)
+    const missing = PROFILE_REQUIRED.filter(([k])=>!_me[k] || (k==='role' && _me.role==='applicant'));
+    const pct = Math.round((PROFILE_REQUIRED.length-missing.length)/PROFILE_REQUIRED.length*100);
+    const pp=document.getElementById('profile-progress');
+    if(pp && document.body.classList.contains('is-pending')) pp.innerHTML = `<div style="height:6px;background:rgba(122,80,0,0.12);border-radius:3px;overflow:hidden;max-width:320px"><div style="height:100%;width:${pct}%;background:#7a5000"></div></div>
+      <p style="font-size:12px;color:#7a5000;margin-top:6px">Profile ${pct}% complete${missing.length?` · missing: ${missing.map(m=>esc(m[1])).join(', ')}`:''} <a href="#" onclick="switchTab('profile',null,'top-profile');return false" style="color:#003527;font-weight:700;margin-left:6px">${missing.length?'Complete profile →':'Edit profile →'}</a></p>`;
+    const name=_me.full_name||(_me.email||'').split('@')[0]||'Member';
+    document.getElementById('sb-name').textContent=name;
+  }catch(e){ if(!quiet) console.warn('profile load failed',e); }
+}
+async function saveProfile(e){
+  e.preventDefault();
+  const btn=document.getElementById('pf-save'), msg=document.getElementById('save-msg');
+  btn.disabled=true; msg.textContent='Saving…'; msg.style.color='rgba(27,28,26,0.5)';
+  const payload={ full_name:pfVal('pf-name'), title:pfVal('pf-title'), company_name:pfVal('pf-company'), phone:pfVal('pf-phone'), country:pfVal('pf-country'),
+    linkedin_url:pfVal('pf-linkedin'), website:pfVal('pf-website'), bio:pfVal('pf-bio') };
+  const role=document.getElementById('pf-role'); if(!role.disabled && role.value) payload.role=role.value;
+  try{
+    const r=await fetch('/api/me',{method:'PATCH',body:JSON.stringify(payload)}); const d=await r.json();
+    if(!r.ok||d.error) throw new Error(d.error||'Save failed');
+    msg.textContent='Saved ✓'; msg.style.color='#003527'; await loadProfile(true);
+  }catch(ex){ msg.textContent=ex.message||'Could not save'; msg.style.color='#ba1a1a'; }
+  btn.disabled=false;
+}
+function pfVal(id){return document.getElementById(id).value.trim();}
+async function uploadAvatar(file){
+  const msg=document.getElementById('save-msg');
+  if(!file) return; if(!/^image\/(png|jpeg|webp)$/.test(file.type)||file.size>2*1024*1024){msg.textContent='Use a PNG/JPG/WEBP under 2 MB';msg.style.color='#ba1a1a';return;}
+  try{
+    const sb=await window.getBanaSupabaseClient(); const {data:{user}}=await sb.auth.getUser();
+    const path=`${user.id}/avatar-${Date.now()}.${file.type.split('/')[1]}`;
+    const {error}=await sb.storage.from('avatars').upload(path,file,{upsert:true,contentType:file.type}); if(error) throw error;
+    const url=sb.storage.from('avatars').getPublicUrl(path).data.publicUrl;
+    const r=await fetch('/api/me',{method:'PATCH',body:JSON.stringify({avatar_url:url})}); if(!r.ok) throw new Error('Could not save photo');
+    setAvatar(url); msg.textContent='Photo updated ✓'; msg.style.color='#003527';
+  }catch(ex){ msg.textContent=ex.message||'Upload failed'; msg.style.color='#ba1a1a'; }
+}
+async function changePassword(e){
+  e.preventDefault();
+  const a=document.getElementById('st-pw1').value, b=document.getElementById('st-pw2').value, m=document.getElementById('pw-msg');
+  if(a!==b){m.textContent='Passwords do not match';m.style.color='#ba1a1a';return;}
+  if(a.length<10){m.textContent='Use at least 10 characters';m.style.color='#ba1a1a';return;}
+  try{ const sb=await window.getBanaSupabaseClient(); const {error}=await sb.auth.updateUser({password:a}); if(error) throw error;
+    m.textContent='Password updated ✓'; m.style.color='#003527'; e.target.reset(); }
+  catch(ex){ m.textContent=ex.message||'Could not update password'; m.style.color='#ba1a1a'; }
+}
+async function savePrefs(){
+  const m=document.getElementById('pref-msg');
+  const prefs=Object.assign({}, (_me&&_me.preferences)||{}, { event_updates:document.getElementById('pref-events').checked, capital_alerts:document.getElementById('pref-capital').checked,
+    newsletter:document.getElementById('pref-newsletter').checked, directory_visible:document.getElementById('pref-directory').checked });
+  const r=await fetch('/api/me',{method:'PATCH',body:JSON.stringify({preferences:prefs})});
+  m.textContent = r.ok?'Saved ✓':'Could not save'; m.style.color = r.ok?'#003527':'#ba1a1a';
+  if(r.ok && _me) _me.preferences=prefs;
+}
+async function signOutEverywhere(){
+  if(!confirm('Sign out of BANAHub on every device?')) return;
+  try{ const sb=await window.getBanaSupabaseClient(); await sb.auth.signOut({scope:'global'}); }catch(e){}
+  localStorage.removeItem('bana_user'); localStorage.removeItem('bana_access_token'); window.location.href='login.html';
+}
+async function requestDeletion(){
+  if(!confirm('Send a request to delete your BANAHub account and personal data? The team will confirm by email.')) return;
+  const r=await fetch('/api/enquiries',{method:'POST',body:JSON.stringify({ source:'account_deletion', type:'account_deletion', name:(_me&&_me.full_name)||'', email:(_me&&_me.email)||'',
+    message:'Member requested account and data deletion from Settings.' })});
+  document.getElementById('del-msg').textContent = r.ok ? 'Request sent. We will confirm by email within 5 business days.' : 'Could not send — email hello@banahub.com.';
 }
 
 // ── Sign out ──────────────────────────────────────────────────────

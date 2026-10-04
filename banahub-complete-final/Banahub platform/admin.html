@@ -561,6 +561,10 @@ body::before {
         <button class="nav-item" onclick="nav('payments')">
           <span class="nav-icon material-symbols-outlined">payments</span>Payments
         </button>
+        <button class="nav-item" onclick="nav('crm')">
+          <span class="nav-icon material-symbols-outlined">contacts</span>CRM
+          <span class="nav-badge-count" id="nb-crm" style="display:none">0</span>
+        </button>
         <button class="nav-item" onclick="nav('enquiries')">
           <span class="nav-icon material-symbols-outlined">mail</span>Enquiries
           <span class="nav-badge-count" id="nb-enquiries">0</span>
@@ -834,33 +838,21 @@ body::before {
     <!-- ════ USERS ═══════════════════════════════════════════ -->
     <div id="panel-users" class="panel">
       <div class="page-header">
-        <div><div class="page-title">User Management</div><div class="page-sub">Review, approve, and manage platform members</div></div>
-        <button class="btn btn-primary" onclick="openInviteModal()"><span class="material-symbols-outlined" style="font-size:15px">person_add</span>Invite User</button>
+        <div><div class="page-title">Members &amp; Approvals</div><div class="page-sub">Every sign-up (email, Google, LinkedIn) lands here as pending — approve to unlock the member portal</div></div>
+        <button class="btn btn-ghost" onclick="exportMembers()"><span class="material-symbols-outlined" style="font-size:15px">download</span>Export</button>
       </div>
+      <div class="settings-tabs" style="margin-bottom:12px" id="u-tabs"></div>
       <div class="filter-bar">
-        <input class="f-input" placeholder="Search users…" style="max-width:240px"/>
-        <select class="f-input f-select" style="width:150px" id="u-status-f" onchange="loadUsers()">
-          <option value="">All Status</option>
-          <option value="pending">Pending</option>
-          <option value="vetting">Vetting</option>
-          <option value="approved">Approved</option>
-          <option value="rejected">Rejected</option>
+        <input class="f-input" id="u-search" placeholder="Search name, email, company…" style="max-width:260px" oninput="renderUsers()"/>
+        <select class="f-input f-select" style="width:150px" id="u-role-f" onchange="renderUsers()">
+          <option value="">All roles</option><option value="applicant">Applicant</option><option value="member">Member</option><option value="founder">Founder</option>
+          <option value="business">Business</option><option value="investor">Investor</option><option value="advisor">Advisor</option><option value="partner">Partner</option><option value="provider">Provider</option><option value="admin">Admin</option>
         </select>
-        <select class="f-input f-select" style="width:140px" id="u-role-f" onchange="loadUsers()">
-          <option value="">All Roles</option>
-          <option value="business">Business</option>
-          <option value="investor">Investor</option>
-          <option value="provider">Provider</option>
-          <option value="admin">Admin</option>
-        </select>
+        <select class="f-input f-select" style="width:150px" id="u-prov-f" onchange="renderUsers()"><option value="">Any sign-in</option><option value="email">Email</option><option value="google">Google</option><option value="linkedin_oidc">LinkedIn</option></select>
+        <span id="u-count" style="font-size:12px;color:var(--white-muted);margin-left:auto"></span>
       </div>
-      <div class="card">
-        <div id="users-table">
-          <div style="padding:32px;text-align:center;color:var(--white-muted)">Loading…</div>
-        </div>
-      </div>
+      <div class="card" style="overflow:auto"><div id="users-table"><div style="padding:32px;text-align:center;color:var(--white-muted)">Loading…</div></div></div>
     </div>
-
 
     <!-- ════ APPLICATIONS ════════════════════════════════════ -->
     <div id="panel-applications" class="panel">
@@ -1186,6 +1178,26 @@ body::before {
         <span id="enq-count" style="font-size:12px;color:var(--white-muted);margin-left:auto"></span>
       </div>
       <div class="card" style="overflow:auto"><div id="enquiries-table"><div style="padding:32px;text-align:center;color:var(--white-muted)">Loading…</div></div></div>
+    </div>
+
+    <!-- ════ CRM ═══════════════════════════════════════════ -->
+    <div id="panel-crm" class="panel">
+      <div class="page-header">
+        <div><div class="page-title">CRM</div><div class="page-sub">Leads and relationships — from enquiries, members, events and your own outreach</div></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-ghost" onclick="exportCrm()"><span class="material-symbols-outlined" style="font-size:15px">download</span>Export</button>
+          <button class="btn btn-ghost" onclick="crmView=crmView==='board'?'table':'board';renderCrm()"><span class="material-symbols-outlined" style="font-size:15px">view_kanban</span>Board / Table</button>
+          <button class="btn btn-primary" onclick="openCrm()"><span class="material-symbols-outlined" style="font-size:15px">add</span>New Contact</button>
+        </div>
+      </div>
+      <div id="crm-kpis" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;margin-bottom:16px"></div>
+      <div class="filter-bar">
+        <input class="f-input" id="crm-search" placeholder="Search name, company, email, tags…" style="max-width:280px" oninput="renderCrm()"/>
+        <select class="f-input f-select" id="crm-type-f" style="width:150px" onchange="renderCrm()"><option value="">All types</option><option value="company">Company</option><option value="investor">Investor</option><option value="partner">Partner</option><option value="member">Member</option><option value="sponsor">Sponsor</option><option value="other">Other</option></select>
+        <label style="font-size:12px;color:var(--white-muted);display:flex;gap:6px;align-items:center"><input type="checkbox" id="crm-due-f" onchange="renderCrm()"/>Follow-ups due</label>
+        <span id="crm-count" style="font-size:12px;color:var(--white-muted);margin-left:auto"></span>
+      </div>
+      <div id="crm-body"></div>
     </div>
 
     <!-- ════ ACTIVITY LOGS ════════════════════════════════════ -->
@@ -1695,6 +1707,7 @@ Sitemap: https://www.banahub.com/sitemap.xml</textarea></div>
         <div class="f-group"><label class="f-label">Priority</label><select id="eq-priority" class="f-input f-select"><option value="high">High</option><option value="normal">Normal</option><option value="low">Low</option></select></div>
         <div class="f-group"><label class="f-label">Assigned to</label><input id="eq-assigned" class="f-input" placeholder="Name or email"/></div>
         <div class="f-group"><label class="f-label">Internal notes</label><textarea id="eq-notes" class="f-input" rows="6" style="resize:vertical" placeholder="Call notes, next steps… (never shown to the sender)"></textarea></div>
+        <button class="btn btn-ghost" onclick="enquiryToCrm()"><span class="material-symbols-outlined" style="font-size:15px">contacts</span>Add to CRM</button>
         <a id="eq-reply" class="btn btn-ghost" target="_blank" rel="noopener"><span class="material-symbols-outlined" style="font-size:15px">reply</span>Reply by email</a>
         <div id="eq-timeline" style="font-size:11px;color:var(--white-muted);line-height:1.7"></div>
       </div>
@@ -1788,31 +1801,72 @@ Sitemap: https://www.banahub.com/sitemap.xml</textarea></div>
 
 <!-- User action modal -->
 <div id="modal-user" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeModal('modal-user')">
-  <div class="modal">
+  <div class="modal modal-lg">
     <div class="modal-header">
-      <div><div class="modal-title" id="u-modal-title">User Details</div></div>
+      <div style="display:flex;gap:12px;align-items:center"><img id="u-avatar" alt="" style="width:44px;height:44px;border-radius:50%;object-fit:cover;background:var(--surface-2)"/>
+        <div><div class="modal-title" id="u-modal-title">Member</div><div class="modal-sub" id="u-modal-sub"></div></div></div>
       <button class="modal-close" onclick="closeModal('modal-user')">✕</button>
     </div>
-    <div class="modal-body" style="display:flex;flex-direction:column;gap:14px">
-      <div id="u-detail" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;font-size:13px;color:var(--white-dim)"></div>
-      <div class="f-group"><label class="f-label">Role</label>
-        <select id="u-role-edit" class="f-input f-select">
-          <option value="pending">Pending</option><option value="business">Business</option>
-          <option value="investor">Investor</option><option value="provider">Provider</option><option value="admin">Admin</option>
-        </select>
+    <div class="modal-body" style="display:grid;grid-template-columns:1.3fr 1fr;gap:20px">
+      <div>
+        <div class="f-label">Profile</div><table class="data-table" id="u-profile"></table>
+        <div class="f-label" style="margin-top:16px">Application</div><div id="u-apps" style="font-size:12px"></div>
+        <div class="f-label" style="margin-top:16px">KYC documents</div><div id="u-kyc" style="font-size:12px"></div>
       </div>
-      <div class="f-group"><label class="f-label">Status</label>
-        <select id="u-status-edit" class="f-input f-select">
-          <option value="pending">Pending</option><option value="vetting">Vetting</option>
-          <option value="approved">Approved</option><option value="rejected">Rejected</option><option value="suspended">Suspended</option>
-        </select>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="f-group"><label class="f-label">Account status</label>
+          <select id="u-status-edit" class="f-input f-select"><option value="pending">Pending review</option><option value="vetting">Vetting</option><option value="approved">Approved</option><option value="rejected">Rejected</option><option value="blocked">Blocked</option></select></div>
+        <div class="f-group"><label class="f-label">Member type</label>
+          <select id="u-role-edit" class="f-input f-select"><option value="applicant">Applicant</option><option value="member">Member</option><option value="founder">Founder</option><option value="business">Business</option><option value="investor">Investor</option><option value="advisor">Advisor</option><option value="partner">Partner</option><option value="provider">Provider</option><option value="admin">Admin</option></select></div>
+        <div class="f-group"><label class="f-label">Reason / note (blocked or rejected)</label><textarea id="u-note" class="f-input" rows="3" style="resize:vertical"></textarea></div>
+        <button class="btn btn-ghost" onclick="memberToCrm()"><span class="material-symbols-outlined" style="font-size:15px">contacts</span>Add to CRM</button>
+        <div id="u-timeline" style="font-size:11px;color:var(--white-muted);line-height:1.7"></div>
       </div>
-      <div class="f-group"><label class="f-label">Admin Note (internal)</label><textarea id="u-note" class="f-input" rows="2" style="resize:vertical"></textarea></div>
+      <input type="hidden" id="u-id"/>
     </div>
     <div class="modal-footer">
+      <button class="btn btn-danger" onclick="saveUserEdit('rejected')">Reject</button>
       <button class="btn btn-ghost" onclick="closeModal('modal-user')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveUserEdit()">Save Changes</button>
+      <button class="btn btn-ghost" onclick="saveUserEdit()">Save</button>
+      <button class="btn btn-primary" onclick="saveUserEdit('approved')">Approve</button>
     </div>
+  </div>
+</div>
+
+<!-- CRM Contact Modal -->
+<div id="modal-crm" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeModal('modal-crm')">
+  <div class="modal modal-lg">
+    <div class="modal-header"><div><div class="modal-title" id="crm-title">New Contact</div><div class="modal-sub" id="crm-sub"></div></div><button class="modal-close" onclick="closeModal('modal-crm')">✕</button></div>
+    <div class="modal-body" style="display:grid;grid-template-columns:1.3fr 1fr;gap:20px">
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="f-grid">
+          <div class="f-group"><label class="f-label">Name *</label><input id="crm-name" class="f-input"/></div>
+          <div class="f-group"><label class="f-label">Email</label><input id="crm-email" class="f-input" type="email"/></div>
+          <div class="f-group"><label class="f-label">Company</label><input id="crm-company" class="f-input"/></div>
+          <div class="f-group"><label class="f-label">Title</label><input id="crm-ttl" class="f-input"/></div>
+          <div class="f-group"><label class="f-label">Phone</label><input id="crm-phone" class="f-input"/></div>
+          <div class="f-group"><label class="f-label">LinkedIn</label><input id="crm-li" class="f-input"/></div>
+          <div class="f-group"><label class="f-label">Type</label><select id="crm-type" class="f-input f-select"><option value="company">Company</option><option value="investor">Investor</option><option value="partner">Partner</option><option value="member">Member</option><option value="sponsor">Sponsor</option><option value="other">Other</option></select></div>
+          <div class="f-group"><label class="f-label">Stage</label><select id="crm-stage" class="f-input f-select"></select></div>
+          <div class="f-group"><label class="f-label">Deal value</label><input id="crm-value" class="f-input" placeholder="25k"/></div>
+          <div class="f-group"><label class="f-label">Currency</label><select id="crm-cur" class="f-input f-select"><option>SGD</option><option>USD</option><option>AED</option><option>EUR</option></select></div>
+          <div class="f-group"><label class="f-label">Owner</label><input id="crm-owner" class="f-input"/></div>
+          <div class="f-group"><label class="f-label">Source</label><input id="crm-source" class="f-input" placeholder="enquiry, referral, event…"/></div>
+          <div class="f-group"><label class="f-label">Next action</label><input id="crm-next" class="f-input" placeholder="Send proposal"/></div>
+          <div class="f-group"><label class="f-label">Due</label><input id="crm-due" class="f-input" type="date"/></div>
+        </div>
+        <div class="f-group"><label class="f-label">Tags (comma separated)</label><input id="crm-tags" class="f-input"/></div>
+        <div class="f-group"><label class="f-label">Notes</label><textarea id="crm-notes" class="f-input" rows="3" style="resize:vertical"></textarea></div>
+      </div>
+      <div>
+        <div class="f-label">Activity</div>
+        <div style="display:flex;gap:6px;margin-bottom:8px"><select id="crm-act-kind" class="f-input f-select" style="width:110px"><option value="note">Note</option><option value="call">Call</option><option value="email">Email</option><option value="meeting">Meeting</option></select>
+          <input id="crm-act-body" class="f-input" placeholder="What happened?"/><button class="btn btn-ghost btn-sm" onclick="addCrmActivity()">Log</button></div>
+        <div id="crm-activity" style="max-height:380px;overflow:auto;font-size:12px"></div>
+      </div>
+      <input type="hidden" id="crm-id"/>
+    </div>
+    <div class="modal-footer"><button class="btn btn-danger" id="crm-del" onclick="deleteCrm()">Delete</button><span style="flex:1"></span><button class="btn btn-ghost" onclick="closeModal('modal-crm')">Cancel</button><button class="btn btn-primary" onclick="saveCrm()">Save</button></div>
   </div>
 </div>
 
@@ -1824,7 +1878,7 @@ Sitemap: https://www.banahub.com/sitemap.xml</textarea></div>
 ════════════════════════════════════════════════════════════ -->
 <script src="config.js"></script>
 <script src="api.js"></script>
-<script src="admin-v3.js?v=3.1.0"></script>
+<script src="admin-v3.js?v=3.2.1"></script>
 <script>
 
 // ── State ────────────────────────────────────────────────────
@@ -1965,7 +2019,7 @@ const panelMeta = {
   events:        ['Events',           'Summits, roundtables, and forums'],
   media:         ['Media Library',    'Upload and manage all media assets'],
   programs:      ['Programs',         'Cohorts, acceleration, and summits'],
-  users:         ['Users',            'Member approvals and role management'],
+  users:         ['Members & Approvals', 'Approve sign-ups, manage member accounts'],
   applications:  ['Applications',     'Membership application review'],
   kyc:           ['KYC Documents',    'Identity verification uploads'],
   businesses:    ['Businesses',       'Company portfolio management'],
@@ -1982,6 +2036,7 @@ const panelMeta = {
   admins:        ['Admin Accounts',   'Roles and permissions management'],
   memberships:   ['Memberships',      'Signups, subscriptions and membership payments'],
   capital:       ['Capital Raises',   'Fundraises, member Capital Flows and investor matching'],
+  crm:           ['CRM', 'Leads, pipeline and relationship history'],
   pricing:       ['Pricing & Payment Links', 'Control prices and auto-generate Stripe Payment Links'],
   profile:       ['My Profile',       'Admin account settings'],
 };
@@ -2023,6 +2078,7 @@ function loadPanel(p) {
     partners:   loadPartners,
     access:     loadAccess,
     pricing:    loadPricingCatalog,
+    crm:        loadCrm,
     memberships: loadMemberships,
     capital:    loadCapital,
     payments:   loadPayments,
@@ -2131,61 +2187,8 @@ function renderAccessPreview(items) {
 }
 
 // ── Users ────────────────────────────────────────────────────
-async function loadUsers() {
-  const status = document.getElementById('u-status-f')?.value || '';
-  const role   = document.getElementById('u-role-f')?.value || '';
-  let q = '/api/admin/users';
-  const p = []; if (status) p.push(`status=${status}`); if (role) p.push(`role=${role}`);
-  if (p.length) q += '?' + p.join('&');
-  const data = await api(q).catch(()=>({}));
-  // Backend returns { users: [...] }
-  let users = data.users || (Array.isArray(data) ? data : []);
-  // Client-side filter since backend doesn't support query params yet
-  if (status) users = users.filter(u => u.status === status);
-  if (role)   users = users.filter(u => u.role   === role);
-  document.getElementById('users-table').innerHTML = users.length
-    ? `<table class="data-table"><thead><tr><th>User</th><th>Email</th><th>Role</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead><tbody>
-    ${users.map(u => `<tr>
-      <td><div style="display:flex;align-items:center;gap:8px"><div style="width:28px;height:28px;border-radius:50%;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--white-dim);flex-shrink:0">${(u.full_name||u.email||'?')[0].toUpperCase()}</div><span style="font-weight:500">${esc(u.full_name||'—')}</span></div></td>
-      <td style="font-family:var(--font-mono);font-size:12px">${esc(u.email)}</td>
-      <td><span class="badge badge-ghost">${u.role}</span></td>
-      <td><span class="pill pill-${u.status==='approved'?'live':u.status==='pending'||u.status==='vetting'?'pending':'rejected'}">${u.status}</span></td>
-      <td style="font-size:12px;color:var(--white-muted)">${new Date(u.created_at).toLocaleDateString()}</td>
-      <td><div style="display:flex;gap:5px">
-        ${u.status!=='approved'?`<button class="btn btn-approve btn-sm" onclick="quickApprove('${u.id}')">Approve</button>`:''}
-        <button class="btn btn-ghost btn-sm" onclick="openUserModal('${u.id}','${esc(u.full_name||u.email)}','${u.role}','${u.status}')">Edit</button>
-        ${u.status!=='rejected'?`<button class="btn btn-danger btn-sm" onclick="rejectUser('${u.id}')">Reject</button>`:''}
-      </div></td>
-    </tr>`).join('')}</tbody></table>`
-    : `<div style="padding:48px;text-align:center;color:var(--white-muted)">No users found</div>`;
-}
 
-async function quickApprove(id) {
-  await api(`/api/admin/users/${id}/status`, 'PATCH', {status:'approved'});
-  toast('User approved', 'success'); loadUsers(); loadDashboard(); pollBadges();
-}
-async function rejectUser(id) {
-  if (!confirm('Reject this user?')) return;
-  await api(`/api/admin/users/${id}/status`, 'PATCH', {status:'rejected'});
-  toast('User rejected', 'warn'); loadUsers();
-}
 
-function openUserModal(id, name, role, status) {
-  currentUserId = id;
-  document.getElementById('u-modal-title').textContent = `Edit: ${name}`;
-  document.getElementById('u-detail').innerHTML = `<strong>ID:</strong> ${id}<br><strong>Current Role:</strong> ${role}<br><strong>Current Status:</strong> ${status}`;
-  document.getElementById('u-role-edit').value   = role;
-  document.getElementById('u-status-edit').value = status;
-  document.getElementById('modal-user').style.display = 'flex';
-}
-async function saveUserEdit() {
-  if (!currentUserId) return;
-  // Backend /status endpoint only accepts status changes
-  await api(`/api/admin/users/${currentUserId}/status`, 'PATCH', {
-    status: document.getElementById('u-status-edit').value,
-  });
-  toast('User updated', 'success'); closeModal('modal-user'); loadUsers();
-}
 function openInviteModal() { toast('Email invite feature coming soon', 'warn'); }
 
 
@@ -2227,38 +2230,7 @@ async function rejectApplication(id) {
 }
 
 // ── KYC Documents ─────────────────────────────────────────────
-async function loadKYC() {
-  const data = await api('/api/kyc/admin/all').catch(() => ({}));
-  const uploads = data.uploads || [];
-  document.getElementById('kyc-table').innerHTML = uploads.length
-    ? `<table class="data-table"><thead><tr><th>Uploaded</th><th>Member</th><th>File</th><th>Type</th><th>Size</th><th>Status</th><th>Actions</th></tr></thead><tbody>
-    ${uploads.map(u => `<tr>
-      <td style="font-size:12px;color:var(--white-muted)">${u.uploaded_at ? new Date(u.uploaded_at).toLocaleDateString() : '—'}</td>
-      <td style="font-size:13px">${esc(u.user?.full_name || u.user?.email || '—')}</td>
-      <td style="font-family:var(--font-mono);font-size:12px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(u.original_name || '—')}</td>
-      <td><span class="badge badge-ghost">${esc(u.file_type || '—')}</span></td>
-      <td style="font-size:12px;color:var(--white-muted)">${u.file_size ? (u.file_size / 1024).toFixed(0) + ' KB' : '—'}</td>
-      <td><span class="pill pill-${u.status === 'approved' ? 'live' : u.status === 'pending' ? 'pending' : 'rejected'}">${u.status}</span></td>
-      <td><div style="display:flex;gap:5px">
-        ${u.status !== 'approved' ? `<button class="btn btn-approve btn-sm" onclick="approveKYC('${u.id}')">Approve</button>` : ''}
-        ${u.status !== 'rejected' ? `<button class="btn btn-danger btn-sm" onclick="rejectKYC('${u.id}')">Reject</button>` : ''}
-      </div></td>
-    </tr>`).join('')}</tbody></table>`
-    : `<div style="padding:48px;text-align:center;color:var(--white-muted)">No KYC documents found</div>`;
-  // Update badge
-  const pending = uploads.filter(u => u.status === 'pending').length;
-  setBadge('nb-kyc', pending);
-}
 
-async function approveKYC(id) {
-  await api(`/api/kyc/admin/${id}/status`, 'PATCH', { status: 'approved' });
-  toast('KYC document approved', 'success'); loadKYC(); pollBadges();
-}
-async function rejectKYC(id) {
-  if (!confirm('Reject this KYC document?')) return;
-  await api(`/api/kyc/admin/${id}/status`, 'PATCH', { status: 'rejected' });
-  toast('KYC document rejected', 'warn'); loadKYC();
-}
 
 // ── Shared activity logger — best-effort, never blocks the calling action ──
 async function logActivity(action, category, description) {
@@ -3353,7 +3325,7 @@ function setupMobileNav() {
 function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
 
 // ── Util ──────────────────────────────────────────────────────
-function esc(s) { return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function esc(s) { return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 
 // ── 4-click logo easter egg (from public site) ────────────────
 let _lc=0,_lt;
