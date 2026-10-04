@@ -57,6 +57,7 @@
 
     <!-- FORM: Company -->
     <form id="form-company" novalidate>
+      <div aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden"><label>Leave blank<input type="text" name="_hp" tabindex="-1" autocomplete="off"/></label></div>
       <div class="form-section active" id="fields-company">
         <div class="form-grid">
           <div class="field"><label for="c-name">Full name <span aria-hidden="true">*</span></label><input id="c-name" name="name" type="text" required autocomplete="name" placeholder="Your legal name"/></div>
@@ -94,6 +95,7 @@
 
     <!-- FORM: Investor -->
     <form id="form-investor" novalidate style="display:none">
+      <div aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden"><label>Leave blank<input type="text" name="_hp" tabindex="-1" autocomplete="off"/></label></div>
       <div class="form-section active" id="fields-investor">
         <div class="form-grid">
           <div class="field"><label for="i-name">Full name <span aria-hidden="true">*</span></label><input id="i-name" name="name" type="text" required autocomplete="name" placeholder="Your legal name"/></div>
@@ -129,6 +131,7 @@
 
     <!-- FORM: Partner -->
     <form id="form-partner" novalidate style="display:none">
+      <div aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden"><label>Leave blank<input type="text" name="_hp" tabindex="-1" autocomplete="off"/></label></div>
       <div class="form-section active" id="fields-partner">
         <div class="form-grid">
           <div class="field"><label for="p-name">Full name <span aria-hidden="true">*</span></label><input id="p-name" name="name" type="text" required autocomplete="name" placeholder="Your legal name"/></div>
@@ -156,6 +159,7 @@
       </div>
       <h2>Enquiry received</h2>
       <p style="max-width:420px;margin:0.75rem auto 0">Thank you. Your enquiry has been sent to the BANAHub team. We respond to every submission and will be in touch within two business days.</p>
+      <p style="margin-top:1rem;font-size:0.875rem;color:var(--ink-muted)">Your reference: <strong id="enq-ref" style="font-family:monospace;color:var(--emerald)"></strong></p>
     </div>
 
   </div>
@@ -206,8 +210,10 @@
 
       // Collect data
       var fd = new FormData(form);
-      var payload = { source: type + '_enquiry', status: 'new' };
+      var ref = 'BH-' + new Date().toISOString().slice(2,10).replace(/-/g,'') + '-' + Math.random().toString(36).slice(2,6).toUpperCase();
+      var payload = { source: type + '_enquiry', type: type, reference: ref };
       fd.forEach(function(v,k) { payload[k] = v; });
+      var isBot = !!payload._hp; delete payload._hp;
       payload.name = payload.name || '';
       payload.email = payload.email || '';
       payload.company = payload.organisation || payload.company || '';
@@ -228,11 +234,14 @@
       btn.textContent = 'Sending…';
 
       try {
-        var res = await apiFetch('/api/enquiries', {
-          method: 'POST',
-          body: JSON.stringify(payload)
-        });
-        if (!res.ok) throw new Error('Submission failed');
+        if (!isBot) {
+          var res = await apiFetch('/api/enquiries', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+          });
+          if (!res.ok) throw new Error('Submission failed');
+        }
+        document.getElementById('enq-ref').textContent = ref;
         // Show success, hide forms
         document.querySelectorAll('form,#form-error,.contact-type').forEach(function(el) { el.style.display='none'; });
         document.querySelectorAll('[role=radiogroup]').forEach(function(el){el.style.display='none';});

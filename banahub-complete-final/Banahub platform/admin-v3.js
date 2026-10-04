@@ -779,3 +779,191 @@ function exportMatches(onlyShortlist) {
     ['score', 'fit_score'], ['full_name', 'name'], ['organization', 'organization'], ['email', 'email'], ['investor_type', 'type'],
     ['focus_sectors', 'sectors'], ['preferred_stages', 'stages'], ['geography', 'geography'], ['check_size', 'check_size'], ['linkedin_url', 'linkedin'], ['why', 'why']]));
 }
+
+// ═════════════════════════════════════════════════════════════════════════
+// 8. ENQUIRY TRACKER  (contact + every other website form)
+// ═════════════════════════════════════════════════════════════════════════
+const ENQ_STATUS = { new: ['New', 'pending'], in_progress: ['In progress', 'pending'], responded: ['Responded', 'live'], closed: ['Closed', 'draft'] };
+const enqStatusOf = q => q.status === 'pending' || !q.status ? 'new' : q.status === 'resolved' ? 'closed' : q.status;
+const enqTypeOf = q => q.type || String(q.source || 'contact').replace(/_(enquiry|form|request|interest|campaign)$/, '');
+const enqRef = q => (q.data && q.data.reference) || '';
+let enquiries_db = [], enqTab = 'open';
+async function loadEnquiries() {
+  const el = $('enquiries-table');
+  el.innerHTML = emptyRow('Loading…');
+  const d = await api('/api/admin/enquiries').catch(() => ({}));
+  enquiries_db = (d && d.enquiries) || [];
+  const types = [...new Set(enquiries_db.map(enqTypeOf))].sort();
+  $('enq-type-f').innerHTML = '<option value="">All types</option>' + types.map(t => `<option value="${esc(t)}">${esc(t.replace(/_/g, ' '))}</option>`).join('');
+  const cnt = s => enquiries_db.filter(q => enqStatusOf(q) === s).length;
+  const week = enquiries_db.filter(q => Date.now() - new Date(q.created_at) < 7 * 864e5).length;
+  const resp = enquiries_db.filter(q => q.responded_at).map(q => (new Date(q.responded_at) - new Date(q.created_at)) / 36e5);
+  const avg = resp.length ? Math.round(resp.reduce((a, b) => a + b, 0) / resp.length) : null;
+  $('enq-kpis').innerHTML = [['New', cnt('new'), 'mark_email_unread'], ['In progress', cnt('in_progress'), 'pending_actions'], ['Responded', cnt('responded'), 'forward_to_inbox'],
+    ['Closed', cnt('closed'), 'task_alt'], ['Last 7 days', week, 'date_range'], ['Avg. response', avg == null ? '—' : avg < 48 ? avg + ' h' : Math.round(avg / 24) + ' d', 'timer']]
+    .map(([l, v, i]) => `<div class="card" style="padding:14px"><div style="display:flex;align-items:center;gap:6px;color:var(--white-muted);font-size:12px"><span class="material-symbols-outlined" style="font-size:16px">${i}</span>${l}</div><div style="font-size:22px;font-weight:700;color:var(--ink);margin-top:4px">${esc(v)}</div></div>`).join('');
+  $('enq-tabs').innerHTML = [['open', `Open (${cnt('new') + cnt('in_progress')})`], ['new', `New (${cnt('new')})`], ['in_progress', 'In progress'], ['responded', 'Responded'], ['closed', 'Closed'], ['all', `All (${enquiries_db.length})`]]
+    .map(([k, l]) => `<button class="s-tab${enqTab === k ? ' active' : ''}" onclick="enqTab='${k}';loadEnquiriesTabs()">${l}</button>`).join('');
+  setBadge('nb-enquiries', cnt('new'));
+  renderEnquiries();
+}
+function loadEnquiriesTabs() { document.querySelectorAll('#enq-tabs .s-tab').forEach(b => b.classList.toggle('active', b.getAttribute('onclick').includes(`'${enqTab}'`))); renderEnquiries(); }
+function filterEnquiries() { renderEnquiries(); }
+function enqRows() {
+  const q = ($('enq-search').value || '').toLowerCase(), t = $('enq-type-f').value, pr = $('enq-priority-f').value;
+  return enquiries_db.filter(e => {
+    const st = enqStatusOf(e);
+    if (enqTab === 'open' && !(st === 'new' || st === 'in_progress')) return false;
+    if (!['open', 'all'].includes(enqTab) && st !== enqTab) return false;
+    if (t && enqTypeOf(e) !== t) return false;
+    if (pr && (e.priority || 'normal') !== pr) return false;
+    if (q && ![e.name, e.email, e.company, e.message, e.notes, enqRef(e)].join(' ').toLowerCase().includes(q)) return false;
+    return true;
+  });
+}
+function renderEnquiries() {
+  const rows = enqRows();
+  $('enq-count').textContent = `${rows.length} shown`;
+  const typeBadge = e => { const src = (typeof SOURCE_LABELS !== 'undefined' && SOURCE_LABELS[e.source]) || { label: enqTypeOf(e), color: '#0a5c40' };
+    return `<span style="display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;background:${src.color}18;color:${src.color};border:1px solid ${src.color}40;text-transform:capitalize">${esc(src.label)}</span>`; };
+  const age = d => { const h = (Date.now() - new Date(d)) / 36e5; return h < 1 ? 'just now' : h < 24 ? Math.round(h) + 'h ago' : Math.round(h / 24) + 'd ago'; };
+  $('enquiries-table').innerHTML = rows.length ? `<table class="data-table"><thead><tr><th>From</th><th>Type</th><th>Message</th><th>Status</th><th>Priority</th><th>Received</th><th></th></tr></thead><tbody>
+    ${rows.map(e => { const st = enqStatusOf(e), S = ENQ_STATUS[st] || [st, 'draft']; return `<tr style="cursor:pointer${st === 'new' ? ';font-weight:600' : ''}" onclick="openEnquiry('${e.id}')">
+      <td><div style="color:var(--ink)">${esc(e.name || '—')}</div><div style="font-size:11px;font-family:var(--font-mono);color:var(--white-muted);font-weight:400">${esc(e.email || '')}</div>${e.company ? `<div style="font-size:11px;color:var(--white-dim);font-weight:400">${esc(e.company)}</div>` : ''}</td>
+      <td>${typeBadge(e)}</td>
+      <td style="max-width:320px;font-size:12px;font-weight:400;color:var(--white-dim)">${esc((e.message || '').slice(0, 120))}${(e.message || '').length > 120 ? '…' : ''}</td>
+      <td onclick="event.stopPropagation()"><select class="f-input f-select" style="padding:4px 8px;font-size:12px;width:130px" onchange="setEnquiryStatus('${e.id}',this.value)">${Object.keys(ENQ_STATUS).map(k => `<option value="${k}" ${k === st ? 'selected' : ''}>${ENQ_STATUS[k][0]}</option>`).join('')}</select></td>
+      <td><span class="pill pill-${e.priority === 'high' ? 'rejected' : e.priority === 'low' ? 'draft' : 'pending'}">${esc(e.priority || 'normal')}</span></td>
+      <td style="font-size:12px;color:var(--white-muted);font-weight:400;white-space:nowrap" title="${esc(new Date(e.created_at).toLocaleString())}">${age(e.created_at)}</td>
+      <td><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openEnquiry('${e.id}')">Open</button></td></tr>`; }).join('')}</tbody></table>`
+    : emptyRow(enquiries_db.length ? 'No enquiries in this view.' : 'No enquiries yet. Submissions from the Contact page, events, fundraise and program forms appear here automatically.');
+}
+function openEnquiry(id) {
+  const e = enquiries_db.find(x => x.id === id); if (!e) return;
+  $('eq-id').value = id;
+  $('eq-title').textContent = e.name || e.email || 'Enquiry';
+  $('eq-sub').textContent = [enqTypeOf(e), e.company, enqRef(e) && 'Ref ' + enqRef(e)].filter(Boolean).join(' · ');
+  $('eq-message').textContent = e.message || '(no message)';
+  const fields = [['Email', e.email && `<a href="mailto:${esc(e.email)}" style="color:var(--emerald)">${esc(e.email)}</a>`], ['Phone', e.phone && `<a href="tel:${esc(e.phone)}" style="color:var(--emerald)">${esc(e.phone)}</a>`],
+    ['Title', esc(e.title || '')], ['Company', esc(e.company || '')], ['Service', esc(e.service || '')], ['Source', esc(e.source || '')], ['Page', esc(e.page_url || '')]]
+    .concat(Object.keys(e.data || {}).filter(k => k !== 'reference').map(k => [k.replace(/_/g, ' '), esc(typeof e.data[k] === 'object' ? JSON.stringify(e.data[k]) : e.data[k])]))
+    .filter(f => f[1]);
+  $('eq-fields').innerHTML = fields.map(([k, v]) => `<tr><td style="font-size:12px;color:var(--white-muted);text-transform:capitalize;width:120px">${esc(k)}</td><td style="font-size:12px">${v}</td></tr>`).join('');
+  $('eq-status').value = enqStatusOf(e);
+  $('eq-priority').value = e.priority || 'normal';
+  $('eq-assigned').value = e.assigned_to || '';
+  $('eq-notes').value = e.notes || '';
+  $('eq-reply').href = `mailto:${encodeURIComponent(e.email || '')}?subject=${encodeURIComponent('Re: your BANAHUB enquiry' + (enqRef(e) ? ' (' + enqRef(e) + ')' : ''))}`;
+  $('eq-reply').onclick = () => { if (enqStatusOf(e) === 'new' || enqStatusOf(e) === 'in_progress') $('eq-status').value = 'responded'; };
+  $('eq-timeline').innerHTML = [`Received ${new Date(e.created_at).toLocaleString()}`, e.responded_at && `Responded ${new Date(e.responded_at).toLocaleString()}`, e.updated_at && e.updated_at !== e.created_at && `Last updated ${new Date(e.updated_at).toLocaleString()}`].filter(Boolean).join('<br/>');
+  $('modal-enquiry').style.display = 'flex';
+  if (enqStatusOf(e) === 'new') { $('eq-status').value = 'in_progress'; setEnquiryStatus(id, 'in_progress', true); }
+}
+async function saveEnquiry() {
+  const id = $('eq-id').value;
+  const r = await api(`/api/admin/enquiries/${id}`, 'PATCH', { status: $('eq-status').value, priority: $('eq-priority').value, assigned_to: $('eq-assigned').value.trim() || null, notes: $('eq-notes').value.trim() || null });
+  if (!r || r.error) { toast('Save failed: ' + ((r && r.error) || ''), 'warn'); return; }
+  toast('Enquiry updated', 'success'); logActivity('admin.enquiry_update', 'admin', `${id} → ${$('eq-status').value}`);
+  closeModal('modal-enquiry'); loadEnquiries();
+}
+async function setEnquiryStatus(id, status, silent) {
+  const r = await api(`/api/admin/enquiries/${id}`, 'PATCH', { status });
+  if (!r || r.error) { toast('Update failed: ' + ((r && r.error) || ''), 'warn'); return; }
+  const e = enquiries_db.find(x => x.id === id); if (e && r.enquiry) Object.assign(e, r.enquiry);
+  if (!silent) { toast(`Marked ${ENQ_STATUS[status][0].toLowerCase()}`, 'success'); loadEnquiries(); }
+  else { setBadge('nb-enquiries', enquiries_db.filter(q => enqStatusOf(q) === 'new').length); renderEnquiries(); }
+}
+async function resolveEnquiry(id) { return setEnquiryStatus(id, 'closed'); }
+function exportEnquiries() {
+  downloadFile(`banahub-enquiries-${new Date().toISOString().slice(0, 10)}.csv`, toCSV(enqRows(), [
+    [e => new Date(e.created_at).toISOString(), 'received'], [enqRef, 'reference'], [enqTypeOf, 'type'], ['name', 'name'], ['email', 'email'], ['phone', 'phone'],
+    ['company', 'company'], ['title', 'title'], ['service', 'service'], ['message', 'message'], [enqStatusOf, 'status'], ['priority', 'priority'],
+    ['assigned_to', 'assigned_to'], ['notes', 'notes'], ['responded_at', 'responded_at'], [e => JSON.stringify(e.data || {}), 'other_fields']]));
+}
+
+// ═════════════════════════════════════════════════════════════════════════
+// 9. DASHBOARD + BADGES (real stats)
+// ═════════════════════════════════════════════════════════════════════════
+async function loadDashboard() {
+  const set = (id, v) => { const el = $(id); if (el) el.textContent = v; };
+  try {
+    const d = await api('/api/admin/stats');
+    set('ds-users', d.total_members ?? '—');
+    set('ds-pending', d.pending_approvals ?? '—');
+    set('ds-access', d.pending_access ?? '—');
+    set('ds-enquiries', d.open_enquiries ?? '—');
+    set('ds-enq-d', d.new_enquiries ? `${d.new_enquiries} new` : '');
+    set('ds-businesses', d.total_companies ?? '—');
+    const rev = d.revenue || {};
+    set('ds-revenue', Object.keys(rev).length ? Object.keys(rev).map(c => money(rev[c], c)).join(' · ') : '0');
+    applyBadges(d);
+  } catch (e) { ['ds-users', 'ds-pending', 'ds-access', 'ds-enquiries', 'ds-businesses', 'ds-revenue'].forEach(id => set(id, '—')); }
+  const [ud, eq, ac, tx, lg] = await Promise.all([
+    api('/api/admin/users').catch(() => ({})), api('/api/admin/enquiries').catch(() => ({})), api('/api/admin/access-requests').catch(() => ({})),
+    api('/api/admin/transactions').catch(() => ({})), api('/api/admin/logs').catch(() => ({})),
+  ]);
+  try { renderPendingUsers((ud.users || []).filter(u => u.status === 'pending')); } catch (e) {}
+  try { renderAccessPreview((ac.requests || ac.access_requests || []).filter(r => r.status === 'pending')); } catch (e) {}
+  try { renderPaymentsPreview((tx.transactions || []).slice(0, 5)); } catch (e) {}
+  try { renderActivity((lg.logs || []).slice(0, 10)); } catch (e) {}
+  const recent = (eq.enquiries || []).slice(0, 6);
+  $('dash-enquiries-list').innerHTML = recent.length ? recent.map(e => { const st = enqStatusOf(e); return `
+    <div style="display:flex;align-items:center;gap:12px;padding:10px 20px;border-bottom:1px solid var(--border);cursor:pointer" onclick="nav('enquiries');setTimeout(()=>openEnquiry('${e.id}'),400)">
+      <span class="material-symbols-outlined" style="font-size:18px;color:${st === 'new' ? 'var(--gold)' : 'var(--white-muted)'}">${st === 'new' ? 'mark_email_unread' : 'mail'}</span>
+      <div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:${st === 'new' ? 700 : 500};color:var(--ink)">${esc(e.name || e.email || '—')} <span style="font-weight:400;color:var(--white-muted);text-transform:capitalize">· ${esc(enqTypeOf(e))}</span></div>
+        <div style="font-size:12px;color:var(--white-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc((e.message || '').slice(0, 140))}</div></div>
+      <span class="pill pill-${(ENQ_STATUS[st] || [0, 'draft'])[1]}">${esc((ENQ_STATUS[st] || [st])[0])}</span>
+      <span style="font-size:11px;color:var(--white-muted);white-space:nowrap">${fmtD(e.created_at)}</span>
+    </div>`; }).join('') : '<div style="padding:20px;font-size:13px;color:var(--white-muted)">No enquiries yet — Contact page submissions appear here instantly.</div>';
+}
+function applyBadges(d) {
+  setBadge('nb-users', d.pending_approvals || 0);
+  setBadge('nb-apps', d.pending_applications || 0);
+  setBadge('nb-kyc', d.kyc_uploads || 0);
+  setBadge('nb-access', d.pending_access || 0);
+  setBadge('nb-enquiries', d.new_enquiries || 0);
+  const nb = $('nb-alerts'); if (nb) nb.style.display = (d.pending_approvals || d.new_enquiries) ? 'block' : 'none';
+}
+async function pollBadges() {
+  try { applyBadges(await api('/api/admin/stats')); } catch (e) {}
+  try { setBadge('nb-drafts', (articles || []).filter(a => a.status === 'draft').length); } catch (e) {}
+}
+
+// ── Events: status tabs (All / Published / Drafts / Upcoming / Past) ─────
+let evTab = 'all';
+const _loadEventsBase = loadEvents;
+loadEvents = async function () {
+  await _loadEventsBase();
+  const all = events_db || [], now = Date.now();
+  const tests = { all: () => true, published: e => e.published, draft: e => !e.published,
+    upcoming: e => e.event_date && new Date(e.event_date) >= now, past: e => e.event_date && new Date(e.event_date) < now };
+  $('ev-tabs').innerHTML = [['all', 'All'], ['published', 'Published'], ['draft', 'Drafts'], ['upcoming', 'Upcoming'], ['past', 'Past']]
+    .map(([k, l]) => `<button class="s-tab${evTab === k ? ' active' : ''}" onclick="evTab='${k}';loadEvents()">${l} (${all.filter(tests[k]).length})</button>`).join('');
+  if (evTab === 'all') return;
+  const keep = new Set(all.filter(tests[evTab]).map(e => e.id));
+  const grid = $('events-grid');
+  [...grid.children].forEach(card => {
+    const m = card.innerHTML.match(/editEvent\('([^']+)'\)/);
+    if (m && !keep.has(m[1])) card.remove();
+  });
+  if (!grid.querySelector('[onclick*="editEvent"]')) grid.insertAdjacentHTML('afterbegin', emptyRow(evTab === 'draft' ? 'No drafts — use "Save as Draft" when creating an event.' : 'No events in this view.'));
+};
+function renderPaymentsPreview(items) {
+  const el = $('dash-payments-list');
+  if (!items.length) { el.innerHTML = '<div style="padding:20px;font-size:13px;color:var(--white-muted)">No payments yet</div>'; return; }
+  el.innerHTML = items.slice(0, 5).map(p => `
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 20px;border-bottom:1px solid var(--border)">
+      <div style="min-width:0"><div style="font-size:13px;color:var(--ink)">${money(p.amount, p.currency)}</div><div style="font-size:11px;color:var(--white-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc((p.type || '').replace(/_/g, ' '))} · ${esc(p.email || '')}</div></div>
+      <span class="pill pill-${p.status === 'completed' ? 'live' : p.status === 'pending' ? 'pending' : 'rejected'}">${esc(p.status)}</span>
+    </div>`).join('');
+}
+function renderActivity(items) {
+  const el = $('dash-activity');
+  if (!items.length) { el.innerHTML = '<div style="padding:16px 0;font-size:13px;color:var(--white-muted)">No admin activity logged yet</div>'; return; }
+  el.innerHTML = items.map(l => `
+    <div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+      <span style="width:8px;height:8px;border-radius:50%;margin-top:6px;flex-shrink:0;background:${/approve|publish|create/.test(l.action || '') ? 'var(--emerald)' : /reject|delete/.test(l.action || '') ? '#b3261e' : 'var(--gold)'}"></span>
+      <div style="flex:1;min-width:0"><div style="font-size:13px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(l.description || l.action)}</div>
+        <div style="font-size:11px;color:var(--white-muted)">${esc(l.actor_email || '')} · ${new Date(l.created_at).toLocaleString()}</div></div>
+    </div>`).join('');
+}

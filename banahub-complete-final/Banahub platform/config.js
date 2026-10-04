@@ -129,6 +129,32 @@ function _articleOut(r) {
   });
 }
 
+
+// Map any public form payload onto the enquiries table: known columns go to
+// columns, everything else is preserved in data (jsonb). Never trusts
+// client-supplied status / notes / priority.
+const _ENQ_COLS = ['name', 'email', 'company', 'message', 'source', 'type', 'phone', 'title', 'service', 'page_url'];
+function _enquiryRow(b) {
+  const row = { status: 'new', data: {} };
+  Object.keys(b || {}).forEach(k => {
+    if (['csrf_token', 'status', 'notes', 'priority', 'assigned_to', 'responded_at', 'id', 'created_at'].includes(k)) return;
+    const v = b[k];
+    if (v === undefined || v === null || v === '') return;
+    if (_ENQ_COLS.includes(k)) row[k] = String(v).slice(0, k === 'message' ? 8000 : 300);
+    else row.data[k] = typeof v === 'string' ? v.slice(0, 2000) : v;
+  });
+  if (!row.company && (b.organisation || b.organization)) row.company = String(b.organisation || b.organization).slice(0, 300);
+  if (!row.type && row.source) row.type = String(row.source).replace(/_(enquiry|form|request|interest|campaign)$/, '');
+  if (!row.page_url && typeof location !== 'undefined') row.page_url = location.pathname;
+  return row;
+}
+async function _insertEnquiry(sb, b) {
+  // No .select(): visitors may INSERT but not read enquiries (RLS)
+  const { error } = await sb.from('enquiries').insert(_enquiryRow(b));
+  if (error) return _resp({ success: false, error: error.message }, 400);
+  return _resp({ success: true }, 201);
+}
+
 // ── Fetch interceptor ─────────────────────────────────────────────────────────
 const _nativeFetch = window.fetch.bind(window);
 window.fetch = async function(input, opts) {
@@ -461,15 +487,10 @@ window.fetch = async function(input, opts) {
 
     // ── Program registration request ─────────────────────────────────────────
     if (route.startsWith('/programs/register') && method === 'POST') {
-      const { data } = await sb.from('enquiries').insert({
-        name: body.name,
-        email: body.email,
-        company: body.company,
+      return _insertEnquiry(sb, Object.assign({}, body, {
         message: `Program Registration Request — ${body.program_title || 'Unspecified'}\n\n${body.message || ''}`.trim(),
-        source: 'program_request',
-        status: 'new',
-      }).select().single();
-      return _resp({ success: true, enquiry: data }, 201);
+        source: 'program_request', type: 'program',
+      }));
     }
 
     // ── Newsletter subscribe ──────────────────────────────────────────────────
@@ -540,17 +561,32 @@ window.fetch = async function(input, opts) {
 
     // ── Admin: stats ────────────────────────────────────────────────────────
     if (route.startsWith('/admin/stats')) {
-      const [u, a, p, e, s, k] = await Promise.all([
-        sb.from('users').select('id', { count: 'exact', head: true }),
-        sb.from('applications').select('id', { count: 'exact', head: true }),
-        sb.from('applications').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
-        sb.from('events').select('id', { count: 'exact', head: true }),
-        sb.from('newsletter_subscribers').select('id', { count: 'exact', head: true }).eq('is_active', true),
-        sb.from('kyc_uploads').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+      const c = q => q.then(r => r.count || 0);
+      const head = { count: 'exact', head: true };
+      const [members, pendingUsers, apps, pendingApps, events, subs, kyc, access, enqOpen, enqNew, companies, investors, openRaises, txns] = await Promise.all([
+        c(sb.from('users').select('id', head).neq('role', 'admin')),
+        c(sb.from('users').select('id', head).eq('status', 'pending')),
+        c(sb.from('applications').select('id', head)),
+        c(sb.from('applications').select('id', head).eq('status', 'pending')),
+        c(sb.from('events').select('id', head)),
+        c(sb.from('newsletter_subscribers').select('id', head).eq('is_active', true)),
+        c(sb.from('kyc_uploads').select('id', head).eq('status', 'pending')),
+        c(sb.from('access_requests').select('id', head).eq('status', 'pending')),
+        c(sb.from('enquiries').select('id', head).in('status', ['new', 'pending', 'in_progress'])),
+        c(sb.from('enquiries').select('id', head).in('status', ['new', 'pending'])),
+        c(sb.from('companies').select('id', head)),
+        c(sb.from('investors').select('id', head)),
+        c(sb.from('deal_rooms').select('id', head).eq('status', 'open')),
+        sb.from('transactions').select('amount,currency').eq('status', 'completed').limit(5000).then(r => r.data || []),
       ]);
-      return _resp({ total_users: u.count||0, total_applications: a.count||0,
-                      pending_applications: p.count||0, total_events: e.count||0,
-                      total_subscribers: s.count||0, pending_kyc: k.count||0 });
+      const revenue = {}; txns.forEach(t => { revenue[t.currency || 'SGD'] = (revenue[t.currency || 'SGD'] || 0) + Number(t.amount || 0); });
+      return _resp({
+        total_members: members, total_users: members, pending_approvals: pendingUsers,
+        total_applications: apps, pending_applications: pendingApps, total_events: events,
+        total_subscribers: subs, kyc_uploads: kyc, pending_kyc: kyc, pending_access: access,
+        open_enquiries: enqOpen, new_enquiries: enqNew, total_companies: companies,
+        total_investors: investors, open_deal_rooms: openRaises, revenue,
+      });
     }
 
     // ── Admin: users (with optional role filter) ────────────────────────────
@@ -741,13 +777,16 @@ window.fetch = async function(input, opts) {
     }
     if (route.startsWith('/admin/enquiries/') && (method === 'PATCH' || method === 'PUT')) {
       const id = route.split('/admin/enquiries/')[1];
-      const { data } = await sb.from('enquiries').update(body).eq('id', id).select().single();
+      const patch = {};
+      ['status', 'priority', 'notes', 'assigned_to'].forEach(k => { if (k in body) patch[k] = body[k]; });
+      if (patch.status === 'responded') patch.responded_at = new Date().toISOString();
+      const { data, error } = await sb.from('enquiries').update(patch).eq('id', id).select().single();
+      if (error) return _resp({ error: error.message }, 400);
       return _resp({ success: true, enquiry: data });
     }
     // Public: contact form submission
     if (route.startsWith('/enquiries') && method === 'POST') {
-      const { data } = await sb.from('enquiries').insert(body).select().single();
-      return _resp({ success: true, enquiry: data }, 201);
+      return _insertEnquiry(sb, body);
     }
 
     // ── Admin: activity logs ────────────────────────────────────────────────
