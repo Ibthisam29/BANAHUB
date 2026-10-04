@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="description" content="Launch your capital raise campaign through BANAHUB's curated network of 1,000+ institutional investors across Southeast Asia, the Gulf, and North Asia."/>
+<title>Raise Capital | BANAHUB</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico"/>
+<link rel="icon" type="image/png" sizes="512x512" href="logo-icon-512.png"/>
+<link rel="apple-touch-icon" href="apple-touch-icon.png"/>
+<link rel="stylesheet" href="./output.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Manrope:wght@300;400;500;600;700&family=Material+Symbols+Outlined:wght,FILL@400,0&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;}
+  
+body{font-family:'Manrope',system-ui,sans-serif;}
+.font-display{font-family:'Newsreader',Georgia,serif;}
+.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;vertical-align:middle;}
+.ivory-texture{background-image:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23000' fill-opacity='.012' fill-rule='evenodd'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E");}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.anim-up{animation:fadeUp .5s ease-out both;}
+.anim-up-d1{animation-delay:.08s;}
+.anim-up-d2{animation-delay:.16s;}
+.anim-up-d3{animation-delay:.24s;}
+
+/* Glass hero */
+.hero-glass{background:linear-gradient(135deg,rgba(0,53,39,0.96) 0%,rgba(0,77,55,0.95) 100%);position:relative;overflow:hidden;}
+.hero-glass::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23fff' fill-opacity='.03' fill-rule='evenodd'%3E%3Ccircle cx='40' cy='40' r='30'/%3E%3C/g%3E%3C/svg%3E");opacity:.4;}
+.stat-bubble{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:12px;padding:16px 20px;text-align:center;backdrop-filter:blur(8px);}
+
+/* Form */
+.f-input{width:100%;border:1.5px solid rgba(0,53,39,0.18);border-radius:10px;padding:11px 14px;font-family:'Manrope',sans-serif;font-size:14px;background:#fafaf8;color:#1b1c1a;transition:all .15s;outline:none;}
+.f-input:focus{border-color:#003527;box-shadow:0 0 0 3px rgba(0,53,39,0.08);background:#fff;}
+.f-label{display:block;font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:rgba(27,28,26,0.50);margin-bottom:6px;}
+textarea.f-input{resize:vertical;}
+
+/* Step indicator */
+.step-dot{width:10px;height:10px;border-radius:50%;transition:all .2s;}
+.step-dot.done{background:#003527;}
+.step-dot.active{background:#003527;transform:scale(1.3);}
+.step-dot.pending{background:rgba(0,53,39,0.15);}
+
+/* Process cards */
+.process-card{background:#fff;border:1px solid rgba(0,53,39,0.10);border-radius:16px;padding:24px;box-shadow:0 2px 12px rgba(0,53,39,0.04);}
+.process-num{width:36px;height:36px;border-radius:50%;background:rgba(0,53,39,0.08);display:flex;align-items:center;justify-content:center;font-family:'Newsreader',Georgia,serif;font-size:16px;font-weight:600;color:#003527;margin-bottom:12px;}
+</style>
+</head>
+<body class="min-h-screen bg-background ivory-texture antialiased">
+
+<!-- Nav -->
+<header class="px-10 py-5 flex items-center justify-between border-b border-outline-variant/20 bg-surface/80 backdrop-blur-md sticky top-0 z-10">
+  <a href="index.html" class="font-display font-semibold text-xl text-primary">BANAHUB</a>
+  <div class="flex items-center gap-4">
+    <a href="membership.html" class="font-sans text-sm text-on-surface-variant hover:text-primary transition-colors">Join $8/mo</a>
+    <a href="login.html" class="font-sans text-sm text-on-surface-variant hover:text-primary transition-colors">Sign In</a>
+    <a href="#register-form" class="bg-primary text-on-primary px-5 py-2 rounded font-sans font-semibold text-sm hover:bg-primary-container transition-colors">Start Your Raise →</a>
+  </div>
+</header>
+
+<!-- Hero -->
+<section class="hero-glass px-6 md:px-14 py-20 md:py-28 relative">
+  <div class="max-w-container-max mx-auto relative z-10">
+    <div class="max-w-3xl anim-up">
+      <span class="inline-block font-sans font-bold text-xs tracking-[0.18em] uppercase text-white/60 mb-4">Capital Raise Campaign</span>
+      <h1 class="font-display font-semibold text-4xl md:text-6xl text-white mb-6 leading-tight">A structured capital campaign delivered to investors matched to your mandate</h1>
+      <p class="font-sans text-base md:text-lg text-white/75 mb-10 max-w-2xl">BANAHUB curates your campaign materials, matches your raise against active investor mandates in our network, and facilitates introductions where alignment exists. Advisory-backed. We do not guarantee investor meetings, capital commitments, or outcomes.</p>
+      <div class="flex flex-wrap gap-4">
+        <a href="#register-form" class="bg-white text-primary px-8 py-3.5 rounded-xl font-sans font-bold text-sm hover:bg-gray-50 transition-colors">Register Your Campaign</a>
+        <a href="#how-it-works" class="border border-white/25 text-white px-8 py-3.5 rounded-xl font-sans font-semibold text-sm hover:border-white/50 transition-colors">How It Works</a>
+      </div>
+    </div>
+    </div>
+  </div>
+  </div>
+</section>
+
+<!-- How it works -->
+<section id="how-it-works" class="py-20 px-6 md:px-14 bg-surface">
+  <div class="max-w-container-max mx-auto">
+    <div class="text-center mb-14 anim-up">
+      <span class="block font-sans font-bold text-xs tracking-[0.15em] uppercase text-on-surface-variant mb-3">Process</span>
+      <h2 class="font-display font-semibold text-3xl md:text-4xl text-primary">How BANAHUB Runs Your Raise</h2>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 anim-up anim-up-d1">
+      <div class="process-card">
+        <div class="process-num">1</div>
+        <h3 class="font-display font-semibold text-lg text-primary mb-2">Register &amp; Brief</h3>
+        <p class="font-sans text-sm text-on-surface-variant">Complete your campaign registration. Our team schedules an advisory call to review your deck, financials, and raise narrative.</p>
+      </div>
+      <div class="process-card">
+        <div class="process-num">2</div>
+        <h3 class="font-display font-semibold text-lg text-primary mb-2">Advisory Package</h3>
+        <p class="font-sans text-sm text-on-surface-variant">We refine your pitch materials, investment memo, and investor messaging to institutional standard before any outreach begins.</p>
+      </div>
+      <div class="process-card">
+        <div class="process-num">3</div>
+        <h3 class="font-display font-semibold text-lg text-primary mb-2">Curated Campaign</h3>
+        <p class="font-sans text-sm text-on-surface-variant">Your campaign goes out to 1,000+ investors matched by mandate, sector, geography, and cheque size — not a blast list.</p>
+      </div>
+      <div class="process-card">
+        <div class="process-num">4</div>
+        <h3 class="font-display font-semibold text-lg text-primary mb-2">Introductions</h3>
+        <p class="font-sans text-sm text-on-surface-variant">Interested investors are introduced directly. We facilitate the first meeting, handle follow-up, and track engagement on your behalf.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- What's included -->
+<section class="py-20 px-6 md:px-14 bg-surface-container-lowest border-y border-outline-variant/20">
+  <div class="max-w-container-max mx-auto">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+      <div class="anim-up">
+        <span class="block font-sans font-bold text-xs tracking-[0.15em] uppercase text-on-surface-variant mb-3">What You Get</span>
+        <h2 class="font-display font-semibold text-3xl text-primary mb-6">An Institutional-Grade Campaign, End to End</h2>
+        <div class="flex flex-col gap-4">
+          <div class="flex gap-4"><span class="material-symbols-outlined text-primary mt-0.5">check_circle</span><div><p class="font-sans font-semibold text-sm text-on-surface">Advisory pitch review</p><p class="font-sans text-sm text-on-surface-variant">Deck, memo, and narrative reviewed before any investor sees it</p></div></div>
+          <div class="flex gap-4"><span class="material-symbols-outlined text-primary mt-0.5">check_circle</span><div><p class="font-sans font-semibold text-sm text-on-surface">1,000+ curated investor outreach</p><p class="font-sans text-sm text-on-surface-variant">Matched by mandate — VC, family office, PE, sovereign</p></div></div>
+          <div class="flex gap-4"><span class="material-symbols-outlined text-primary mt-0.5">check_circle</span><div><p class="font-sans font-semibold text-sm text-on-surface">Multi-region distribution</p><p class="font-sans text-sm text-on-surface-variant">Southeast Asia, Gulf (UAE, KSA, Qatar), North Asia (Japan, Korea, HK)</p></div></div>
+          <div class="flex gap-4"><span class="material-symbols-outlined text-primary mt-0.5">check_circle</span><div><p class="font-sans font-semibold text-sm text-on-surface">Warm introductions</p><p class="font-sans text-sm text-on-surface-variant">Only interested investors are introduced — no cold handoffs</p></div></div>
+          <div class="flex gap-4"><span class="material-symbols-outlined text-primary mt-0.5">check_circle</span><div><p class="font-sans font-semibold text-sm text-on-surface">Campaign tracking &amp; reporting</p><p class="font-sans text-sm text-on-surface-variant">Engagement reports every 2 weeks while the campaign is active</p></div></div>
+        </div>
+      </div>
+      <div class="anim-up anim-up-d1">
+        <div class="bg-primary rounded-2xl p-8 text-white">
+          <p class="font-sans font-bold text-xs tracking-[0.15em] uppercase text-white/60 mb-4">Who This Is For</p>
+          <div class="flex flex-col gap-5">
+            <div><p class="font-display font-semibold text-lg mb-1">Founders raising Series A–C</p><p class="font-sans text-sm text-white/65">$2M – $50M+ mandates, institutional-ready</p></div>
+            <div><p class="font-display font-semibold text-lg mb-1">GPs launching a new fund</p><p class="font-sans text-sm text-white/65">VC, PE, credit, or real estate fund managers seeking LPs</p></div>
+            <div><p class="font-display font-semibold text-lg mb-1">Pre-IPO companies</p><p class="font-sans text-sm text-white/65">Bridge rounds and strategic investors ahead of listing</p></div>
+            <div><p class="font-display font-semibold text-lg mb-1">Cross-border expansion</p><p class="font-sans text-sm text-white/65">Companies entering SEA, Gulf, or North Asia seeking capital + market partners simultaneously</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Registration form -->
+<section id="register-form" class="py-20 px-6 md:px-14 bg-surface">
+  <div class="max-w-2xl mx-auto">
+    <div class="text-center mb-10 anim-up">
+      <span class="block font-sans font-bold text-xs tracking-[0.15em] uppercase text-on-surface-variant mb-3">Get Started</span>
+      <h2 class="font-display font-semibold text-3xl md:text-4xl text-primary mb-3">Register Your Campaign</h2>
+      <p class="font-sans text-sm text-on-surface-variant">Fill in the details below. Our team will review and be in touch within 2 business days to schedule your advisory call.</p>
+    </div>
+
+    <div id="form-view" class="anim-up anim-up-d1">
+      <div id="err-box" class="hidden mb-5 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700"></div>
+      <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-8 md:p-10 flex flex-col gap-6">
+
+        <!-- Step dots -->
+        <div class="flex items-center gap-2 mb-2">
+          <div class="step-dot active" id="sdot-1"></div>
+          <div style="flex:1;height:1px;background:rgba(0,53,39,0.10)"></div>
+          <div class="step-dot pending" id="sdot-2"></div>
+          <div style="flex:1;height:1px;background:rgba(0,53,39,0.10)"></div>
+          <div class="step-dot pending" id="sdot-3"></div>
+          <span style="font-size:11px;color:rgba(27,28,26,0.40);margin-left:8px" id="fdot-label">Step 1 of 3</span>
+        </div>
+
+        <!-- Step 1: Founder -->
+        <div id="fs-1">
+          <h3 class="font-display font-semibold text-xl text-primary mb-5">About You</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div><label class="f-label">Full Name *</label><input id="fr-name" class="f-input" placeholder="Your legal name"/></div>
+            <div><label class="f-label">Title / Role *</label><input id="fr-title" class="f-input" placeholder="CEO, Founder, GP…"/></div>
+            <div class="sm:col-span-2"><label class="f-label">Email *</label><input id="fr-email" class="f-input" type="email" placeholder="you@company.com"/></div>
+            <div><label class="f-label">Phone</label><input id="fr-phone" class="f-input" type="tel" placeholder="+65 XXXX XXXX"/></div>
+            <div><label class="f-label">LinkedIn Profile</label><input id="fr-linkedin" class="f-input" placeholder="linkedin.com/in/…"/></div>
+          </div>
+          <button onclick="fStep(2)" class="bg-primary text-on-primary w-full py-3 rounded-xl font-sans font-semibold text-sm hover:bg-primary-container transition-colors mt-6">Continue →</button>
+        </div>
+
+        <!-- Step 2: Company & Raise -->
+        <div id="fs-2" class="hidden">
+          <h3 class="font-display font-semibold text-xl text-primary mb-5">Company &amp; Raise Details</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="sm:col-span-2"><label class="f-label">Company / Fund Name *</label><input id="fr-company" class="f-input" placeholder="Registered entity name"/></div>
+            <div><label class="f-label">Industry / Sector *</label>
+              <select id="fr-industry" class="f-input">
+                <option>Technology</option><option>Fintech</option><option>Healthcare</option>
+                <option>Real Estate</option><option>Infrastructure</option><option>Energy / Clean Tech</option>
+                <option>Consumer</option><option>Private Credit</option><option>Fund (VC/PE/Credit)</option><option>Other</option>
+              </select>
+            </div>
+            <div><label class="f-label">Raise Stage</label>
+              <select id="fr-stage" class="f-input">
+                <option>Pre-Seed</option><option>Seed</option><option>Series A</option>
+                <option>Series B</option><option>Series C+</option><option>Growth</option>
+                <option>Pre-IPO Bridge</option><option>Fund Launch (LP raise)</option>
+              </select>
+            </div>
+            <div><label class="f-label">Target Raise Amount *</label><input id="fr-amount" class="f-input" placeholder="e.g. $10,000,000"/></div>
+            <div><label class="f-label">Currency</label>
+              <select id="fr-currency" class="f-input">
+                <option>USD</option><option>SGD</option><option>AED</option><option>EUR</option><option>JPY</option>
+              </select>
+            </div>
+            <div class="sm:col-span-2"><label class="f-label">Target Investor Regions (select all)</label>
+              <div class="flex flex-wrap gap-2 mt-1" id="fr-regions">
+                <span class="sector-chip px-3 py-1.5 border border-outline-variant rounded-full font-sans text-xs text-on-surface-variant cursor-pointer select-none transition-all" onclick="toggleChip(this)">Southeast Asia</span>
+                <span class="sector-chip px-3 py-1.5 border border-outline-variant rounded-full font-sans text-xs text-on-surface-variant cursor-pointer select-none transition-all" onclick="toggleChip(this)">Gulf (UAE/KSA/Qatar)</span>
+                <span class="sector-chip px-3 py-1.5 border border-outline-variant rounded-full font-sans text-xs text-on-surface-variant cursor-pointer select-none transition-all" onclick="toggleChip(this)">North Asia (JP/KR/HK)</span>
+                <span class="sector-chip px-3 py-1.5 border border-outline-variant rounded-full font-sans text-xs text-on-surface-variant cursor-pointer select-none transition-all" onclick="toggleChip(this)">Europe</span>
+                <span class="sector-chip px-3 py-1.5 border border-outline-variant rounded-full font-sans text-xs text-on-surface-variant cursor-pointer select-none transition-all" onclick="toggleChip(this)">Global</span>
+              </div>
+            </div>
+          </div>
+          <div class="flex gap-3 mt-6">
+            <button onclick="fStep(1)" class="border border-outline-variant text-on-surface py-3 px-6 rounded-xl font-sans font-semibold text-sm hover:bg-surface-container transition-colors">← Back</button>
+            <button onclick="fStep(3)" class="flex-1 bg-primary text-on-primary py-3 rounded-xl font-sans font-semibold text-sm hover:bg-primary-container transition-colors">Continue →</button>
+          </div>
+        </div>
+
+        <!-- Step 3: Campaign details -->
+        <div id="fs-3" class="hidden">
+          <h3 class="font-display font-semibold text-xl text-primary mb-5">Campaign Briefing</h3>
+          <div class="flex flex-col gap-4">
+            <div><label class="f-label">Describe Your Business / Fund *</label><textarea id="fr-desc" class="f-input" rows="4" placeholder="What does your company do? What problem does it solve? What stage are you at?"></textarea></div>
+            <div><label class="f-label">Use of Proceeds</label><textarea id="fr-use" class="f-input" rows="3" placeholder="How will the capital be deployed?"></textarea></div>
+            <div><label class="f-label">What type of investors are you looking for?</label>
+              <select id="fr-inv-type" class="f-input">
+                <option>Any — open to all mandates</option>
+                <option>Family Offices only</option>
+                <option>Venture Capital</option>
+                <option>Private Equity / Growth</option>
+                <option>Corporate Strategic Investors</option>
+                <option>Sovereign / Institutional LPs</option>
+              </select>
+            </div>
+            <div><label class="f-label">Do you have a pitch deck ready?</label>
+              <select id="fr-deck" class="f-input">
+                <option value="yes">Yes — ready to share</option>
+                <option value="draft">Draft / In progress</option>
+                <option value="no">No — I need advisory help preparing one</option>
+              </select>
+            </div>
+            <div><label class="f-label">Anything else we should know?</label><textarea id="fr-notes" class="f-input" rows="3" placeholder="Previous investors, existing commitments, timeline requirements, deal structure preferences…"></textarea></div>
+            <label class="flex items-start gap-3 cursor-pointer mt-1">
+              <input type="checkbox" id="fr-consent" class="mt-0.5 accent-primary"/>
+              <span class="font-sans text-sm text-on-surface-variant">I confirm all information is accurate and consent to BANAHub sharing this information with relevant investors in our network as part of the campaign. <a href="#" class="text-primary underline">Privacy Policy</a></span>
+            </label>
+          </div>
+          <div class="flex gap-3 mt-6">
+            <button onclick="fStep(2)" class="border border-outline-variant text-on-surface py-3 px-6 rounded-xl font-sans font-semibold text-sm hover:bg-surface-container transition-colors">← Back</button>
+            <button onclick="submitFundraise()" id="fr-submit-btn" class="flex-1 bg-primary text-on-primary py-3 rounded-xl font-sans font-semibold text-sm hover:bg-primary-container transition-colors flex items-center justify-center gap-2">Submit Campaign Registration</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Success -->
+    <div id="success-view" class="hidden text-center py-16 anim-up">
+      <div class="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+        <span class="material-symbols-outlined text-primary" style="font-size:40px">rocket_launch</span>
+      </div>
+      <h2 class="font-display font-semibold text-3xl text-primary mb-3">Campaign Registered</h2>
+      <p class="font-sans text-base text-on-surface-variant mb-8 max-w-md mx-auto">Your campaign is in. Our advisory team will review your submission and reach out within 2 business days to schedule your briefing call.</p>
+      <div class="flex flex-wrap gap-4 justify-center">
+        <a href="index.html" class="bg-primary text-on-primary px-8 py-3 rounded-xl font-sans font-semibold text-sm hover:bg-primary-container transition-colors">Return to Home</a>
+        <a href="membership.html" class="border border-outline-variant text-on-surface px-8 py-3 rounded-xl font-sans font-semibold text-sm hover:bg-surface-container transition-colors">Join Membership</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="border-t border-outline-variant/20 py-10 px-10 text-center">
+  <p class="font-sans text-sm text-on-surface-variant">BANAHub is a market introduction and GTM advisory service. Not a licensed financial adviser. Nothing on this page constitutes financial advice or a solicitation to invest.</p>
+</footer>
+
+<script src="config.js"></script>
+<script src="api.js"></script>
+<script>
+const STEP_LABELS = ['Step 1 of 3','Step 2 of 3','Step 3 of 3'];
+let _fStep = 1;
+
+function fStep(n) {
+  const errEl = document.getElementById('err-box');
+  errEl.classList.add('hidden');
+  // Validate current step before advancing
+  if (n > _fStep) {
+    if (_fStep === 1) {
+      if (!document.getElementById('fr-name').value.trim()) { errEl.textContent='Name required.'; errEl.classList.remove('hidden'); return; }
+      if (!document.getElementById('fr-email').value.trim()) { errEl.textContent='Email required.'; errEl.classList.remove('hidden'); return; }
+    }
+    if (_fStep === 2) {
+      if (!document.getElementById('fr-company').value.trim()) { errEl.textContent='Company / fund name required.'; errEl.classList.remove('hidden'); return; }
+      if (!document.getElementById('fr-amount').value.trim()) { errEl.textContent='Target raise amount required.'; errEl.classList.remove('hidden'); return; }
+    }
+  }
+  for (let i=1;i<=3;i++) {
+    document.getElementById('fs-'+i).classList.toggle('hidden', i!==n);
+    const dot = document.getElementById('sdot-'+i);
+    dot.className = 'step-dot ' + (i<n?'done':i===n?'active':'pending');
+  }
+  document.getElementById('fdot-label').textContent = STEP_LABELS[n-1];
+  _fStep = n;
+  window.scrollTo({top:document.getElementById('register-form').offsetTop-80, behavior:'smooth'});
+}
+
+function toggleChip(el) {
+  el.classList.toggle('selected');
+  if (el.classList.contains('selected')) {
+    el.style.background='#003527'; el.style.color='#fff'; el.style.borderColor='#003527';
+  } else {
+    el.style.background=''; el.style.color=''; el.style.borderColor='';
+  }
+}
+
+async function submitFundraise() {
+  const errEl  = document.getElementById('err-box');
+  const btn    = document.getElementById('fr-submit-btn');
+  const desc   = document.getElementById('fr-desc').value.trim();
+  const consent= document.getElementById('fr-consent').checked;
+  errEl.classList.add('hidden');
+  if (!desc) { errEl.textContent='Please describe your business or fund.'; errEl.classList.remove('hidden'); return; }
+  if (!consent) { errEl.textContent='Please confirm your consent to proceed.'; errEl.classList.remove('hidden'); return; }
+
+  const regions = [...document.querySelectorAll('#fr-regions .selected')].map(el=>el.textContent.trim());
+
+  btn.disabled = true; btn.textContent = 'Submitting…';
+  try {
+    await apiFetch('/api/enquiries', {
+      method: 'POST',
+      body: JSON.stringify({
+        name:    document.getElementById('fr-name').value.trim(),
+        email:   document.getElementById('fr-email').value.trim(),
+        company: document.getElementById('fr-company').value.trim(),
+        source:  'fundraise_campaign',
+        status:  'new',
+        message: [
+          `FUNDRAISE CAMPAIGN REGISTRATION`,
+          `Title: ${document.getElementById('fr-title').value}`,
+          `Phone: ${document.getElementById('fr-phone').value}`,
+          `LinkedIn: ${document.getElementById('fr-linkedin').value}`,
+          `Industry: ${document.getElementById('fr-industry').value}`,
+          `Stage: ${document.getElementById('fr-stage').value}`,
+          `Target: ${document.getElementById('fr-currency').value} ${document.getElementById('fr-amount').value}`,
+          `Regions: ${regions.join(', ')||'Not specified'}`,
+          `Investor type: ${document.getElementById('fr-inv-type').value}`,
+          `Deck ready: ${document.getElementById('fr-deck').value}`,
+          `\nBusiness description:\n${desc}`,
+          `\nUse of proceeds:\n${document.getElementById('fr-use').value}`,
+          `\nAdditional notes:\n${document.getElementById('fr-notes').value}`,
+        ].join('\n'),
+      }),
+    });
+    document.getElementById('form-view').classList.add('hidden');
+    document.getElementById('success-view').classList.remove('hidden');
+    window.scrollTo({top:0,behavior:'smooth'});
+  } catch(e) {
+    errEl.textContent = 'Submission failed. Please try again or email hello@banahub.com directly.';
+    errEl.classList.remove('hidden');
+    btn.disabled = false; btn.textContent = 'Submit Campaign Registration';
+  }
+}
+</script>
+</body>
+</html>

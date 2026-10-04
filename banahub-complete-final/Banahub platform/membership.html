@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Membership | BANAHUB</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico"/>
+<link rel="icon" type="image/png" sizes="512x512" href="logo-icon-512.png"/>
+<link rel="apple-touch-icon" href="apple-touch-icon.png"/>
+<link rel="stylesheet" href="./output.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Manrope:wght@300;400;500;600;700&family=Material+Symbols+Outlined:wght,FILL@400,0&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;}
+body{font-family:'Manrope',system-ui,sans-serif;}
+.font-display{font-family:'Newsreader',Georgia,serif;}
+.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;vertical-align:middle;}
+.ivory-texture{background-image:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23000' fill-opacity='.012' fill-rule='evenodd'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E");}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.anim-up{animation:fadeUp .4s ease-out both;}
+
+/* Plan toggle */
+.billing-toggle{display:inline-flex;background:rgba(0,53,39,0.07);border-radius:40px;padding:4px;gap:2px;}
+.billing-opt{padding:8px 22px;border-radius:36px;border:none;font-family:'Manrope',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;color:rgba(27,28,26,0.55);background:none;}
+.billing-opt.active{background:#003527;color:#fff;}
+
+/* Plan card */
+.plan-card{background:#fff;border:2px solid rgba(0,53,39,0.12);border-radius:20px;padding:32px;transition:all .2s;cursor:pointer;position:relative;}
+.plan-card.selected{border-color:#003527;box-shadow:0 0 0 4px rgba(0,53,39,0.08);}
+.plan-card .check{position:absolute;top:16px;right:16px;width:22px;height:22px;border-radius:50%;background:#003527;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s;}
+.plan-card.selected .check{opacity:1;}
+.check-item{display:flex;align-items:start;gap:10px;margin-bottom:10px;}
+.check-item span.material-symbols-outlined{color:#003527;font-size:17px;margin-top:1px;flex-shrink:0;}
+.check-item p{font-size:13px;color:rgba(27,28,26,0.70);line-height:1.4;}
+
+/* Button */
+.btn-pay{width:100%;padding:15px;border-radius:12px;border:none;background:#003527;color:#fff;font-family:'Manrope',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn-pay:hover{background:#004d37;transform:translateY(-1px);}
+.btn-pay:disabled{opacity:.55;transform:none;cursor:default;}
+.badge-save{display:inline-block;background:#003527;color:#fff;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:20px;margin-left:8px;vertical-align:middle;}
+</style>
+</head>
+<body class="min-h-screen bg-background ivory-texture antialiased">
+
+<header class="px-10 py-5 flex items-center justify-between border-b border-outline-variant/20 bg-surface/80 backdrop-blur-md sticky top-0 z-10">
+  <a href="index.html" class="font-display font-semibold text-xl text-primary">BANAHub</a>
+  <a href="login.html" class="font-sans text-sm text-on-surface-variant hover:text-primary transition-colors">Already a member? Sign in →</a>
+</header>
+
+<main class="max-w-3xl mx-auto px-6 py-14 anim-up">
+  <div class="text-center mb-10">
+    <span class="block font-sans font-bold text-xs text-on-surface-variant tracking-[0.15em] uppercase mb-3">Get Access</span>
+    <h1 class="font-display font-semibold text-4xl md:text-5xl text-primary mb-4">Join BANAHub</h1>
+    <p class="font-sans text-base text-on-surface-variant max-w-lg mx-auto">Access events, programmes, and the member community. Choose the plan that fits you.</p>
+  </div>
+
+  <!-- Billing toggle -->
+  <div class="flex justify-center mb-10">
+    <div class="billing-toggle">
+      <button class="billing-opt active" id="btn-monthly" onclick="setBilling('monthly')">Monthly</button>
+      <button class="billing-opt" id="btn-annual" onclick="setBilling('annual')">Annual <span class="badge-save">Save 8%</span></button>
+    </div>
+  </div>
+
+  <!-- Price display -->
+  <div class="text-center mb-10">
+    <p class="font-display font-semibold text-5xl text-primary" id="price-display">$8</p>
+    <p class="font-sans text-sm text-on-surface-variant mt-1" id="price-sub">per month, billed monthly</p>
+  </div>
+
+  <!-- Feature list -->
+  <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-8 mb-8">
+    <p class="font-sans font-bold text-xs tracking-widest uppercase text-on-surface-variant mb-6">What's included</p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div class="check-item"><span class="material-symbols-outlined">check_circle</span><p>Priority access to BANAHub network events and investor-facing programmes</p></div>
+      <div class="check-item"><span class="material-symbols-outlined">check_circle</span><p>Priority registration for all events and summits</p></div>
+      <div class="check-item"><span class="material-symbols-outlined">check_circle</span><p>Program applications and advisory briefings</p></div>
+      <div class="check-item"><span class="material-symbols-outlined">check_circle</span><p>FundMatch introductions on request</p></div>
+      <div class="check-item"><span class="material-symbols-outlined">check_circle</span><p>Founder Pitch Readiness Audit (discounted)</p></div>
+      <div class="check-item"><span class="material-symbols-outlined">check_circle</span><p>Deal room access for open mandates</p></div>
+      <div class="check-item"><span class="material-symbols-outlined">check_circle</span><p>Member-only newsletter and market intelligence</p></div>
+      <div class="check-item" id="annual-bonus" style="display:none"><span class="material-symbols-outlined" style="color:#003527">star</span><p><strong>Annual only:</strong> 30-min advisory call with the BANAHub team</p></div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div id="error-msg" class="hidden mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700"></div>
+  <button class="btn-pay" id="pay-btn" onclick="startCheckout()">
+    <span class="material-symbols-outlined" style="font-size:18px">lock</span>
+    <span id="pay-label">Get Started — $8 / month</span>
+  </button>
+  <p class="text-center font-sans text-xs text-on-surface-variant mt-4">Secure payment via Stripe. Cancel monthly plans anytime. Membership provides platform access only — investor introductions and advisory work are separate engagements with separate eligibility criteria. Annual plans are non-refundable after 14 days.</p>
+  <p class="text-center font-sans text-xs text-on-surface-variant mt-2">Need institutional access instead? <a href="register.html" class="text-primary font-semibold hover:underline">Apply as an institution →</a></p>
+</main>
+
+<script src="config.js"></script>
+<script src="api.js"></script>
+<script>
+let _billing = 'monthly';
+
+function setBilling(b) {
+  _billing = b;
+  document.getElementById('btn-monthly').classList.toggle('active', b==='monthly');
+  document.getElementById('btn-annual').classList.toggle('active', b==='annual');
+  const isAnnual = b === 'annual';
+  document.getElementById('price-display').textContent = isAnnual ? '$88' : '$8';
+  document.getElementById('price-sub').textContent = isAnnual ? 'per year, billed annually — ~$7.33/mo' : 'per month, billed monthly';
+  document.getElementById('pay-label').textContent = isAnnual ? 'Get Started — $88 / year' : 'Get Started — $8 / month';
+  document.getElementById('annual-bonus').style.display = isAnnual ? 'flex' : 'none';
+}
+
+async function startCheckout() {
+  const btn = document.getElementById('pay-btn');
+  const errEl = document.getElementById('error-msg');
+  errEl.classList.add('hidden');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;animation:spin 1s linear infinite">progress_activity</span><span>Redirecting to secure checkout…</span>';
+
+  try {
+    const res = await apiFetch('/api/membership/checkout', {
+      method: 'POST',
+      body: JSON.stringify({ billing: _billing }),
+    });
+    const data = await res.json();
+    if (!res.ok || !data.url) throw new Error(data.error || 'Checkout failed. Please try again.');
+    window.location.href = data.url;
+  } catch(e) {
+    errEl.textContent = e.message;
+    errEl.classList.remove('hidden');
+    btn.disabled = false;
+    btn.innerHTML = `<span class="material-symbols-outlined" style="font-size:18px">lock</span><span>${_billing==='annual'?'Get Started — $88 / year':'Get Started — $8 / month'}</span>`;
+  }
+}
+</script>
+<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+</body>
+</html>
