@@ -430,7 +430,8 @@ body::before {
 <link rel="stylesheet" href="brand-glass.css">
 <style>
 .pv-dev.active { background: var(--surface-2); color: var(--ink); }
-@media (max-width: 900px) { .pe-grid { grid-template-columns: 1fr !important; } }
+@media (max-width: 900px) { .pe-grid, .ev-grid, #modal-user .modal-body, #modal-crm .modal-body, #modal-enquiry .modal-body { grid-template-columns: 1fr !important; } }
+.ev-grid .f-input, .ev-grid .f-grid > * { min-width: 0; max-width: 100%; box-sizing: border-box; }
 </style>
 </head>
 <body>
@@ -449,8 +450,12 @@ body::before {
   <div id="auth-login" class="auth-card" style="display:none">
     <img src="logo.png" alt="BANAHub" style="height:36px;margin-bottom:10px"/>
     <div class="auth-sub">Admin Operating System</div>
-    <input id="a-email" class="auth-input" type="email" placeholder="admin email" autocomplete="email"/>
-    <input id="a-pw"    class="auth-input" type="password" placeholder="Password" autocomplete="current-password"/>
+    <div id="auth-notadmin" style="display:none;font-size:12px;line-height:1.5;background:rgba(197,160,40,.1);border:1px solid rgba(197,160,40,.3);border-radius:10px;padding:10px;margin-bottom:12px"></div>
+    <button type="button" style="width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:11px;border-radius:10px;border:1px solid var(--border);background:#fff;font:600 13px var(--font-b,inherit);cursor:pointer;margin-bottom:8px;color:var(--ink)" onclick="adminOAuth('google',this)"><svg width="16" height="16" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.6 5.4 2.7 13.3l7.9 6.1C12.5 13.6 17.8 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.7 6c4.5-4.2 6.9-10.3 6.9-17.7z"/><path fill="#FBBC05" d="M10.5 28.6c-.5-1.4-.8-3-.8-4.6s.3-3.2.8-4.6l-7.9-6.1C1 16.6 0 20.2 0 24s1 7.4 2.7 10.7l7.8-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.7-6c-2.1 1.4-4.9 2.3-8.2 2.3-6.2 0-11.5-4.1-13.4-9.8l-7.9 6.1C6.6 42.6 14.6 48 24 48z"/></svg><span>Continue with Google</span></button>
+    <button type="button" style="width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:11px;border-radius:10px;border:1px solid var(--border);background:#fff;font:600 13px var(--font-b,inherit);cursor:pointer;margin-bottom:8px;color:var(--ink)" onclick="adminOAuth('linkedin',this)"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="#0A66C2" d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/></svg><span>Continue with LinkedIn</span></button>
+    <div style="display:flex;align-items:center;gap:10px;margin:10px 0 12px;font-size:11px;color:var(--white-muted);text-transform:uppercase;letter-spacing:.08em"><span style="flex:1;height:1px;background:var(--border)"></span>or<span style="flex:1;height:1px;background:var(--border)"></span></div>
+    <input id="a-email" class="auth-input" type="email" placeholder="admin email" autocomplete="email" onkeydown="if(event.key==='Enter')document.getElementById('a-pw').focus()"/>
+    <input id="a-pw"    class="auth-input" type="password" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"/>
     <button class="auth-btn" id="a-login-btn" onclick="doLogin()">Access Admin OS</button>
     <div id="auth-err" class="auth-err"></div>
     <div class="auth-link" onclick="showForgot()">Forgot password? <span>Reset it</span></div>
@@ -1495,61 +1500,70 @@ Sitemap: https://www.banahub.com/sitemap.xml</textarea></div>
 
 <!-- Event Modal -->
 <div id="modal-event" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeModal('modal-event')">
-  <div class="modal">
+  <div class="modal modal-lg" style="max-width:1040px;width:96vw">
     <div class="modal-header">
-      <div><div class="modal-title">Create Event</div><div class="modal-sub">Summits, roundtables, forums, and cohorts</div></div>
+      <div><div class="modal-title">Create Event</div><div class="modal-sub">Saved events appear on banahub.com/events once published</div></div>
       <button class="modal-close" onclick="closeModal('modal-event')">✕</button>
     </div>
-    <div class="modal-body" style="display:flex;flex-direction:column;gap:16px">
-      <div class="f-group"><label class="f-label">Event Title *</label><input id="ev-title" class="f-input" placeholder="Asia North Capital Summit 2025"/></div>
-      <div class="f-grid">
-        <div class="f-group"><label class="f-label">Type</label><select id="ev-type" class="f-input f-select"><option>Summit</option><option>Roundtable</option><option>Forum</option><option>Cohort Launch</option><option>Workshop</option></select></div>
-        <div class="f-group"><label class="f-label">Format</label><select id="ev-format" class="f-input f-select"><option>In-Person</option><option>Virtual</option><option>Hybrid</option></select></div>
-        <div class="f-group"><label class="f-label">Start Date</label><input id="ev-start" class="f-input" type="datetime-local"/></div>
-        <div class="f-group"><label class="f-label">End Date</label><input id="ev-end" class="f-input" type="datetime-local"/></div>
+    <div class="modal-body ev-grid" style="display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:22px">
+      <div style="display:flex;flex-direction:column;gap:14px;min-width:0">
+        <div class="f-group"><label class="f-label">Event title *</label><input id="ev-title" class="f-input" maxlength="200" placeholder="Capital &amp; Growth Exchange 2026"/></div>
+        <div class="f-grid">
+          <div class="f-group"><label class="f-label">Type</label><select id="ev-type" class="f-input f-select"><option>Summit</option><option>Roundtable</option><option>Forum</option><option>Conference</option><option>Networking</option><option>Cohort Launch</option><option>Workshop</option><option>Webinar</option></select></div>
+          <div class="f-group"><label class="f-label">Format</label><select id="ev-format" class="f-input f-select"><option>In-Person</option><option>Virtual</option><option>Hybrid</option></select></div>
+          <div class="f-group"><label class="f-label">Starts *</label><input id="ev-start" class="f-input" type="datetime-local"/></div>
+          <div class="f-group"><label class="f-label">Ends</label><input id="ev-end" class="f-input" type="datetime-local"/></div>
+        </div>
+        <div class="f-group"><label class="f-label">Location / platform</label><input id="ev-location" class="f-input" maxlength="300" placeholder="Marina Bay Sands, Singapore · or Zoom"/></div>
+        <div class="f-group"><label class="f-label">Event description</label>
+          <textarea id="ev-desc" class="f-input" rows="9" maxlength="10000" style="resize:vertical;line-height:1.55" placeholder="What the event is, who it's for, agenda highlights, speakers, what attendees get…&#10;&#10;Leave a blank line between paragraphs."></textarea>
+          <div style="font-size:11px;color:var(--white-muted);display:flex;justify-content:space-between"><span>Shown on the event page. Blank line = new paragraph.</span><span id="ev-desc-count">0</span></div></div>
+        <div class="f-label" style="margin-top:4px">Links</div>
+        <div class="f-group"><label class="f-label">Event link — registration / tickets / livestream</label><input id="ev-reg" class="f-input" type="url" placeholder="https://…"/>
+          <div style="font-size:11px;color:var(--white-muted)">The main button on the event page opens this link (unless paid checkout, Luma or invite-only is set).</div></div>
+        <div class="f-grid">
+          <div class="f-group"><label class="f-label">Luma page URL</label><input id="ev-luma-url" class="f-input" type="url" placeholder="https://lu.ma/…"/></div>
+          <div class="f-group"><label class="f-label">Video (YouTube / Vimeo / mp4)</label><input id="ev-video" class="f-input" type="url" placeholder="https://youtube.com/watch?v=…"/></div>
+        </div>
       </div>
-      <div class="f-group"><label class="f-label">Location / Platform</label><input id="ev-location" class="f-input" placeholder="Singapore, Marina Bay Sands / Zoom"/></div>
-      <div class="f-group"><label class="f-label">Description</label><textarea id="ev-desc" class="f-input" rows="4" style="resize:vertical" placeholder="Describe the event…"></textarea></div>
-      <div class="f-grid">
-        <div class="f-group"><label class="f-label">Max Attendees</label><input id="ev-cap" class="f-input" type="number" placeholder="50"/></div>
-        <div class="f-group"><label class="f-label">Registration URL (if free/external)</label><input id="ev-reg" class="f-input" placeholder="https://…"/></div>
-      </div>
-      <div class="f-grid">
-        <div class="f-group"><label class="f-label">Price (0 = free)</label><input id="ev-price" class="f-input" type="number" min="0" step="0.01" placeholder="0"/></div>
-        <div class="f-group"><label class="f-label">Currency</label><select id="ev-currency" class="f-input f-select"><option>SGD</option><option>USD</option><option>AED</option><option>EUR</option></select></div>
-      </div>
-      <div class="f-group"><label class="f-label">Cover Image URL</label><div style="display:flex;gap:8px"><input id="ev-img" class="f-input" placeholder="https://…"/><button type="button" class="btn btn-ghost" onclick="openImagePicker(document.getElementById('ev-img').value,u=>document.getElementById('ev-img').value=u)">Browse</button></div></div>
-      <div class="f-group"><label class="f-label">Video URL (YouTube / Vimeo / mp4)</label><input id="ev-video" class="f-input" placeholder="https://youtube.com/watch?v=…"/></div>
-      <div class="f-grid">
-        <div class="f-group"><label class="f-label">Page slug (optional)</label><input id="ev-slug" class="f-input" placeholder="capital-growth-exchange-2026"/></div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div class="f-group"><label class="f-label">Event image</label>
+          <div id="ev-img-preview" style="aspect-ratio:16/9;border-radius:12px;background:linear-gradient(135deg,var(--emerald-deep),var(--bg-2)) center/cover;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;border:1px solid var(--border)">No image</div>
+          <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+            <label class="btn btn-primary btn-sm" style="cursor:pointer"><span class="material-symbols-outlined" style="font-size:14px">upload</span>Upload image<input type="file" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="uploadEventImage(this.files[0]);this.value=''"/></label>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="openImagePicker(document.getElementById('ev-img').value,u=>{document.getElementById('ev-img').value=u;evImgPreview()})">Media library</button>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('ev-img').value='';evImgPreview()">Remove</button>
+          </div>
+          <input id="ev-img" class="f-input" style="margin-top:8px;font-size:12px" placeholder="…or paste an image URL" oninput="evImgPreview()"/>
+          <div style="font-size:11px;color:var(--white-muted)">16:9 landscape works best · JPG/PNG/WEBP up to 5 MB</div></div>
+        <div class="f-grid">
+          <div class="f-group"><label class="f-label">Ticket price (0 = free)</label><input id="ev-price" class="f-input" type="number" min="0" step="0.01" placeholder="0"/></div>
+          <div class="f-group"><label class="f-label">Currency</label><select id="ev-currency" class="f-input f-select"><option>SGD</option><option>USD</option><option>AED</option><option>EUR</option></select></div>
+          <div class="f-group"><label class="f-label">Capacity</label><input id="ev-cap" class="f-input" type="number" min="0" placeholder="150"/></div>
+          <div class="f-group"><label class="f-label">Page slug</label><input id="ev-slug" class="f-input" placeholder="cge-2026"/></div>
+        </div>
         <div class="f-group"><label class="f-label">Custom landing page (optional)</label><input id="ev-page-url" class="f-input" placeholder="/capital-growth-exchange"/></div>
+        <div style="display:grid;grid-template-columns:auto 1fr;gap:10px 12px;align-items:center;padding:12px;border:1px solid var(--border);border-radius:12px">
+          <label class="toggle"><input type="checkbox" id="ev-pub"/><span class="toggle-slider"></span></label><span style="font-size:13px">Published (visible on website)</span>
+          <label class="toggle"><input type="checkbox" id="ev-featured"/><span class="toggle-slider"></span></label><span style="font-size:13px">Featured at top of Events page</span>
+          <label class="toggle"><input type="checkbox" id="ev-invite-only"/><span class="toggle-slider"></span></label><span style="font-size:13px">Invite only (visitors request access)</span>
+          <label class="toggle"><input type="checkbox" id="ev-require-approval"/><span class="toggle-slider"></span></label><span style="font-size:13px">Require approval (Luma)</span>
+        </div>
+        <div id="ev-public-link" style="display:none;font-size:12px;background:var(--surface);border-radius:10px;padding:10px"></div>
+        <div id="ev-luma-status" style="font-size:12px;color:var(--white-muted)"></div>
+        <input type="hidden" id="ev-id"/>
       </div>
-      <div style="font-size:11px;color:var(--white-muted);margin-top:-8px">Event page link: custom landing page if set, otherwise <code>/event?id=…</code> (auto-generated from these details).</div>
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-        <label class="f-label" style="margin:0">Published</label>
-        <label class="toggle"><input type="checkbox" id="ev-pub"/><span class="toggle-slider"></span></label>
-        <label class="f-label" style="margin:0;margin-left:8px">Featured on homepage</label>
-        <label class="toggle"><input type="checkbox" id="ev-featured"/><span class="toggle-slider"></span></label>
-      </div>
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding-top:8px;border-top:1px solid var(--border)">
-        <label class="f-label" style="margin:0">Invite Only</label>
-        <label class="toggle"><input type="checkbox" id="ev-invite-only"/><span class="toggle-slider"></span></label>
-        <label class="f-label" style="margin:0;margin-left:8px">Require Approval</label>
-        <label class="toggle"><input type="checkbox" id="ev-require-approval"/><span class="toggle-slider"></span></label>
-      </div>
-      <div id="ev-luma-status" style="font-size:12px;color:var(--white-muted)"></div>
-      <input type="hidden" id="ev-id"/>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="previewEventFromModal()"><span class="material-symbols-outlined" style="font-size:14px">visibility</span>View page</button>
       <button class="btn btn-ghost" onclick="syncEventToLuma()" id="ev-luma-btn">Sync to Luma</button>
+      <span style="flex:1"></span>
       <button class="btn btn-ghost" onclick="closeModal('modal-event')">Cancel</button>
-      <button class="btn btn-ghost" onclick="document.getElementById('ev-pub').checked=false;saveEvent()"><span class="material-symbols-outlined" style="font-size:14px">draft</span>Save as Draft</button>
-      <button class="btn btn-primary" id="ev-save-btn" onclick="document.getElementById('ev-pub').checked=true;saveEvent()">Publish</button>
+      <button class="btn btn-ghost" onclick="saveEvent(false)"><span class="material-symbols-outlined" style="font-size:14px">draft</span>Save as Draft</button>
+      <button class="btn btn-primary" id="ev-save-btn" onclick="saveEvent(true)">Publish</button>
     </div>
   </div>
 </div>
-
 <!-- Preview Modal (embedded page) -->
 <div id="modal-preview" class="modal-overlay" style="display:none" onclick="if(event.target===this)closePreview()">
   <div class="modal" style="max-width:1280px;width:96vw;max-height:94vh;display:flex;flex-direction:column">
@@ -1878,7 +1892,7 @@ Sitemap: https://www.banahub.com/sitemap.xml</textarea></div>
 ════════════════════════════════════════════════════════════ -->
 <script src="config.js"></script>
 <script src="api.js"></script>
-<script src="admin-v3.js?v=3.2.1"></script>
+<script src="admin-v3.js?v=3.3.0"></script>
 <script>
 
 // ── State ────────────────────────────────────────────────────
@@ -1918,7 +1932,13 @@ async function apiFetch(path, opts = {}) {
     const data = await fetch(`${API_BASE}/api/auth/me`, { credentials: 'include' });
     if (!data.ok) { showLogin(); return; }
     const { user } = await data.json();
-    if (user.role !== 'admin') { showLogin(); return; }
+    if (user.role !== 'admin') {
+      showLogin();
+      const n = document.getElementById('auth-notadmin');
+      n.style.display = 'block';
+      n.innerHTML = 'Signed in as <b>' + esc(user.email || '') + '</b>, which is not an admin account. <a href="#" onclick="adminSignOut();return false" style="color:var(--emerald);font-weight:700">Sign out</a> to switch account, or go to the <a href="/dashboard" style="color:var(--emerald);font-weight:700">member portal</a>.';
+      return;
+    }
     ADMIN_USER = user;
     // Refresh CSRF token
     CSRF_TOKEN = await getCsrf(true);
@@ -1973,9 +1993,27 @@ async function doLogin() {
 }
 
 async function doForgot() {
-  await new Promise(r => setTimeout(r, 800));
+  const email = document.getElementById('a-forgot-email').value.trim().toLowerCase();
+  if (!email) { toast('Enter your email', 'warn'); return; }
+  try {
+    const sb = await window.getBanaSupabaseClient();
+    await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + '/reset-password-confirm' });
+  } catch (e) {}
   toast('If that email exists, a reset link was sent.', 'success');
   showLogin2();
+}
+async function adminOAuth(provider, btn) {
+  const span = btn.querySelector('span'), label = span.textContent;
+  btn.disabled = true; span.textContent = 'Redirecting…';
+  try { await window.banaOAuth(provider, '/admin'); }
+  catch (e) {
+    btn.disabled = false; span.textContent = label;
+    const err = document.getElementById('auth-err'); err.textContent = (e && e.message) || 'This sign-in method is not enabled yet.'; err.style.display = 'block';
+  }
+}
+async function adminSignOut() {
+  try { const sb = await window.getBanaSupabaseClient(); await sb.auth.signOut(); } catch (e) {}
+  localStorage.removeItem('bana_access_token'); localStorage.removeItem('bana_user'); location.reload();
 }
 
 async function enterOS() {
@@ -2951,82 +2989,6 @@ function deleteArticle(i) {
 function filterArticles() { loadArticles(); }
 
 // ── Events ───────────────────────────────────────────────────
-function openEventModal() {
-  ['ev-id','ev-title','ev-location','ev-start','ev-end','ev-desc','ev-cap','ev-reg','ev-img','ev-price','ev-video','ev-slug','ev-page-url'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('ev-type').selectedIndex=0; document.getElementById('ev-format').selectedIndex=0; document.getElementById('ev-currency').selectedIndex=0;
-  document.getElementById('ev-pub').checked=false; document.getElementById('ev-featured').checked=false;
-  document.getElementById('ev-invite-only').checked=false; document.getElementById('ev-require-approval').checked=false;
-  document.getElementById('ev-luma-status').textContent='';
-  document.getElementById('ev-luma-btn').style.display='none';
-  document.querySelector('#modal-event .modal-title').textContent='Create Event';
-  document.getElementById('ev-save-btn').textContent='Publish';
-  document.getElementById('modal-event').style.display='flex';
-}
-function editEvent(id) {
-  const e = events_db.find(x=>x.id===id); if(!e) return;
-  document.getElementById('ev-id').value=e.id;
-  document.getElementById('ev-title').value=e.title||'';
-  document.getElementById('ev-type').value=e.type||'Summit';
-  document.getElementById('ev-format').value=e.format||'In-Person';
-  document.getElementById('ev-start').value=e.event_date?e.event_date.slice(0,16):'';
-  document.getElementById('ev-end').value=e.end_date?e.end_date.slice(0,16):'';
-  document.getElementById('ev-location').value=e.location||'';
-  document.getElementById('ev-desc').value=e.description||'';
-  document.getElementById('ev-cap').value=e.capacity||'';
-  document.getElementById('ev-reg').value=e.registration_url||'';
-  document.getElementById('ev-img').value=e.cover_image||'';
-  document.getElementById('ev-video').value=e.video_url||'';
-  document.getElementById('ev-slug').value=e.slug||'';
-  document.getElementById('ev-page-url').value=e.page_url||'';
-  document.getElementById('ev-price').value=e.price_amount||0;
-  document.getElementById('ev-currency').value=e.currency||'SGD';
-  document.getElementById('ev-pub').checked=!!e.published;
-  document.getElementById('ev-featured').checked=!!e.featured;
-  document.getElementById('ev-invite-only').checked=!!e.invite_only;
-  document.getElementById('ev-require-approval').checked=!!e.require_approval;
-  document.getElementById('ev-luma-btn').style.display='inline-block';
-  document.getElementById('ev-luma-status').innerHTML = e.luma_url
-    ? `Synced to Luma — <a href="${esc(e.luma_url)}" target="_blank" style="color:var(--emerald)">${esc(e.luma_url)}</a> · <span style="color:var(--emerald);cursor:pointer" onclick="syncEventRsvps('${e.id}')">Sync RSVPs</span>`
-    : 'Not synced to Luma yet — save the event, then click "Sync to Luma".';
-  document.querySelector('#modal-event .modal-title').textContent='Edit Event';
-  document.getElementById('ev-save-btn').textContent=e.published?'Save & Keep Live':'Publish';
-  document.getElementById('modal-event').style.display='flex';
-}
-async function saveEvent() {
-  const id = document.getElementById('ev-id').value;
-  const payload = {
-    title: document.getElementById('ev-title').value,
-    type: document.getElementById('ev-type').value,
-    format: document.getElementById('ev-format').value,
-    event_date: document.getElementById('ev-start').value || null,
-    end_date: document.getElementById('ev-end').value || null,
-    location: document.getElementById('ev-location').value,
-    description: document.getElementById('ev-desc').value,
-    capacity: document.getElementById('ev-cap').value ? Number(document.getElementById('ev-cap').value) : null,
-    registration_url: document.getElementById('ev-reg').value,
-    cover_image: document.getElementById('ev-img').value,
-    video_url: document.getElementById('ev-video').value || null,
-    slug: (document.getElementById('ev-slug').value || '').trim().toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') || null,
-    page_url: document.getElementById('ev-page-url').value.trim() || null,
-    price_amount: Number(document.getElementById('ev-price').value) || 0,
-    currency: document.getElementById('ev-currency').value,
-    invite_only: document.getElementById('ev-invite-only').checked,
-    require_approval: document.getElementById('ev-require-approval').checked,
-    published: document.getElementById('ev-pub').checked,
-    featured: document.getElementById('ev-featured').checked,
-  };
-  if (!payload.title) { toast('Title required','warn'); return; }
-  try {
-    let savedId = id;
-    if (id) { const r = await api(`/api/admin/content/events/${id}`, 'PATCH', payload); if (!r || !r.event) throw new Error((r && r.error) || 'Save failed — run SQL migration 08'); }
-    else { const r = await api('/api/admin/content/events', 'POST', payload); savedId = r.event && r.event.id; if (!savedId) throw new Error((r && r.error) || 'Save failed — run SQL migration 08'); }
-    toast(id?'Event updated':'Event created','success');
-    logActivity(id?'admin.event_update':'admin.event_create','admin',payload.title);
-    await loadCmsContent(); loadEvents();
-    if (savedId && !id) { document.getElementById('ev-id').value = savedId; document.getElementById('ev-luma-btn').style.display='inline-block'; toast('Now click "Sync to Luma" to enable RSVP/invite management','success'); }
-    else closeModal('modal-event');
-  } catch(err) { console.warn('saveEvent failed', err); toast(err.message || 'Could not save event','warn'); }
-}
 async function syncEventToLuma() {
   const id = document.getElementById('ev-id').value;
   if (!id) { toast('Save the event first','warn'); return; }
@@ -3060,15 +3022,6 @@ async function syncEventRsvps(id) {
     if (!res.ok) throw new Error(data.error || 'RSVP sync failed');
     toast(`Synced ${data.synced} RSVPs`,'success');
   } catch(err) { toast(err.message || 'RSVP sync failed','warn'); }
-}
-async function toggleEvent(id, publish) {
-  try { await api(`/api/admin/content/events/${id}`, 'PATCH', { published: publish }); toast(publish?'Published!':'Unpublished','success'); await loadCmsContent(); loadEvents(); }
-  catch(err) { toast('Could not update event','warn'); }
-}
-async function deleteEvent(id) {
-  if(!confirm('Delete?')) return;
-  try { await api(`/api/admin/content/events/${id}`, 'DELETE'); toast('Deleted','warn'); await loadCmsContent(); loadEvents(); }
-  catch(err) { toast('Could not delete event','warn'); }
 }
 
 // ── Media Library ────────────────────────────────────────────

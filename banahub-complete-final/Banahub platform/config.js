@@ -791,17 +791,20 @@ window.fetch = async function(input, opts) {
     }
     if (route.startsWith('/admin/content/events') && method === 'POST') {
       const { data: { user } } = await sb.auth.getUser();
-      const { data } = await sb.from('events').insert(Object.assign({}, body, { created_by: user && user.id })).select().single();
+      const { data, error } = await sb.from('events').insert(Object.assign(_clean(body), { created_by: user && user.id })).select().single();
+      if (error) return _resp({ success: false, error: error.message }, 400);
       return _resp({ success: true, event: data }, 201);
     }
     if (route.startsWith('/admin/content/events/') && (method === 'PATCH' || method === 'PUT')) {
       const id = route.split('/admin/content/events/')[1];
-      const { data } = await sb.from('events').update(body).eq('id', id).select().single();
+      const { data, error } = await sb.from('events').update(_clean(body)).eq('id', id).select().single();
+      if (error) return _resp({ success: false, error: error.message }, 400);
       return _resp({ success: true, event: data });
     }
     if (route.startsWith('/admin/content/events/') && method === 'DELETE') {
       const id = route.split('/admin/content/events/')[1];
-      await sb.from('events').delete().eq('id', id);
+      const { error } = await sb.from('events').delete().eq('id', id);
+      if (error) return _resp({ success: false, error: error.message }, 400);
       return _resp({ success: true });
     }
 
@@ -812,12 +815,14 @@ window.fetch = async function(input, opts) {
     }
     if (route.startsWith('/admin/content/programs') && method === 'POST') {
       const { data: { user } } = await sb.auth.getUser();
-      const { data } = await sb.from('programs').insert(Object.assign({}, body, { created_by: user && user.id })).select().single();
+      const { data, error } = await sb.from('programs').insert(Object.assign(_clean(body), { created_by: user && user.id })).select().single();
+      if (error) return _resp({ success: false, error: error.message }, 400);
       return _resp({ success: true, program: data }, 201);
     }
     if (route.startsWith('/admin/content/programs/') && (method === 'PATCH' || method === 'PUT')) {
       const id = route.split('/admin/content/programs/')[1];
-      const { data } = await sb.from('programs').update(body).eq('id', id).select().single();
+      const { data, error } = await sb.from('programs').update(_clean(body)).eq('id', id).select().single();
+      if (error) return _resp({ success: false, error: error.message }, 400);
       return _resp({ success: true, program: data });
     }
     if (route.startsWith('/admin/content/programs/') && method === 'DELETE') {

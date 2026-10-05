@@ -1197,3 +1197,102 @@ function memberToCrm() {
   crmCreateFrom({ name: u.full_name || u.email, email: u.email, company: u.company_name, title: u.title, phone: u.phone, linkedin_url: u.linkedin_url,
     contact_type: u.role === 'investor' ? 'investor' : u.role === 'partner' ? 'partner' : 'member', pipeline_stage: 'qualified', source: 'member', source_id: u.id });
 }
+
+// ═════════════════════════════════════════════════════════════════════════
+// 12. EVENT EDITOR (create · draft · publish · edit · image upload · links)
+// ═════════════════════════════════════════════════════════════════════════
+const SITE_ORIGIN = location.origin;
+function evImgPreview() {
+  const url = $('ev-img').value.trim(), box = $('ev-img-preview');
+  if (url && /^https?:\/\//i.test(url)) { box.style.backgroundImage = `url("${url.replace(/"/g, '%22')}")`; box.textContent = ''; }
+  else { box.style.backgroundImage = ''; box.textContent = 'No image'; }
+}
+async function uploadEventImage(file) {
+  if (!file) return;
+  if (!/^image\/(png|jpeg|webp)$/.test(file.type)) { toast('Use a JPG, PNG or WEBP image', 'warn'); return; }
+  if (file.size > 5 * 1024 * 1024) { toast('Image must be under 5 MB', 'warn'); return; }
+  const box = $('ev-img-preview'); box.textContent = 'Uploading…';
+  try {
+    const sb = await window.getBanaSupabaseClient();
+    const path = `events/${Date.now()}-${file.name.replace(/[^a-z0-9._-]/gi, '_')}`;
+    const { error } = await sb.storage.from('media').upload(path, file, { upsert: false, contentType: file.type, cacheControl: '31536000' });
+    if (error) throw error;
+    const url = sb.storage.from('media').getPublicUrl(path).data.publicUrl;
+    await api('/api/admin/content/media', 'POST', { file_url: url, file_name: file.name, file_type: file.type, storage_path: path });
+    $('ev-img').value = url; evImgPreview(); toast('Image uploaded', 'success');
+  } catch (e) { box.textContent = 'Upload failed'; toast('Upload failed: ' + (e.message || e), 'warn'); }
+}
+function evShowPublicLink(e) {
+  const el = $('ev-public-link');
+  if (!e || !e.id) { el.style.display = 'none'; return; }
+  const url = SITE_ORIGIN + eventPageUrl(e);
+  el.style.display = '';
+  el.innerHTML = `<div style="color:var(--white-muted);margin-bottom:4px">${e.published ? 'Live at' : 'Draft — will be live at'}</div>
+    <div style="display:flex;gap:6px;align-items:center"><code style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(url)}</code>
+    <button class="btn btn-ghost btn-sm" onclick="navigator.clipboard&&navigator.clipboard.writeText('${esc(url)}');toast('Link copied','success')">Copy</button></div>`;
+}
+function _evSet(e) {
+  const v = (id, val) => { $(id).value = val == null ? '' : val; };
+  const dt = d => d ? new Date(new Date(d).getTime() - new Date(d).getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '';
+  v('ev-id', e.id); v('ev-title', e.title); $('ev-type').value = e.type || 'Summit'; $('ev-format').value = e.format || 'In-Person';
+  v('ev-start', dt(e.event_date)); v('ev-end', dt(e.end_date)); v('ev-location', e.location); v('ev-desc', e.description);
+  v('ev-reg', e.registration_url); v('ev-luma-url', e.luma_url); v('ev-video', e.video_url); v('ev-img', e.cover_image);
+  v('ev-price', e.price_amount || ''); $('ev-currency').value = e.currency || 'SGD'; v('ev-cap', e.capacity); v('ev-slug', e.slug); v('ev-page-url', e.page_url);
+  $('ev-pub').checked = !!e.published; $('ev-featured').checked = !!e.featured; $('ev-invite-only').checked = !!e.invite_only; $('ev-require-approval').checked = !!e.require_approval;
+  $('ev-desc-count').textContent = `${(e.description || '').length} / 10000`;
+  evImgPreview(); evShowPublicLink(e.id ? e : null);
+  $('ev-luma-btn').style.display = e.id ? '' : 'none';
+  $('ev-luma-status').innerHTML = e.luma_event_id ? `Synced to Luma · <span style="color:var(--emerald);cursor:pointer" onclick="syncEventRsvps('${esc(e.id)}')">Sync RSVPs</span>` : '';
+  document.querySelector('#modal-event .modal-title').textContent = e.id ? 'Edit Event' : 'Create Event';
+  $('ev-save-btn').textContent = e.id && e.published ? 'Save & keep live' : 'Publish';
+}
+function openEventModal() { _evSet({}); $('modal-event').style.display = 'flex'; setTimeout(() => $('ev-title').focus(), 50); }
+function editEvent(id) { const e = (events_db || []).find(x => x.id === id); if (!e) return; _evSet(e); $('modal-event').style.display = 'flex'; }
+document.addEventListener('input', ev => { if (ev.target && ev.target.id === 'ev-desc') $('ev-desc-count').textContent = `${ev.target.value.length} / 10000`; });
+const _okUrl = u => !u || /^https:\/\/[^\s]+$/i.test(u) || /^http:\/\/[^\s]+$/i.test(u);
+async function saveEvent(publish) {
+  const id = $('ev-id').value;
+  if (typeof publish === 'boolean') $('ev-pub').checked = publish;
+  const val = x => $(x).value.trim();
+  const toIso = x => val(x) ? new Date(val(x)).toISOString() : null;
+  const slug = val('ev-slug').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || null;
+  const p = {
+    title: val('ev-title'), type: $('ev-type').value, format: $('ev-format').value,
+    event_date: toIso('ev-start'), end_date: toIso('ev-end'), location: val('ev-location') || null, description: $('ev-desc').value.trim() || null,
+    registration_url: val('ev-reg') || null, luma_url: val('ev-luma-url') || null, video_url: val('ev-video') || null, cover_image: val('ev-img') || null,
+    price_amount: Number(val('ev-price')) || 0, currency: $('ev-currency').value, capacity: val('ev-cap') ? Number(val('ev-cap')) : null,
+    slug, page_url: val('ev-page-url') || null,
+    published: $('ev-pub').checked, featured: $('ev-featured').checked, invite_only: $('ev-invite-only').checked, require_approval: $('ev-require-approval').checked,
+  };
+  if (!p.title) { toast('Event title is required', 'warn'); $('ev-title').focus(); return; }
+  if (p.published && !p.event_date) { toast('Add a start date before publishing', 'warn'); $('ev-start').focus(); return; }
+  if (p.end_date && p.event_date && p.end_date < p.event_date) { toast('End must be after start', 'warn'); return; }
+  for (const [k, l] of [['registration_url', 'Event link'], ['luma_url', 'Luma URL'], ['video_url', 'Video URL'], ['cover_image', 'Image URL']])
+    if (!_okUrl(p[k])) { toast(`${l} must start with https://`, 'warn'); return; }
+  if (p.page_url && !/^\/[a-z0-9\-\/]*$/i.test(p.page_url)) { toast('Custom landing page must be a site path like /capital-growth-exchange', 'warn'); return; }
+  const btn = $('ev-save-btn'); btn.disabled = true;
+  try {
+    const r = id ? await api(`/api/admin/content/events/${id}`, 'PATCH', p) : await api('/api/admin/content/events', 'POST', p);
+    const saved = r && r.event;
+    if (!saved) throw new Error((r && (r.error || r.detail)) || 'Save failed — check you are signed in as admin');
+    toast(p.published ? (id ? 'Event updated — live on website' : 'Event published') : 'Saved as draft', 'success');
+    logActivity(id ? 'admin.event_update' : 'admin.event_create', 'admin', `${p.title} (${p.published ? 'published' : 'draft'})`);
+    await loadEvents();
+    _evSet(saved);   // stay in the editor: shows the public link, enables Luma sync
+  } catch (e) { toast(e.message || 'Could not save event', 'warn'); }
+  finally { btn.disabled = false; }
+}
+async function toggleEvent(id, publish) {
+  const e = (events_db || []).find(x => x.id === id);
+  if (publish && e && !e.event_date) { toast('Add a start date before publishing', 'warn'); editEvent(id); return; }
+  const r = await api(`/api/admin/content/events/${id}`, 'PATCH', { published: publish });
+  if (!r || !r.event) { toast('Could not update: ' + ((r && (r.error || r.detail)) || ''), 'warn'); return; }
+  toast(publish ? 'Published — live on website' : 'Unpublished (draft)', 'success'); loadEvents();
+}
+async function deleteEvent(id) {
+  const e = (events_db || []).find(x => x.id === id);
+  if (!confirm(`Delete "${e ? e.title : 'this event'}"? This cannot be undone.`)) return;
+  const r = await api(`/api/admin/content/events/${id}`, 'DELETE');
+  if (r && r.error) { toast(r.error, 'warn'); return; }
+  toast('Event deleted', 'warn'); loadEvents();
+}

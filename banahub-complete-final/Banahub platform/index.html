@@ -323,8 +323,8 @@
       const d = new Date(e.event_date);
       const month = d.toLocaleDateString('en-SG',{month:'short'}).toUpperCase();
       const day   = d.getDate();
-      const href  = e.luma_url || e.registration_url || 'events.html';
-      const label = e.luma_url ? 'RSVP on Luma' : e.registration_url ? 'Register' : 'View details';
+      const href  = (e.page_url && /^\/[a-z0-9\-\/]*$/i.test(e.page_url)) ? e.page_url : 'event.html?id=' + encodeURIComponent(e.id);
+      const label = 'View event';
       return `
         <div class="event-row">
           <div class="event-date-block" aria-hidden="true">

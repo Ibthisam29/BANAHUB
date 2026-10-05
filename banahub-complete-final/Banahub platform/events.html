@@ -162,7 +162,7 @@
       return null; // direct video file or unrecognized — handled separately
     }
 
-    function eventUrl(e) { return e.page_url || ('event.html?id=' + encodeURIComponent(e.id)); }
+    function eventUrl(e) { return (e.page_url && /^\/[a-z0-9\-\/]*$/i.test(e.page_url)) ? e.page_url : ('event.html?id=' + encodeURIComponent(e.id)); }
 
     function renderFeatured(e) {
       const wrap = document.getElementById('featured-wrap');
@@ -224,6 +224,7 @@
             <h3 class="font-display font-semibold text-headline-sm text-primary mb-2"><a href="${esc(eventUrl(e))}" class="hover:underline">${esc(e.title)}</a></h3>
             <p class="font-sans text-body-sm text-on-surface-variant mb-1">${esc(e.location || 'Location TBD')}</p>
             <p class="font-sans text-body-sm text-primary mb-2">${fmtDate(e.event_date)}</p>
+            ${e.description ? `<p class="font-sans text-body-sm text-on-surface-variant mb-3" style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">${esc(e.description)}</p>` : ''}
             <p class="font-sans text-headline-sm font-display text-primary mb-4">${priceLine}</p>
             ${cta}
             <a href="${esc(eventUrl(e))}" class="block text-center mt-2 font-sans font-semibold text-body-sm text-primary hover:underline">View event details →</a>
