@@ -912,6 +912,7 @@ body::before {
         <div><div class="page-title">Investor Directory</div><div class="page-sub">Search, filter, import and manage investor mandates</div></div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           <button class="btn btn-ghost" onclick="exportInvestors()"><span class="material-symbols-outlined" style="font-size:15px">download</span>Export</button>
+          <button class="btn btn-ghost" onclick="tidyInvestors()" title="Normalise types, sectors, stages, geography, tickets, emails and websites on existing records"><span class="material-symbols-outlined" style="font-size:15px">auto_fix_high</span>Tidy up</button>
           <button class="btn btn-ghost" onclick="openImportModal('investor')"><span class="material-symbols-outlined" style="font-size:15px">upload_file</span>Import CSV / Excel</button>
           <button class="btn btn-primary" onclick="openInvestorModal()"><span class="material-symbols-outlined" style="font-size:15px">add</span>Add Investor</button>
         </div>
@@ -923,6 +924,7 @@ body::before {
         <select id="inv-stage" class="f-input f-select" style="width:130px" onchange="inv.page=0;renderInvestors()"><option value="">All stages</option><option>Pre-seed</option><option>Seed</option><option>Series A</option><option>Series B</option><option>Series C</option><option>Growth</option><option>Pre-IPO</option><option>Buyout</option><option>Debt</option></select>
         <input id="inv-geo" class="f-input" placeholder="Geography" style="width:130px" oninput="inv.page=0;renderInvestors()"/>
         <select id="inv-status" class="f-input f-select" style="width:130px" onchange="inv.page=0;renderInvestors()"><option value="">All statuses</option><option value="directory">Directory</option><option value="approved">Approved</option><option value="pending">Pending</option></select>
+        <select id="inv-sort" class="f-input f-select" style="width:170px" onchange="inv.sort=this.value;inv.page=0;renderInvestors()"><option value="type">Group by type</option><option value="org">Organisation A–Z</option><option value="name">Name A–Z</option><option value="ticket">Largest ticket</option><option value="recent">Recently added</option></select>
         <span id="inv-count" style="font-size:12px;color:var(--white-muted);margin-left:auto"></span>
       </div>
       <div class="card" style="overflow:auto"><div id="investors-table"></div></div>
@@ -1892,7 +1894,7 @@ Sitemap: https://www.banahub.com/sitemap.xml</textarea></div>
 ════════════════════════════════════════════════════════════ -->
 <script src="config.js"></script>
 <script src="api.js"></script>
-<script src="admin-v3.js?v=3.3.0"></script>
+<script src="admin-v3.js?v=3.4.0"></script>
 <script>
 
 // ── State ────────────────────────────────────────────────────

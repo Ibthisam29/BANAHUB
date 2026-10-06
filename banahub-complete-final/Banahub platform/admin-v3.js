@@ -354,31 +354,6 @@ function invFiltered() {
     (!geo || (i.geography || '').toLowerCase().includes(geo)) &&
     (!st || i.status === st));
 }
-function renderInvestors() {
-  const rows = invFiltered(), start = inv.page * inv.per, page = rows.slice(start, start + inv.per);
-  $('inv-count').textContent = `${rows.length} investor${rows.length === 1 ? '' : 's'}${rows.length !== inv.all.length ? ` (of ${inv.all.length})` : ''}`;
-  $('investors-table').innerHTML = rows.length ? `<table class="data-table"><thead><tr>
-      <th>Investor</th><th>Type</th><th>Sectors</th><th>Stages</th><th>Geography</th><th>Ticket</th><th>Contact</th><th>Status</th><th></th></tr></thead><tbody>
-    ${page.map(i => `<tr>
-      <td><div style="font-weight:600;color:var(--ink)">${esc(i.full_name || '—')}</div><div style="font-size:12px;color:var(--white-muted)">${esc(i.organization || '')}</div></td>
-      <td style="font-size:12px">${esc(i.investor_type || '—')}</td>
-      <td>${chips(i.focus_sectors)}</td>
-      <td>${chips(i.preferred_stages, 2)}</td>
-      <td style="font-size:12px">${esc(i.geography || '—')}</td>
-      <td style="font-size:12px;white-space:nowrap">${esc(i.check_size || (i.check_min || i.check_max ? `${money(i.check_min, '$').replace('$ ', '$')}–${money(i.check_max, '$').replace('$ ', '$')}` : '—'))}</td>
-      <td style="font-size:12px;white-space:nowrap">${i.email ? `<a href="mailto:${esc(i.email)}" style="color:var(--emerald)" title="${esc(i.email)}"><span class="material-symbols-outlined" style="font-size:16px">mail</span></a>` : ''}
-        ${i.linkedin_url ? `<a href="${esc(i.linkedin_url)}" target="_blank" rel="noopener" style="color:var(--emerald)"><span class="material-symbols-outlined" style="font-size:16px">link</span></a>` : ''}
-        ${i.website ? `<a href="${esc(i.website)}" target="_blank" rel="noopener" style="color:var(--emerald)"><span class="material-symbols-outlined" style="font-size:16px">language</span></a>` : ''}</td>
-      <td><span class="pill pill-${i.status === 'approved' ? 'live' : i.status === 'pending' ? 'pending' : 'draft'}">${esc(i.status || 'directory')}</span></td>
-      <td style="white-space:nowrap"><button class="btn btn-ghost btn-sm" onclick="openInvestorModal('${i.id}')">Edit</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteInvestor('${i.id}')">✕</button></td>
-    </tr>`).join('')}</tbody></table>
-    ${rows.length > inv.per ? `<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;font-size:12px;color:var(--white-muted)">
-      <span>Showing ${start + 1}–${Math.min(start + inv.per, rows.length)}</span>
-      <span><button class="btn btn-ghost btn-sm" ${inv.page ? '' : 'disabled'} onclick="inv.page--;renderInvestors()">Prev</button>
-      <button class="btn btn-ghost btn-sm" ${start + inv.per < rows.length ? '' : 'disabled'} onclick="inv.page++;renderInvestors()">Next</button></span></div>` : ''}`
-    : emptyRow(inv.all.length ? 'No investors match these filters.' : `No investors yet. <span style="color:var(--emerald);cursor:pointer" onclick="openImportModal('investor')">Import a CSV / Excel sheet</span> or <span style="color:var(--emerald);cursor:pointer" onclick="openInvestorModal()">add one</span>.`);
-}
 function openInvestorModal(id) {
   const i = id ? inv.all.find(x => x.id === id) || {} : {};
   $('im-id').value = id || '';
@@ -455,7 +430,7 @@ let imp = { type: 'investor', rows: [], map: {}, headers: [] };
 function openImportModal(type) {
   imp = { type: type || 'investor', rows: [], map: {}, headers: [] };
   $('imp-type').value = imp.type; $('imp-file').value = '';
-  $('imp-preview').innerHTML = `<div style="color:var(--white-muted);font-size:13px">Choose a .csv, .xlsx or .xls file. The first row must be column headers — e.g. <code>name, organization, email, type, sectors, stages, geography, check size, linkedin</code>. Lists (sectors, stages) can be separated by commas or semicolons.</div>`;
+  $('imp-preview').innerHTML = `<div style="color:var(--white-muted);font-size:13px;line-height:1.6">Drop in any .csv, .xlsx or .xls list — it is arranged automatically:<br>• header row found even below titles; columns detected by name <em>or</em> content (Fund/Firm, Email Address, HQ, Ticket…)<br>• first + last names joined, types/sectors/stages/regions standardised, tickets formatted, emails & websites cleaned<br>• duplicates merged, extra columns kept in notes, list grouped by investor type.</div>`;
   $('imp-go').disabled = true; $('imp-result').textContent = '';
   $('modal-import').style.display = 'flex';
 }
@@ -465,76 +440,6 @@ function downloadTemplate() {
     ? 'company_name,contact_name,email,website,industry,stage,description,linkedin\nAcme Pte Ltd,Jane Tan,jane@acme.sg,https://acme.sg,"Fintech; Payments",Seed,Cross-border payments for SMEs,https://linkedin.com/company/acme\n'
     : 'name,organization,email,phone,type,sectors,stages,geography,check_size,website,linkedin,notes\nAlex Lim,Lion Ventures,alex@lionvc.com,+65 6000 0000,VC,"Fintech; SaaS; AI","Seed; Series A","Singapore, SEA",$250k-$2M,https://lionvc.com,https://linkedin.com/in/alexlim,Met at SFF 2026\n';
   downloadFile(`banahub-${t}-import-template.csv`, csv);
-}
-async function handleImportFile(file) {
-  if (!file) return;
-  imp.type = $('imp-type').value; imp.file = file.name;
-  $('imp-preview').innerHTML = '<div style="color:var(--white-muted)">Reading file…</div>';
-  try {
-    const XLSX = await loadXLSX();
-    const wb = XLSX.read(await file.arrayBuffer(), { type: 'array' });
-    const raw = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: '', raw: false });
-    if (!raw.length) throw new Error('No rows found in the first sheet');
-    imp.raw = raw; imp.headers = Object.keys(raw[0]);
-    const fields = IMPORT_FIELDS[imp.type], norm = s => String(s).toLowerCase().replace(/[^a-z0-9]+/g, '');
-    imp.map = {};
-    imp.headers.forEach(h => {
-      const n = norm(h);
-      const f = Object.keys(fields).find(k => norm(k) === n || fields[k].some(c => norm(c) === n));
-      if (f && !Object.values(imp.map).includes(f)) imp.map[h] = f;
-    });
-    buildImportRows();
-  } catch (e) { $('imp-preview').innerHTML = `<div style="color:#b3261e">Could not read file: ${esc(e.message || e)}</div>`; }
-}
-function buildImportRows() {
-  imp.rows = (imp.raw || []).map(r => {
-    const o = {};
-    Object.keys(imp.map).forEach(h => {
-      const f = imp.map[h], v = String(r[h] == null ? '' : r[h]).trim(); if (!v) return;
-      o[f] = ARRAY_FIELDS.includes(f) ? arr(v) : (f === 'check_min' || f === 'check_max') ? parseMoney(v) : v;
-    });
-    if (o.email) o.email = o.email.toLowerCase();
-    if (imp.type === 'investor' && o.check_size && (o.check_min == null || o.check_max == null)) {
-      const [a, b] = parseRange(o.check_size); if (o.check_min == null) o.check_min = a; if (o.check_max == null) o.check_max = b;
-    }
-    o.source = 'import:' + String(imp.file || '').slice(0, 60);
-    return o;
-  }).filter(o => imp.type === 'investor' ? (o.full_name || o.organization || o.email) : (o.company_name || o.email));
-  renderImportPreview();
-}
-function renderImportPreview() {
-  const fields = Object.keys(IMPORT_FIELDS[imp.type]);
-  const mapRows = imp.headers.map((h, idx) => `<tr><td style="font-size:12px">${esc(h)}</td><td><select class="f-input f-select" style="padding:4px 8px;font-size:12px" onchange="remapImport(${idx},this.value)">
-      <option value="">— skip —</option>${fields.map(f => `<option ${imp.map[h] === f ? 'selected' : ''}>${f}</option>`).join('')}</select></td></tr>`).join('');
-  const cols = [...new Set(Object.values(imp.map))];
-  $('imp-preview').innerHTML = `
-    <div style="display:grid;grid-template-columns:minmax(220px,280px) 1fr;gap:16px">
-      <div><div class="f-label">Column mapping</div><table class="data-table">${mapRows}</table></div>
-      <div style="overflow:auto"><div class="f-label">${imp.rows.length} rows ready · preview</div>
-        <table class="data-table"><thead><tr>${cols.map(c => `<th>${c}</th>`).join('')}</tr></thead><tbody>
-        ${imp.rows.slice(0, 8).map(r => `<tr>${cols.map(c => `<td style="font-size:12px">${esc(Array.isArray(r[c]) ? r[c].join(', ') : r[c] == null ? '' : r[c])}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
-    </div>`;
-  $('imp-go').disabled = !imp.rows.length;
-}
-function remapImport(idx, field) {
-  const header = imp.headers[idx];
-  Object.keys(imp.map).forEach(h => { if (imp.map[h] === field) delete imp.map[h]; });
-  if (field) imp.map[header] = field; else delete imp.map[header];
-  buildImportRows();
-}
-async function runImport() {
-  const btn = $('imp-go'); btn.disabled = true;
-  let ins = 0, upd = 0; const errs = [];
-  for (let i = 0; i < imp.rows.length; i += 300) {
-    btn.textContent = `Importing ${Math.min(i + 300, imp.rows.length)}/${imp.rows.length}…`;
-    const r = await api('/api/admin/network/import', 'POST', { type: imp.type, rows: imp.rows.slice(i, i + 300) }).catch(e => ({ errors: [e.message] }));
-    ins += r.imported || 0; upd += r.updated || 0; (r.errors || []).forEach(e => errs.push(e));
-  }
-  btn.textContent = 'Import';
-  $('imp-result').innerHTML = `<b>${ins}</b> added · <b>${upd}</b> updated${errs.length ? ` · <span style="color:#b3261e">${esc(errs[0])}</span>` : ''}`;
-  toast(`Import complete: ${ins} added, ${upd} updated`, errs.length ? 'warn' : 'success');
-  logActivity('admin.network_import', 'admin', `${imp.type}: +${ins} / ~${upd}`);
-  if (imp.type === 'investor') loadInvestors(); else loadBusinesses();
 }
 
 // ═════════════════════════════════════════════════════════════════════════
@@ -1295,4 +1200,385 @@ async function deleteEvent(id) {
   const r = await api(`/api/admin/content/events/${id}`, 'DELETE');
   if (r && r.error) { toast(r.error, 'warn'); return; }
   toast('Event deleted', 'warn'); loadEvents();
+}
+
+// ═════════════════════════════════════════════════════════════════════════
+// 13. SMART IMPORT — auto-detects columns and arranges investor data
+//     (header-row detection, fuzzy + content-based column matching,
+//      standardised type / sectors / stages / geography / ticket,
+//      tidy names, emails and links, duplicate merge, nothing dropped)
+// ═════════════════════════════════════════════════════════════════════════
+const _n = s => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+const _title = s => String(s || '').trim().replace(/\s+/g, ' ').replace(/\w[^\s-]*/g, w => (w.length <= 3 && w === w.toUpperCase() && /[A-Z]/.test(w)) ? w : w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
+const _fixCase = s => String(s || '').trim().replace(/\s+/g, ' ').split(' ').map(w => (w === w.toLowerCase() || (w === w.toUpperCase() && w.length > 2)) ? w.toLowerCase().replace(/(^|[-'’])(\p{L})/gu, (m, a, c) => a + c.toUpperCase()) : w).join(' ');
+const HEADER_SYNONYMS = {
+  investor: {
+    full_name: ['name', 'full name', 'contact', 'contact name', 'contact person', 'investor name', 'partner', 'partner name', 'person', 'decision maker', 'key contact', 'managing partner'],
+    first_name: ['first name', 'firstname', 'given name', 'first'],
+    last_name: ['last name', 'lastname', 'surname', 'family name', 'last'],
+    organization: ['organization', 'organisation', 'firm', 'fund', 'company', 'fund name', 'firm name', 'investor', 'institution', 'vc firm', 'fund firm', 'company name', 'entity', 'family office', 'investor firm'],
+    email: ['email', 'e mail', 'email address', 'mail', 'work email', 'contact email', 'business email'],
+    phone: ['phone', 'mobile', 'tel', 'telephone', 'phone number', 'contact number', 'whatsapp', 'cell'],
+    investor_type: ['type', 'investor type', 'category', 'investor category', 'type of investor', 'fund type', 'investor class', 'segment'],
+    focus_sectors: ['sectors', 'sector', 'focus', 'focus sectors', 'industries', 'industry', 'verticals', 'vertical', 'thesis', 'sector focus', 'industry focus', 'investment focus', 'areas of interest', 'interests', 'themes'],
+    preferred_stages: ['stages', 'stage', 'preferred stage', 'preferred stages', 'investment stage', 'investment stages', 'round', 'rounds', 'stage focus', 'funding stage'],
+    geography: ['geography', 'region', 'regions', 'location', 'country', 'countries', 'hq', 'markets', 'geo', 'geographic focus', 'city', 'based in', 'headquarters', 'market focus', 'target markets'],
+    check_size: ['check size', 'ticket', 'ticket size', 'cheque size', 'investment size', 'check', 'typical check', 'investment range', 'ticket range', 'deal size', 'cheque'],
+    check_min: ['check min', 'min check', 'min ticket', 'minimum', 'min investment', 'minimum ticket', 'min'],
+    check_max: ['check max', 'max check', 'max ticket', 'maximum', 'max investment', 'maximum ticket', 'max'],
+    website: ['website', 'url', 'web', 'site', 'homepage', 'web address', 'company website'],
+    linkedin_url: ['linkedin', 'linkedin url', 'linkedin profile', 'li', 'linkedin link'],
+    notes: ['notes', 'note', 'comments', 'comment', 'description', 'remarks', 'bio', 'about', 'details'],
+  },
+  company: {
+    company_name: ['company', 'company name', 'name', 'business', 'startup', 'organisation', 'organization', 'brand'],
+    contact_name: ['contact', 'contact name', 'founder', 'ceo', 'full name', 'founder name'],
+    email: ['email', 'e mail', 'email address', 'contact email'],
+    website: ['website', 'url', 'web', 'homepage'],
+    industry: ['industry', 'sector', 'sectors', 'industries', 'vertical', 'category'],
+    stage: ['stage', 'round', 'funding stage', 'current stage'],
+    description: ['description', 'about', 'summary', 'notes', 'pitch', 'one liner'],
+    linkedin_url: ['linkedin', 'linkedin url'],
+  },
+};
+// keep the older name working for anything still referencing it
+const IMPORT_FIELDS_ALL = HEADER_SYNONYMS;
+
+const TYPE_RULES = [
+  [/sovereign|\bswf\b|government|\bgov\b|state fund|public fund/, 'Sovereign / Government'],
+  [/venture debt|\bbank\b|lender|lending|private credit|\bdebt\b|credit fund/, 'Bank / Debt'],
+  [/family office|\bs?m?fo\b|single family|multi family/, 'Family Office'],
+  [/corporate|\bcvc\b|strategic/, 'Corporate VC'],
+  [/fund of funds|\bfof\b|\blps?\b|limited partner|pension|endowment|insurance|asset manag|institutional/, 'LP / Fund of Funds'],
+  [/private equity|\bpe\b|buy ?out|growth equity/, 'Private Equity'],
+  [/hedge/, 'Hedge Fund'],
+  [/accelerator|incubator|venture studio|\bstudio\b/, 'Accelerator'],
+  [/angel|individual|\bhnwi?\b|syndicate|super angel/, 'Angel'],
+  [/venture|\bvc\b|micro ?vc|seed fund|early stage fund/, 'VC'],
+];
+const SECTOR_RULES = [
+  [/generalist|agnostic|all sectors|sector neutral|^any$|^all$/, 'Generalist'],
+  [/web ?3|crypto|blockchain|defi|digital asset|\bnft/, 'Web3 / Digital Assets'],
+  [/fin ?tech|financial (services|tech)|payment|banking|insur ?tech|wealth ?tech|lending|regtech|neobank/, 'Fintech'],
+  [/\bai\b|artificial intelligence|machine learning|\bml\b|gen ?ai|\bllm|data (science|analytics)|\bdata\b/, 'AI / Data'],
+  [/cyber|security/, 'Cybersecurity'],
+  [/deep ?tech|semiconductor|quantum|space ?tech|\bspace\b|advanced material/, 'Deep Tech'],
+  [/saas|software|b2b|enterprise|cloud|dev ?tools|productivity/, 'SaaS / Software'],
+  [/health|med ?tech|bio ?tech|life science|pharma|medical|wellness|femtech|digital health/, 'Healthcare / Life Sciences'],
+  [/climate|clean ?tech|energy|renewable|sustainab|\besg\b|green|carbon|solar|battery|circular/, 'Climate / Energy'],
+  [/prop ?tech|real estate|property|construction|con ?tech/, 'Real Estate / PropTech'],
+  [/agri|ag ?tech|food ?tech|aquaculture|farming/, 'Agri / Food Tech'],
+  [/consumer|e ?commerce|retail|d2c|\bdtc\b|fmcg|\bf ?b\b|food|beverage|lifestyle|fashion|beauty|marketplace/, 'Consumer / E-commerce'],
+  [/ed ?tech|education|learning/, 'Education'],
+  [/logistic|supply chain|transport|mobility|shipping|automotive|\bev\b/, 'Logistics / Mobility'],
+  [/industrial|manufactur|hardware|robotic|\biot\b|automation/, 'Industrial / Hardware'],
+  [/media|entertainment|gaming|games|content|creator|sports/, 'Media / Gaming'],
+  [/hr ?tech|future of work|workforce|recruit/, 'HR / Future of Work'],
+  [/travel|hospitality|tourism/, 'Travel / Hospitality'],
+  [/telecom|connectivity|5g/, 'Telecom'],
+];
+const STAGE_RULES = [
+  [/pre ?seed|idea|concept/, ['Pre-seed']],
+  [/early stage|early/, ['Seed', 'Series A']],
+  [/late stage|late/, ['Series C+', 'Growth']],
+  [/pre ?ipo|mezz/, ['Pre-IPO']],
+  [/(?<!pre ?)\bseed\b/, ['Seed']],
+  [/series ?a\b|\ba round\b/, ['Series A']],
+  [/series ?b\b|\bb round\b/, ['Series B']],
+  [/series ?[c-z]\b|series ?c\+/, ['Series C+']],
+  [/growth|expansion|scale ?up/, ['Growth']],
+  [/buy ?out|\bmbo\b|\blbo\b|control/, ['Buyout']],
+  [/debt|credit|loan/, ['Debt']],
+];
+const GEO_RULES = [
+  [/global|worldwide|international|all regions|any/, 'Global'],
+  [/south ?east asia|\bsea\b|asean/, 'Southeast Asia'],
+  [/^sg$|singapore/, 'Singapore'], [/^(my|malaysia|kuala lumpur|kl)$/, 'Malaysia'], [/^(id|indonesia|jakarta)$/, 'Indonesia'],
+  [/^(vn|vietnam|viet nam|ho chi minh|hanoi)$/, 'Vietnam'], [/^(th|thailand|bangkok)$/, 'Thailand'], [/^(ph|philippines|manila)$/, 'Philippines'],
+  [/\buae\b|dubai|abu dhabi|emirates/, 'UAE'], [/saudi|\bksa\b|riyadh/, 'Saudi Arabia'], [/qatar|doha/, 'Qatar'],
+  [/\bgcc\b|gulf|middle east|\bmena\b/, 'Middle East / GCC'],
+  [/hong ?kong|^hk$/, 'Hong Kong'], [/^(cn|china|prc|shanghai|beijing|shenzhen)$/, 'China'], [/japan|tokyo|^jp$/, 'Japan'], [/korea|seoul|^kr$/, 'South Korea'],
+  [/^(in|india|mumbai|bangalore|bengaluru|delhi)$/, 'India'], [/australia|\banz\b|sydney|melbourne|new zealand/, 'Australia / NZ'],
+  [/^(us|usa|united states|america|north america|new york|san francisco|silicon valley)$/, 'United States'],
+  [/^(uk|united kingdom|london|britain|england)$/, 'United Kingdom'], [/europe|^eu$|emea/, 'Europe'], [/africa/, 'Africa'], [/latin america|latam/, 'Latin America'],
+  [/^asia$|^apac$|asia pacific|asia-pacific/, 'Asia Pacific'],
+];
+const FREE_MAIL = /@(gmail|yahoo|hotmail|outlook|live|icloud|me|aol|proton|protonmail|gmx|qq|163)\./i;
+function normType(v) { const t = _n(v); if (!t) return null; for (const [re, c] of TYPE_RULES) if (re.test(t)) return c; return _fixCase(v); }
+function normSectors(v) {
+  const out = [];
+  String(v || '').split(/[;,|\n\/]+| and /i).map(x => x.trim()).filter(Boolean).forEach(x => {
+    const t = _n(x); const hit = SECTOR_RULES.find(([re]) => re.test(t));
+    const c = hit ? hit[1] : _fixCase(x); if (c && !out.includes(c)) out.push(c);
+  });
+  return out.length > 1 ? out.filter(c => c !== 'Generalist') : out;
+}
+function normStages(v) {
+  const t = _n(v); if (!t) return [];
+  if (/agnostic|all stages|any stage|^all$|^any$/.test(t)) return [];
+  const out = [];
+  String(v).split(/[;,|\n\/]+| to | - | and /i).forEach(part => {
+    const p = _n(part); STAGE_RULES.forEach(([re, cs]) => { if (re.test(p)) cs.forEach(c => { if (!out.includes(c)) out.push(c); }); });
+  });
+  const order = ['Pre-seed', 'Seed', 'Series A', 'Series B', 'Series C+', 'Growth', 'Pre-IPO', 'Buyout', 'Debt'];
+  return out.sort((a, b) => order.indexOf(a) - order.indexOf(b));
+}
+function normGeo(v) {
+  const out = [];
+  String(v || '').split(/[;,|\n\/]+| and /i).map(x => x.trim()).filter(Boolean).forEach(x => {
+    const t = _n(x); const hit = GEO_RULES.find(([re]) => re.test(t));
+    const c = hit ? hit[1] : _fixCase(x); if (c && !out.includes(c)) out.push(c);
+  });
+  return out.join(', ') || null;
+}
+function normUrl(v, linkedin) {
+  let u = String(v || '').trim(); if (!u || /^n\/?a$|^-$/i.test(u)) return null;
+  u = u.replace(/^<|>$/g, '').split(/\s+/)[0];
+  if (!/^https?:\/\//i.test(u)) u = 'https://' + u.replace(/^\/+/, '');
+  u = u.replace(/^http:\/\//i, 'https://');
+  if (linkedin) u = u.replace(/^https:\/\/(?:[a-z]{2,3}\.)?linkedin\.com/i, 'https://www.linkedin.com');
+  return u.replace(/\/+$/, '');
+}
+function normEmail(v) { const m = String(v || '').match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i); return m ? m[0].toLowerCase() : null; }
+function normPhone(v) { const t = String(v || '').trim(); if (!t || !/\d{6,}/.test(t.replace(/[\s().-]/g, ''))) return null; return t.replace(/\s+/g, ' '); }
+function orgFromEmail(email) {
+  if (!email || FREE_MAIL.test(email)) return null;
+  const d = email.split('@')[1].split('.'); const stem = d.length > 2 && d[d.length - 2].length <= 3 ? d[d.length - 3] : d[d.length - 2];
+  return stem ? _title(stem.replace(/[-_]/g, ' ')) : null;
+}
+function fmtTicket(a, b) {
+  const f = n => n == null ? '' : n >= 1e9 ? `$${+(n / 1e9).toFixed(2)}B` : n >= 1e6 ? `$${+(n / 1e6).toFixed(2)}M` : n >= 1e3 ? `$${Math.round(n / 1e3)}K` : `$${n}`;
+  return a != null && b != null && a !== b ? `${f(a)} – ${f(b)}` : (f(a) || f(b) || null);
+}
+// Arrange one investor record into the directory's standard shape
+function arrangeInvestor(o) {
+  const r = Object.assign({}, o), changed = [];
+  const set = (k, v) => { const before = JSON.stringify(r[k] == null ? null : r[k]); r[k] = v; if (JSON.stringify(v == null ? null : v) !== before) changed.push(k); };
+  if (r.first_name || r.last_name) { if (!r.full_name) set('full_name', [r.first_name, r.last_name].filter(Boolean).join(' ')); delete r.first_name; delete r.last_name; }
+  if (r.full_name) set('full_name', _fixCase(r.full_name));
+  if (r.organization) set('organization', String(r.organization).trim().replace(/\s+/g, ' '));
+  if (r.email != null) set('email', normEmail(r.email));
+  if (!r.organization && r.email) { const o2 = orgFromEmail(r.email); if (o2) set('organization', o2); }
+  if (r.phone != null) set('phone', normPhone(r.phone));
+  if (r.investor_type != null) set('investor_type', normType(r.investor_type));
+  if (!r.investor_type) { const g = normType(`${r.organization || ''} ${r.notes || ''}`); if (g && TYPE_RULES.some(([, c]) => c === g)) set('investor_type', g); }
+  if (r.focus_sectors != null) set('focus_sectors', normSectors(arr(r.focus_sectors).join(';')));
+  if (r.preferred_stages != null) set('preferred_stages', normStages(arr(r.preferred_stages).join(';')));
+  if (r.geography != null) set('geography', normGeo(r.geography));
+  if (r.website != null) set('website', normUrl(r.website));
+  if (r.linkedin_url != null) set('linkedin_url', normUrl(r.linkedin_url, true));
+  if (r.website && /linkedin\.com/i.test(r.website) && !r.linkedin_url) { set('linkedin_url', normUrl(r.website, true)); set('website', null); }
+  let mn = r.check_min != null && r.check_min !== '' ? parseMoney(r.check_min) : null, mx = r.check_max != null && r.check_max !== '' ? parseMoney(r.check_max) : null;
+  if ((mn == null || mx == null) && r.check_size) { const [a, b] = parseRange(r.check_size); if (mn == null) mn = a; if (mx == null) mx = b; }
+  if (mn != null && mx != null && mn > mx) [mn, mx] = [mx, mn];
+  if (mn != null || r.check_min != null) set('check_min', mn); if (mx != null || r.check_max != null) set('check_max', mx);
+  if (mn != null || mx != null) set('check_size', fmtTicket(mn, mx));
+  return { row: r, changed };
+}
+function arrangeCompany(o) {
+  const r = Object.assign({}, o);
+  if (r.company_name) r.company_name = String(r.company_name).trim().replace(/\s+/g, ' ');
+  if (r.contact_name) r.contact_name = _fixCase(r.contact_name);
+  if (r.email != null) r.email = normEmail(r.email);
+  if (r.industry != null) r.industry = normSectors(arr(r.industry).join(';'));
+  if (r.stage) r.stage = normStages(r.stage)[0] || _fixCase(r.stage);
+  if (r.website != null) r.website = normUrl(r.website);
+  if (r.linkedin_url != null) r.linkedin_url = normUrl(r.linkedin_url, true);
+  return { row: r, changed: [] };
+}
+
+// Column detection ------------------------------------------------------
+function matchHeader(h, type) {
+  const n = _n(h); if (!n) return null;
+  const syn = HEADER_SYNONYMS[type];
+  let best = null, bestScore = 0;
+  Object.keys(syn).forEach(f => {
+    [f.replace(/_/g, ' ')].concat(syn[f]).forEach(c => {
+      const cn = _n(c); let sc = 0;
+      if (n === cn) sc = 100;
+      else if (n.replace(/ /g, '') === cn.replace(/ /g, '')) sc = 95;
+      else if (cn.length > 3 && (` ${n} `).includes(` ${cn} `)) sc = 60 + cn.length;
+      if (sc > bestScore) { bestScore = sc; best = f; }
+    });
+  });
+  return bestScore >= 60 ? best : null;
+}
+function sniffColumn(values) {
+  const v = values.map(x => String(x || '').trim()).filter(Boolean).slice(0, 40); if (v.length < 2) return null;
+  const share = re => v.filter(x => re.test(x)).length / v.length;
+  if (share(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i) > 0.6) return 'email';
+  if (share(/linkedin\.com/i) > 0.6) return 'linkedin_url';
+  if (share(/^(https?:\/\/|www\.)|\.(com|io|co|vc|net|org|sg|ai|capital|fund|ventures)(\/|$)/i) > 0.6) return 'website';
+  if (share(/^\+?[\d\s().-]{7,}$/) > 0.7) return 'phone';
+  if (share(/\$|usd|sgd|\d+(\.\d+)?\s*(k|m|mn|b|bn)\b/i) > 0.6) return 'check_size';
+  if (share(/series|seed|growth|pre-?ipo|buyout/i) > 0.6) return 'preferred_stages';
+  return null;
+}
+async function handleImportFile(file) {
+  if (!file) return;
+  imp.type = $('imp-type').value; imp.file = file.name;
+  $('imp-preview').innerHTML = '<div style="color:var(--white-muted)">Reading and arranging…</div>';
+  try {
+    const XLSX = await loadXLSX();
+    const wb = XLSX.read(await file.arrayBuffer(), { type: 'array', cellDates: false });
+    // pick the sheet + header row with the most recognisable column names
+    let best = null;
+    wb.SheetNames.forEach(sn => {
+      const grid = XLSX.utils.sheet_to_json(wb.Sheets[sn], { header: 1, defval: '', raw: false, blankrows: true });
+      for (let i = 0; i < Math.min(15, grid.length); i++) {
+        const score = grid[i].filter(h => matchHeader(h, imp.type)).length;
+        if (score >= 1 && (!best || score > best.score)) best = { sn, grid, i, score };
+      }
+    });
+    if (!best) { const sn = wb.SheetNames[0]; const grid = XLSX.utils.sheet_to_json(wb.Sheets[sn], { header: 1, defval: '', raw: false, blankrows: true }); best = { sn, grid, i: 0, score: 0 }; }
+    const headerRow = best.grid[best.i].map((h, k) => String(h || '').trim() || `Column ${k + 1}`);
+    const seen = {}; imp.headers = headerRow.map(h => { seen[h] = (seen[h] || 0) + 1; return seen[h] > 1 ? `${h} (${seen[h]})` : h; });
+    imp.raw = best.grid.slice(best.i + 1).filter(r => r.some(c => String(c).trim()))
+      .map(r => Object.fromEntries(imp.headers.map((h, k) => [h, r[k] == null ? '' : r[k]])));
+    imp.sheet = best.sn; imp.headerAt = best.i + 1;
+    if (!imp.raw.length) throw new Error('No data rows found under the header row');
+    imp.map = {};
+    imp.headers.forEach(h => { const f = matchHeader(h, imp.type); if (f && !Object.values(imp.map).includes(f)) imp.map[h] = f; });
+    imp.headers.filter(h => !imp.map[h]).forEach(h => { const f = sniffColumn(imp.raw.map(r => r[h])); if (f && HEADER_SYNONYMS[imp.type][f] && !Object.values(imp.map).includes(f)) imp.map[h] = f; });
+    imp.sniffed = true;
+    buildImportRows();
+  } catch (e) { $('imp-preview').innerHTML = `<div style="color:#b3261e">Could not read file: ${esc(e.message || e)}</div>`; }
+}
+function buildImportRows() {
+  const isInv = imp.type === 'investor', stats = { cleaned: 0, merged: 0, extra: 0, types: {} };
+  const unmapped = imp.headers.filter(h => !imp.map[h]);
+  let rows = (imp.raw || []).map(r => {
+    const o = {};
+    Object.keys(imp.map).forEach(h => {
+      const f = imp.map[h], v = String(r[h] == null ? '' : r[h]).trim(); if (!v || /^(n\/?a|none|-|—)$/i.test(v)) return;
+      o[f] = ['focus_sectors', 'preferred_stages', 'industry'].includes(f) ? arr(v) : v;
+    });
+    // keep every other column instead of dropping it
+    const extras = unmapped.map(h => { const v = String(r[h] == null ? '' : r[h]).trim(); return v && !/^(n\/?a|-)$/i.test(v) ? `${h}: ${v}` : null; }).filter(Boolean);
+    if (extras.length) { o.notes = [o.notes, ...extras].filter(Boolean).join('\n'); stats.extra++; }
+    const { row, changed } = isInv ? arrangeInvestor(o) : arrangeCompany(o);
+    if (changed.length) stats.cleaned++;
+    row.source = 'import:' + String(imp.file || '').slice(0, 60);
+    return row;
+  }).filter(o => isInv ? (o.full_name || o.organization || o.email) : (o.company_name || o.email));
+  // merge duplicates inside the file (same email, or same name + organisation)
+  const byKey = new Map(), out = [];
+  rows.forEach(o => {
+    const key = o.email || _n(isInv ? `${o.full_name}|${o.organization}` : o.company_name);
+    const ex = key && byKey.get(key);
+    if (!ex) { byKey.set(key, o); out.push(o); return; }
+    stats.merged++;
+    Object.keys(o).forEach(k => {
+      if (Array.isArray(o[k])) ex[k] = [...new Set(arr(ex[k]).concat(o[k]))];
+      else if (k === 'notes' && o.notes && ex.notes !== o.notes) ex.notes = [ex.notes, o.notes].filter(Boolean).join('\n');
+      else if (ex[k] == null || ex[k] === '') ex[k] = o[k];
+    });
+  });
+  // arrange: by type, then organisation, then name
+  const typeOrder = INVESTOR_TYPES;
+  if (isInv) out.sort((a, b) => (typeOrder.indexOf(a.investor_type || 'Other') + 100 * !a.investor_type) - (typeOrder.indexOf(b.investor_type || 'Other') + 100 * !b.investor_type)
+    || String(a.organization || '').localeCompare(String(b.organization || '')) || String(a.full_name || '').localeCompare(String(b.full_name || '')));
+  out.forEach(o => { const t = o.investor_type || 'Unclassified'; stats.types[t] = (stats.types[t] || 0) + 1; });
+  imp.rows = out; imp.stats = stats;
+  renderImportPreview();
+}
+function renderImportPreview() {
+  const fields = Object.keys(HEADER_SYNONYMS[imp.type]).filter(f => !['first_name', 'last_name'].includes(f) || imp.type === 'investor');
+  const st = imp.stats || { types: {} };
+  const mapRows = imp.headers.map((h, idx) => `<tr><td style="font-size:12px">${esc(h)}</td><td><select class="f-input f-select" style="padding:4px 8px;font-size:12px" onchange="remapImport(${idx},this.value)">
+      <option value="">→ keep in notes</option>${fields.map(f => `<option value="${f}" ${imp.map[h] === f ? 'selected' : ''}>${f.replace(/_/g, ' ')}</option>`).join('')}</select></td></tr>`).join('');
+  const cols = imp.type === 'investor' ? ['full_name', 'organization', 'investor_type', 'focus_sectors', 'preferred_stages', 'geography', 'check_size', 'email', 'linkedin_url']
+    : ['company_name', 'contact_name', 'email', 'industry', 'stage', 'website'];
+  const typeChips = Object.entries(st.types).sort((a, b) => b[1] - a[1]).map(([t, n]) => `<span class="badge badge-blue" style="margin:2px">${esc(t)} · ${n}</span>`).join('');
+  $('imp-preview').innerHTML = `
+    <div style="background:rgba(10,92,64,.06);border:1px solid rgba(10,92,64,.18);border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:13px">
+      <b>${imp.rows.length}</b> ${imp.type === 'investor' ? 'investors' : 'companies'} ready · sheet “${esc(imp.sheet || '')}”, header on row ${imp.headerAt || 1}
+      · <b>${Object.keys(imp.map).length}</b> of ${imp.headers.length} columns matched${st.merged ? ` · <b>${st.merged}</b> duplicates merged` : ''}${st.cleaned ? ` · <b>${st.cleaned}</b> rows tidied` : ''}${st.extra ? ` · extra columns kept in notes` : ''}
+      ${typeChips ? `<div style="margin-top:8px">${typeChips}</div>` : ''}
+      <div style="font-size:11px;color:var(--white-muted);margin-top:6px">Types, sectors, stages and regions are standardised; names, emails, links and ticket sizes are cleaned; rows are arranged by type → organisation.</div>
+    </div>
+    <div style="display:grid;grid-template-columns:minmax(220px,280px) minmax(0,1fr);gap:16px">
+      <div><div class="f-label">Columns detected (change if needed)</div><div style="max-height:360px;overflow:auto"><table class="data-table">${mapRows}</table></div></div>
+      <div style="overflow:auto;max-height:400px"><div class="f-label">Preview (arranged)</div>
+        <table class="data-table"><thead><tr>${cols.map(c => `<th>${c.replace(/_/g, ' ')}</th>`).join('')}</tr></thead><tbody>
+        ${imp.rows.slice(0, 12).map(r => `<tr>${cols.map(c => `<td style="font-size:12px">${Array.isArray(r[c]) ? chips(r[c], 3) : esc(r[c] == null ? '' : r[c])}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
+    </div>`;
+  $('imp-go').disabled = !imp.rows.length;
+}
+function remapImport(idx, field) {
+  const header = imp.headers[idx];
+  Object.keys(imp.map).forEach(h => { if (imp.map[h] === field) delete imp.map[h]; });
+  if (field) imp.map[header] = field; else delete imp.map[header];
+  buildImportRows();
+}
+async function runImport() {
+  const btn = $('imp-go'); btn.disabled = true;
+  let ins = 0, upd = 0; const errs = [];
+  for (let i = 0; i < imp.rows.length; i += 300) {
+    btn.textContent = `Importing ${Math.min(i + 300, imp.rows.length)}/${imp.rows.length}…`;
+    const r = await api('/api/admin/network/import', 'POST', { type: imp.type, rows: imp.rows.slice(i, i + 300) }).catch(e => ({ errors: [e.message] }));
+    ins += r.imported || 0; upd += r.updated || 0; (r.errors || []).forEach(e => errs.push(e));
+  }
+  btn.textContent = 'Import';
+  $('imp-result').innerHTML = `<b>${ins}</b> added · <b>${upd}</b> updated${errs.length ? ` · <span style="color:#b3261e">${esc(errs[0])}</span>` : ''}`;
+  toast(`Import complete: ${ins} added, ${upd} updated`, errs.length ? 'warn' : 'success');
+  logActivity('admin.network_import', 'admin', `${imp.type}: +${ins} / ~${upd} from ${imp.file}`);
+  if (imp.type === 'investor') { inv.sort = 'type'; if ($('inv-sort')) $('inv-sort').value = 'type'; loadInvestors(); } else loadBusinesses();
+}
+
+// Directory: arranged view (grouped by type) + one-click tidy of existing data
+function invSorted(rows) {
+  const s = inv.sort || 'type', by = (k) => (a, b) => String(a[k] || '~').localeCompare(String(b[k] || '~'));
+  const t = i => { const k = INVESTOR_TYPES.indexOf(i.investor_type || ''); return k < 0 ? 99 : k; };
+  const list = rows.slice();
+  if (s === 'type') list.sort((a, b) => t(a) - t(b) || by('organization')(a, b) || by('full_name')(a, b));
+  else if (s === 'org') list.sort((a, b) => by('organization')(a, b) || by('full_name')(a, b));
+  else if (s === 'name') list.sort(by('full_name'));
+  else if (s === 'ticket') list.sort((a, b) => (b.check_max || b.check_min || 0) - (a.check_max || a.check_min || 0));
+  else list.sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || '')));
+  return list;
+}
+function renderInvestors() {
+  const rows = invSorted(invFiltered()), start = inv.page * inv.per, page = rows.slice(start, start + inv.per);
+  $('inv-count').textContent = `${rows.length} investor${rows.length === 1 ? '' : 's'}${rows.length !== inv.all.length ? ` (of ${inv.all.length})` : ''}`;
+  const grouped = (inv.sort || 'type') === 'type';
+  let lastType = null;
+  const rowHtml = i => {
+    const head = grouped && (i.investor_type || 'Unclassified') !== lastType
+      ? `<tr><td colspan="9" style="background:var(--surface);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--emerald);padding:8px 12px">${esc((lastType = i.investor_type || 'Unclassified'))} · ${rows.filter(x => (x.investor_type || 'Unclassified') === lastType).length}</td></tr>` : '';
+    return head + `<tr>
+      <td><div style="font-weight:600;color:var(--ink)">${esc(i.full_name || '—')}</div><div style="font-size:12px;color:var(--white-muted)">${esc(i.organization || '')}</div></td>
+      <td style="font-size:12px">${esc(i.investor_type || '—')}</td>
+      <td>${chips(i.focus_sectors)}</td>
+      <td>${chips(i.preferred_stages, 2)}</td>
+      <td style="font-size:12px">${esc(i.geography || '—')}</td>
+      <td style="font-size:12px;white-space:nowrap">${esc(i.check_size || fmtTicket(i.check_min, i.check_max) || '—')}</td>
+      <td style="font-size:12px;white-space:nowrap">${i.email ? `<a href="mailto:${esc(i.email)}" style="color:var(--emerald)" title="${esc(i.email)}"><span class="material-symbols-outlined" style="font-size:16px">mail</span></a>` : ''}
+        ${i.linkedin_url ? `<a href="${esc(i.linkedin_url)}" target="_blank" rel="noopener noreferrer" style="color:var(--emerald)"><span class="material-symbols-outlined" style="font-size:16px">link</span></a>` : ''}
+        ${i.website ? `<a href="${esc(i.website)}" target="_blank" rel="noopener noreferrer" style="color:var(--emerald)"><span class="material-symbols-outlined" style="font-size:16px">language</span></a>` : ''}</td>
+      <td><span class="pill pill-${i.status === 'approved' ? 'live' : i.status === 'pending' ? 'pending' : 'draft'}">${esc(i.status || 'directory')}</span></td>
+      <td style="white-space:nowrap"><button class="btn btn-ghost btn-sm" onclick="openInvestorModal('${esc(i.id)}')">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteInvestor('${esc(i.id)}')">✕</button></td></tr>`;
+  };
+  $('investors-table').innerHTML = rows.length ? `<table class="data-table"><thead><tr>
+      <th>Investor</th><th>Type</th><th>Sectors</th><th>Stages</th><th>Geography</th><th>Ticket</th><th>Contact</th><th>Status</th><th></th></tr></thead><tbody>
+    ${page.map(rowHtml).join('')}</tbody></table>
+    ${rows.length > inv.per ? `<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;font-size:12px;color:var(--white-muted)">
+      <span>Showing ${start + 1}–${Math.min(start + inv.per, rows.length)}</span>
+      <span><button class="btn btn-ghost btn-sm" ${inv.page ? '' : 'disabled'} onclick="inv.page--;renderInvestors()">Prev</button>
+      <button class="btn btn-ghost btn-sm" ${start + inv.per < rows.length ? '' : 'disabled'} onclick="inv.page++;renderInvestors()">Next</button></span></div>` : ''}`
+    : emptyRow(inv.all.length ? 'No investors match these filters.' : `No investors yet. <span style="color:var(--emerald);cursor:pointer" onclick="openImportModal('investor')">Import a CSV / Excel sheet</span> or <span style="color:var(--emerald);cursor:pointer" onclick="openInvestorModal()">add one</span>.`);
+}
+async function tidyInvestors() {
+  const todo = inv.all.map(i => { const { row, changed } = arrangeInvestor(i); return changed.length ? [i.id, Object.fromEntries(changed.map(k => [k, row[k]]))] : null; }).filter(Boolean);
+  if (!todo.length) { toast('Directory is already tidy', 'success'); return; }
+  if (!confirm(`Standardise ${todo.length} investor record${todo.length > 1 ? 's' : ''} (types, sectors, stages, regions, links, ticket sizes)?`)) return;
+  let done = 0, fail = 0;
+  for (let k = 0; k < todo.length; k += 5) {
+    await Promise.all(todo.slice(k, k + 5).map(([id, patch]) => api(`/api/admin/investors/${id}`, 'PATCH', patch).then(r => { if (r && !r.error) done++; else fail++; }).catch(() => fail++)));
+    $('inv-count').textContent = `Tidying… ${done + fail}/${todo.length}`;
+  }
+  toast(`Tidied ${done} records${fail ? ` · ${fail} failed` : ''}`, fail ? 'warn' : 'success');
+  logActivity('admin.investors_tidy', 'admin', `${done} records standardised`);
+  loadInvestors();
 }
