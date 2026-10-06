@@ -347,7 +347,7 @@ function invFiltered() {
   const q = ($('inv-search').value || '').toLowerCase(), t = $('inv-type').value, sec = ($('inv-sector').value || '').toLowerCase(),
         stg = $('inv-stage').value.toLowerCase(), geo = ($('inv-geo').value || '').toLowerCase(), st = $('inv-status').value;
   return inv.all.filter(i =>
-    (!q || [i.full_name, i.organization, i.email, i.notes, i.investor_type, i.geography].join(' ').toLowerCase().includes(q)) &&
+    (!q || [i.full_name, i.organization, i.email, i.phone, i.notes, i.investor_type, i.geography, i.website].join(' ').toLowerCase().includes(q)) &&
     (!t || i.investor_type === t) &&
     (!sec || arr(i.focus_sectors).some(s => s.toLowerCase().includes(sec))) &&
     (!stg || arr(i.preferred_stages).some(s => s.toLowerCase().includes(stg))) &&
@@ -664,7 +664,7 @@ async function runMatch() {
       <td style="font-size:12px">${esc(i.investor_type || '—')}</td>
       <td style="font-size:11px;color:var(--white-dim)">${reasons.map(esc).join(' · ') || '—'}</td>
       <td style="font-size:12px;white-space:nowrap">${esc(i.check_size || '—')}</td>
-      <td style="white-space:nowrap">${i.email ? `<a class="btn btn-ghost btn-sm" href="mailto:${esc(i.email)}?subject=${encodeURIComponent('Introduction: ' + raiseName(r))}">Email</a>` : ''}${i.linkedin_url ? ` <a class="btn btn-ghost btn-sm" href="${esc(i.linkedin_url)}" target="_blank" rel="noopener">LinkedIn</a>` : ''}</td>
+      <td style="white-space:nowrap">${i.email ? `<a class="btn btn-ghost btn-sm" href="mailto:${esc(i.email)}?subject=${encodeURIComponent('Introduction: ' + raiseName(r))}">Email</a>` : ''}${i.linkedin_url ? ` <a class="btn btn-ghost btn-sm" href="${esc(i.linkedin_url)}" target="_blank" rel="noopener">LinkedIn</a>` : ''}${i.phone ? ` <a class="btn btn-ghost btn-sm" href="tel:${esc(String(i.phone).replace(/[^\d+]/g, ''))}" title="${esc(i.phone)}">Call</a>` : ''}${i.phone ? `<div style="font-size:11px;color:var(--white-muted);margin-top:3px">${esc(i.phone)}</div>` : ''}</td>
       <td><button class="btn ${shortlist.has(i.id) ? 'btn-approve' : 'btn-ghost'} btn-sm" onclick="toggleShortlist('${r.id}','${i.id}')">${shortlist.has(i.id) ? '★ Shortlisted' : '☆ Shortlist'}</button></td>
     </tr>`).join('')}</tbody></table>`
     : emptyRow(inv.all.length ? 'No investors meet the minimum fit score. Lower the threshold or broaden the raise criteria.' : `Your investor directory is empty. <span style="color:var(--emerald);cursor:pointer" onclick="nav('investors');openImportModal('investor')">Import investors</span> first.`);
@@ -1218,7 +1218,7 @@ const HEADER_SYNONYMS = {
     last_name: ['last name', 'lastname', 'surname', 'family name', 'last'],
     organization: ['organization', 'organisation', 'firm', 'fund', 'company', 'fund name', 'firm name', 'investor', 'institution', 'vc firm', 'fund firm', 'company name', 'entity', 'family office', 'investor firm'],
     email: ['email', 'e mail', 'email address', 'mail', 'work email', 'contact email', 'business email'],
-    phone: ['phone', 'mobile', 'tel', 'telephone', 'phone number', 'contact number', 'whatsapp', 'cell'],
+    phone: ['phone', 'mobile', 'tel', 'telephone', 'phone number', 'contact number', 'whatsapp', 'cell', 'handphone', 'hand phone', 'hp', 'hp no', 'hp number', 'handphone number', 'mobile number', 'mobile no', 'phone no', 'tel no', 'contact no', 'whatsapp number', 'cell phone', 'direct line', 'office phone', 'mobile phone'],
     investor_type: ['type', 'investor type', 'category', 'investor category', 'type of investor', 'fund type', 'investor class', 'segment'],
     focus_sectors: ['sectors', 'sector', 'focus', 'focus sectors', 'industries', 'industry', 'verticals', 'vertical', 'thesis', 'sector focus', 'industry focus', 'investment focus', 'areas of interest', 'interests', 'themes'],
     preferred_stages: ['stages', 'stage', 'preferred stage', 'preferred stages', 'investment stage', 'investment stages', 'round', 'rounds', 'stage focus', 'funding stage'],
@@ -1487,7 +1487,7 @@ function renderImportPreview() {
   const st = imp.stats || { types: {} };
   const mapRows = imp.headers.map((h, idx) => `<tr><td style="font-size:12px">${esc(h)}</td><td><select class="f-input f-select" style="padding:4px 8px;font-size:12px" onchange="remapImport(${idx},this.value)">
       <option value="">→ keep in notes</option>${fields.map(f => `<option value="${f}" ${imp.map[h] === f ? 'selected' : ''}>${f.replace(/_/g, ' ')}</option>`).join('')}</select></td></tr>`).join('');
-  const cols = imp.type === 'investor' ? ['full_name', 'organization', 'investor_type', 'focus_sectors', 'preferred_stages', 'geography', 'check_size', 'email', 'linkedin_url']
+  const cols = imp.type === 'investor' ? ['full_name', 'organization', 'investor_type', 'focus_sectors', 'preferred_stages', 'geography', 'check_size', 'email', 'phone', 'linkedin_url', 'website', 'notes']
     : ['company_name', 'contact_name', 'email', 'industry', 'stage', 'website'];
   const typeChips = Object.entries(st.types).sort((a, b) => b[1] - a[1]).map(([t, n]) => `<span class="badge badge-blue" style="margin:2px">${esc(t)} · ${n}</span>`).join('');
   $('imp-preview').innerHTML = `
@@ -1501,7 +1501,7 @@ function renderImportPreview() {
       <div><div class="f-label">Columns detected (change if needed)</div><div style="max-height:360px;overflow:auto"><table class="data-table">${mapRows}</table></div></div>
       <div style="overflow:auto;max-height:400px"><div class="f-label">Preview (arranged)</div>
         <table class="data-table"><thead><tr>${cols.map(c => `<th>${c.replace(/_/g, ' ')}</th>`).join('')}</tr></thead><tbody>
-        ${imp.rows.slice(0, 12).map(r => `<tr>${cols.map(c => `<td style="font-size:12px">${Array.isArray(r[c]) ? chips(r[c], 3) : esc(r[c] == null ? '' : r[c])}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
+        ${imp.rows.slice(0, 12).map(r => `<tr>${cols.map(c => `<td style="font-size:12px;${['email', 'phone', 'check_size'].includes(c) ? 'white-space:nowrap' : ''}${c === 'notes' ? 'min-width:200px;white-space:pre-line' : ''}">${Array.isArray(r[c]) ? chips(r[c], 3) : esc(r[c] == null ? '' : c === 'notes' && String(r[c]).length > 140 ? String(r[c]).slice(0, 140) + '…' : r[c])}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
     </div>`;
   $('imp-go').disabled = !imp.rows.length;
 }
@@ -1527,9 +1527,10 @@ async function runImport() {
 }
 
 // Directory: arranged view (grouped by type) + one-click tidy of existing data
+function invGroup(i) { return i.investor_type ? (normType(i.investor_type) || i.investor_type) : 'Unclassified'; }
 function invSorted(rows) {
   const s = inv.sort || 'type', by = (k) => (a, b) => String(a[k] || '~').localeCompare(String(b[k] || '~'));
-  const t = i => { const k = INVESTOR_TYPES.indexOf(i.investor_type || ''); return k < 0 ? 99 : k; };
+  const t = i => { const k = INVESTOR_TYPES.indexOf(invGroup(i)); return k < 0 ? 99 : k; };
   const list = rows.slice();
   if (s === 'type') list.sort((a, b) => t(a) - t(b) || by('organization')(a, b) || by('full_name')(a, b));
   else if (s === 'org') list.sort((a, b) => by('organization')(a, b) || by('full_name')(a, b));
@@ -1544,8 +1545,8 @@ function renderInvestors() {
   const grouped = (inv.sort || 'type') === 'type';
   let lastType = null;
   const rowHtml = i => {
-    const head = grouped && (i.investor_type || 'Unclassified') !== lastType
-      ? `<tr><td colspan="9" style="background:var(--surface);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--emerald);padding:8px 12px">${esc((lastType = i.investor_type || 'Unclassified'))} · ${rows.filter(x => (x.investor_type || 'Unclassified') === lastType).length}</td></tr>` : '';
+    const head = grouped && invGroup(i) !== lastType
+      ? `<tr><td colspan="9" style="background:var(--surface);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--emerald);padding:8px 12px">${esc((lastType = invGroup(i)))} · ${rows.filter(x => invGroup(x) === lastType).length}</td></tr>` : '';
     return head + `<tr>
       <td><div style="font-weight:600;color:var(--ink)">${esc(i.full_name || '—')}</div><div style="font-size:12px;color:var(--white-muted)">${esc(i.organization || '')}</div></td>
       <td style="font-size:12px">${esc(i.investor_type || '—')}</td>
@@ -1553,16 +1554,19 @@ function renderInvestors() {
       <td>${chips(i.preferred_stages, 2)}</td>
       <td style="font-size:12px">${esc(i.geography || '—')}</td>
       <td style="font-size:12px;white-space:nowrap">${esc(i.check_size || fmtTicket(i.check_min, i.check_max) || '—')}</td>
-      <td style="font-size:12px;white-space:nowrap">${i.email ? `<a href="mailto:${esc(i.email)}" style="color:var(--emerald)" title="${esc(i.email)}"><span class="material-symbols-outlined" style="font-size:16px">mail</span></a>` : ''}
-        ${i.linkedin_url ? `<a href="${esc(i.linkedin_url)}" target="_blank" rel="noopener noreferrer" style="color:var(--emerald)"><span class="material-symbols-outlined" style="font-size:16px">link</span></a>` : ''}
-        ${i.website ? `<a href="${esc(i.website)}" target="_blank" rel="noopener noreferrer" style="color:var(--emerald)"><span class="material-symbols-outlined" style="font-size:16px">language</span></a>` : ''}</td>
+      <td style="font-size:12px;line-height:1.5">${i.email ? `<div style="white-space:nowrap"><a href="mailto:${esc(i.email)}" style="color:var(--emerald)">${esc(i.email)}</a></div>` : ''}
+        ${i.phone ? `<div style="white-space:nowrap"><a href="tel:${esc(String(i.phone).replace(/[^\d+]/g, ''))}" style="color:var(--ink)">${esc(i.phone)}</a>${/^\+?\d/.test(i.phone) ? ` <a href="https://wa.me/${esc(String(i.phone).replace(/\D/g, ''))}" target="_blank" rel="noopener noreferrer" style="color:var(--emerald);font-size:11px">WhatsApp</a>` : ''}</div>` : ''}
+        <div>${i.linkedin_url ? `<a href="${esc(i.linkedin_url)}" target="_blank" rel="noopener noreferrer" style="color:var(--emerald)" title="LinkedIn"><span class="material-symbols-outlined" style="font-size:16px">link</span></a>` : ''}
+        ${i.website ? `<a href="${esc(i.website)}" target="_blank" rel="noopener noreferrer" style="color:var(--emerald)" title="Website"><span class="material-symbols-outlined" style="font-size:16px">language</span></a>` : ''}${!i.email && !i.phone && !i.linkedin_url && !i.website ? '—' : ''}</div>
+        ${i.notes ? `<div style="font-size:11px;color:var(--white-muted);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(i.notes)}">${esc(String(i.notes).split('\n')[0])}</div>` : ''}</td>
+
       <td><span class="pill pill-${i.status === 'approved' ? 'live' : i.status === 'pending' ? 'pending' : 'draft'}">${esc(i.status || 'directory')}</span></td>
       <td style="white-space:nowrap"><button class="btn btn-ghost btn-sm" onclick="openInvestorModal('${esc(i.id)}')">Edit</button>
         <button class="btn btn-danger btn-sm" onclick="deleteInvestor('${esc(i.id)}')">✕</button></td></tr>`;
   };
-  $('investors-table').innerHTML = rows.length ? `<table class="data-table"><thead><tr>
+  $('investors-table').innerHTML = rows.length ? `<div style="overflow-x:auto"><table class="data-table"><thead><tr>
       <th>Investor</th><th>Type</th><th>Sectors</th><th>Stages</th><th>Geography</th><th>Ticket</th><th>Contact</th><th>Status</th><th></th></tr></thead><tbody>
-    ${page.map(rowHtml).join('')}</tbody></table>
+    ${page.map(rowHtml).join('')}</tbody></table></div>
     ${rows.length > inv.per ? `<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;font-size:12px;color:var(--white-muted)">
       <span>Showing ${start + 1}–${Math.min(start + inv.per, rows.length)}</span>
       <span><button class="btn btn-ghost btn-sm" ${inv.page ? '' : 'disabled'} onclick="inv.page--;renderInvestors()">Prev</button>
