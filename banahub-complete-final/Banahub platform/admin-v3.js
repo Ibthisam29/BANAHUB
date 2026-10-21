@@ -68,11 +68,11 @@ function previewEvent(id) { const e = (events_db || []).find(x => x.id === id); 
 // 2. VISUAL PAGE EDITOR
 // ═════════════════════════════════════════════════════════════════════════
 const PUBLIC_PAGES = [
-  ['index', 'Home'], ['about', 'About'], ['services', 'Services'], ['service-gtm', 'GTM & Market Entry'],
-  ['service-readiness', 'Investor Readiness'], ['service-introductions', 'Investor Introductions'],
-  ['service-portfolio', 'Portfolio Advisory'], ['programs', 'Programs'], ['events', 'Events'],
-  ['capital-growth-exchange', 'Capital & Growth Exchange'], ['fundraise', 'Raise Capital'],
-  ['membership', 'Membership'], ['insights', 'Insights'], ['contact', 'Contact'],
+  ['index', 'Home'], ['market-entry', 'Market Entry & GTM'], ['capital-access', 'Capital Access'], ['investors', 'Investors'],
+  ['partnerships', 'Strategic Partnerships'], ['insights', 'Insights & Events'], ['about', 'About'],
+  ['growth-plan', 'Form: Discuss Your Growth Plan'], ['capital-review', 'Form: Apply for Capital Review'], ['investor-network', 'Form: Join Investor Network'],
+  ['programs', 'Programs'], ['events', 'Events'], ['capital-growth-exchange', 'Capital & Growth Exchange'],
+  ['membership', 'Membership'], ['contact', 'Contact'],
   ['program-register', 'Program Registration'], ['privacy', 'Privacy'], ['terms', 'Terms'], ['disclosures', 'Disclosures'],
 ];
 const pe = { slug: 'index', sections: {}, dirty: 0, pending: {}, pickKey: null };
@@ -782,13 +782,14 @@ async function loadEnquiries() {
 function loadEnquiriesTabs() { document.querySelectorAll('#enq-tabs .s-tab').forEach(b => b.classList.toggle('active', b.getAttribute('onclick').includes(`'${enqTab}'`))); renderEnquiries(); }
 function filterEnquiries() { renderEnquiries(); }
 function enqRows() {
-  const q = ($('enq-search').value || '').toLowerCase(), t = $('enq-type-f').value, pr = $('enq-priority-f').value;
+  const q = ($('enq-search').value || '').toLowerCase(), t = $('enq-type-f').value, pr = $('enq-priority-f').value, tr = ($('enq-tier-f') || {}).value || '';
   return enquiries_db.filter(e => {
     const st = enqStatusOf(e);
     if (enqTab === 'open' && !(st === 'new' || st === 'in_progress')) return false;
     if (!['open', 'all'].includes(enqTab) && st !== enqTab) return false;
     if (t && enqTypeOf(e) !== t) return false;
     if (pr && (e.priority || 'normal') !== pr) return false;
+    if (tr && !String((e.data || {}).lead_tier || '').startsWith(tr)) return false;
     if (q && ![e.name, e.email, e.company, e.message, e.notes, enqRef(e)].join(' ').toLowerCase().includes(q)) return false;
     return true;
   });
@@ -798,17 +799,34 @@ function renderEnquiries() {
   $('enq-count').textContent = `${rows.length} shown`;
   const typeBadge = e => { const src = (typeof SOURCE_LABELS !== 'undefined' && SOURCE_LABELS[e.source]) || { label: enqTypeOf(e), color: '#0a5c40' };
     return `<span style="display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;background:${src.color}18;color:${src.color};border:1px solid ${src.color}40;text-transform:capitalize">${esc(src.label)}</span>`; };
+  const tierBadge = e => { const t = (e.data || {}).lead_tier; if (!t) return ''; const c = t[0] === 'A' ? '#0a5c40' : t[0] === 'B' ? '#7a5c00' : '#6b7570';
+    return `<div style="margin-top:4px;font-size:11px;font-weight:700;color:${c}" title="Lead score ${esc(e.data.lead_score)}/100${e.data.qualification_signals ? ' — ' + esc(e.data.qualification_signals) : ''}">${esc(t)} · ${esc(e.data.lead_score)}</div>`; };
   const age = d => { const h = (Date.now() - new Date(d)) / 36e5; return h < 1 ? 'just now' : h < 24 ? Math.round(h) + 'h ago' : Math.round(h / 24) + 'd ago'; };
   $('enquiries-table').innerHTML = rows.length ? `<table class="data-table"><thead><tr><th>From</th><th>Type</th><th>Message</th><th>Status</th><th>Priority</th><th>Received</th><th></th></tr></thead><tbody>
     ${rows.map(e => { const st = enqStatusOf(e), S = ENQ_STATUS[st] || [st, 'draft']; return `<tr style="cursor:pointer${st === 'new' ? ';font-weight:600' : ''}" onclick="openEnquiry('${e.id}')">
       <td><div style="color:var(--ink)">${esc(e.name || '—')}</div><div style="font-size:11px;font-family:var(--font-mono);color:var(--white-muted);font-weight:400">${esc(e.email || '')}</div>${e.company ? `<div style="font-size:11px;color:var(--white-dim);font-weight:400">${esc(e.company)}</div>` : ''}</td>
-      <td>${typeBadge(e)}</td>
+      <td>${typeBadge(e)}${tierBadge(e)}</td>
       <td style="max-width:320px;font-size:12px;font-weight:400;color:var(--white-dim)">${esc((e.message || '').slice(0, 120))}${(e.message || '').length > 120 ? '…' : ''}</td>
       <td onclick="event.stopPropagation()"><select class="f-input f-select" style="padding:4px 8px;font-size:12px;width:130px" onchange="setEnquiryStatus('${e.id}',this.value)">${Object.keys(ENQ_STATUS).map(k => `<option value="${k}" ${k === st ? 'selected' : ''}>${ENQ_STATUS[k][0]}</option>`).join('')}</select></td>
       <td><span class="pill pill-${e.priority === 'high' ? 'rejected' : e.priority === 'low' ? 'draft' : 'pending'}">${esc(e.priority || 'normal')}</span></td>
       <td style="font-size:12px;color:var(--white-muted);font-weight:400;white-space:nowrap" title="${esc(new Date(e.created_at).toLocaleString())}">${age(e.created_at)}</td>
       <td><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openEnquiry('${e.id}')">Open</button></td></tr>`; }).join('')}</tbody></table>`
     : emptyRow(enquiries_db.length ? 'No enquiries in this view.' : 'No enquiries yet. Submissions from the Contact page, events, fundraise and program forms appear here automatically.');
+}
+async function enquiryToInvestor() {
+  const e = enquiries_db.find(x => x.id === $('eq-id').value); if (!e) return;
+  const d = e.data || {}, split = v => String(v || '').split(/;\s*/).filter(Boolean);
+  const tmap = { 'Venture Capital': 'VC', 'Family Office': 'Family Office', 'Private Equity': 'Private Equity', 'Corporate': 'Corporate VC', 'Institutional': 'LP / Fund of Funds', 'Angel': 'Angel' };
+  const tkey = Object.keys(tmap).find(k => String(d.investor_type || '').startsWith(k));
+  const mn = parseMoney(d.ticket_min), mx = parseMoney(d.ticket_max);
+  const row = { full_name: e.name || null, organization: e.company || d.organisation || null, email: e.email || null, phone: e.phone || null,
+    investor_type: tkey ? tmap[tkey] : 'Other', focus_sectors: split(d.sectors), preferred_stages: split(d.stages), geography: split(d.regions).join(', ') || null,
+    check_min: mn, check_max: mx, check_size: fmtTicket(mn, mx), website: d.website || null, linkedin_url: d.linkedin_url || null, status: 'pending', source: 'investor_network',
+    notes: [d.investor_status && 'Investor status (self-declared): ' + d.investor_status, d.deployment && 'Activity: ' + d.deployment, d.lead_follow && 'Lead/follow: ' + d.lead_follow,
+      d.interests && 'Interests: ' + d.interests, d.based_in && 'Based in: ' + d.based_in, d.mandate_notes, enqRef(e) && 'Enquiry ref ' + enqRef(e)].filter(Boolean).join('\n') };
+  const r = await api('/api/admin/network/import', 'POST', { type: 'investor', rows: [arrangeInvestor(row).row] }).catch(err => ({ errors: [err.message] }));
+  if (r && (r.imported || r.updated)) { toast(r.imported ? 'Added to Investor Directory (pending)' : 'Existing investor updated', 'success'); logActivity('admin.enquiry_to_investor', 'admin', `${e.email} from ${enqRef(e)}`); }
+  else toast('Could not add: ' + ((r && (r.error || (r.errors || [])[0])) || 'unknown error'), 'warn');
 }
 function openEnquiry(id) {
   const e = enquiries_db.find(x => x.id === id); if (!e) return;
@@ -825,6 +843,7 @@ function openEnquiry(id) {
   $('eq-priority').value = e.priority || 'normal';
   $('eq-assigned').value = e.assigned_to || '';
   $('eq-notes').value = e.notes || '';
+  if ($('eq-to-inv')) $('eq-to-inv').style.display = (e.source === 'investor_network' || enqTypeOf(e) === 'investor') ? '' : 'none';
   $('eq-reply').href = `mailto:${encodeURIComponent(e.email || '')}?subject=${encodeURIComponent('Re: your BANAHUB enquiry' + (enqRef(e) ? ' (' + enqRef(e) + ')' : ''))}`;
   $('eq-reply').onclick = () => { if (enqStatusOf(e) === 'new' || enqStatusOf(e) === 'in_progress') $('eq-status').value = 'responded'; };
   $('eq-timeline').innerHTML = [`Received ${new Date(e.created_at).toLocaleString()}`, e.responded_at && `Responded ${new Date(e.responded_at).toLocaleString()}`, e.updated_at && e.updated_at !== e.created_at && `Last updated ${new Date(e.updated_at).toLocaleString()}`].filter(Boolean).join('<br/>');

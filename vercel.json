@@ -32,30 +32,6 @@
       "destination": "/admin.html"
     },
     {
-      "source": "/platform",
-      "destination": "/platform.html"
-    },
-    {
-      "source": "/services",
-      "destination": "/services.html"
-    },
-    {
-      "source": "/service-gtm",
-      "destination": "/service-gtm.html"
-    },
-    {
-      "source": "/service-readiness",
-      "destination": "/service-readiness.html"
-    },
-    {
-      "source": "/service-introductions",
-      "destination": "/service-introductions.html"
-    },
-    {
-      "source": "/service-portfolio",
-      "destination": "/service-portfolio.html"
-    },
-    {
       "source": "/programs",
       "destination": "/programs.html"
     },
@@ -82,18 +58,6 @@
     {
       "source": "/join",
       "destination": "/membership.html"
-    },
-    {
-      "source": "/fundraise",
-      "destination": "/fundraise.html"
-    },
-    {
-      "source": "/raise",
-      "destination": "/fundraise.html"
-    },
-    {
-      "source": "/raise-capital",
-      "destination": "/fundraise.html"
     },
     {
       "source": "/program-register",
@@ -138,13 +102,78 @@
       "permanent": true
     },
     {
-      "source": "/platform.html",
-      "destination": "/services",
-      "permanent": true
-    },
-    {
       "source": "/events/capital-growth-exchange",
       "destination": "/capital-growth-exchange",
+      "permanent": false
+    },
+    {
+      "source": "/services",
+      "destination": "/market-entry",
+      "permanent": false
+    },
+    {
+      "source": "/service-gtm",
+      "destination": "/market-entry",
+      "permanent": false
+    },
+    {
+      "source": "/service-readiness",
+      "destination": "/capital-access",
+      "permanent": false
+    },
+    {
+      "source": "/service-introductions",
+      "destination": "/capital-access",
+      "permanent": false
+    },
+    {
+      "source": "/service-portfolio",
+      "destination": "/investors",
+      "permanent": false
+    },
+    {
+      "source": "/fundraise",
+      "destination": "/capital-review",
+      "permanent": false
+    },
+    {
+      "source": "/raise",
+      "destination": "/capital-review",
+      "permanent": false
+    },
+    {
+      "source": "/raise-capital",
+      "destination": "/capital-review",
+      "permanent": false
+    },
+    {
+      "source": "/platform",
+      "destination": "/about",
+      "permanent": false
+    },
+    {
+      "source": "/growth",
+      "destination": "/growth-plan",
+      "permanent": false
+    },
+    {
+      "source": "/diagnostic",
+      "destination": "/growth-plan",
+      "permanent": false
+    },
+    {
+      "source": "/invest",
+      "destination": "/investor-network",
+      "permanent": false
+    },
+    {
+      "source": "/partners",
+      "destination": "/partnerships",
+      "permanent": false
+    },
+    {
+      "source": "/events-and-insights",
+      "destination": "/insights",
       "permanent": false
     }
   ],
@@ -198,6 +227,15 @@
         {
           "key": "Content-Type",
           "value": "application/xml"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)\\.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
         }
       ]
     }

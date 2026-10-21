@@ -1205,6 +1205,7 @@ body::before {
       <div class="filter-bar" style="flex-wrap:wrap">
         <input class="f-input" placeholder="Search name, email, company, message, reference…" id="enq-search" style="max-width:300px" oninput="renderEnquiries()"/>
         <select class="f-input f-select" style="width:170px" id="enq-type-f" onchange="renderEnquiries()"><option value="">All types</option></select>
+        <select class="f-input f-select" style="width:150px" id="enq-tier-f" onchange="renderEnquiries()"><option value="">All lead tiers</option><option value="A">A · Priority</option><option value="B">B · Qualified</option><option value="C">C · Nurture</option></select>
         <select class="f-input f-select" style="width:150px" id="enq-priority-f" onchange="renderEnquiries()"><option value="">Any priority</option><option value="high">High</option><option value="normal">Normal</option><option value="low">Low</option></select>
         <span id="enq-count" style="font-size:12px;color:var(--white-muted);margin-left:auto"></span>
       </div>
@@ -1748,6 +1749,7 @@ Sitemap: https://www.banahub.com/sitemap.xml</textarea></div>
         <div class="f-group"><label class="f-label">Assigned to</label><input id="eq-assigned" class="f-input" placeholder="Name or email"/></div>
         <div class="f-group"><label class="f-label">Internal notes</label><textarea id="eq-notes" class="f-input" rows="6" style="resize:vertical" placeholder="Call notes, next steps… (never shown to the sender)"></textarea></div>
         <button class="btn btn-ghost" onclick="enquiryToCrm()"><span class="material-symbols-outlined" style="font-size:15px">contacts</span>Add to CRM</button>
+        <button class="btn btn-ghost" id="eq-to-inv" onclick="enquiryToInvestor()"><span class="material-symbols-outlined" style="font-size:15px">account_balance</span>Add to Investor Directory</button>
         <a id="eq-reply" class="btn btn-ghost" target="_blank" rel="noopener"><span class="material-symbols-outlined" style="font-size:15px">reply</span>Reply by email</a>
         <div id="eq-timeline" style="font-size:11px;color:var(--white-muted);line-height:1.7"></div>
       </div>
@@ -1918,7 +1920,7 @@ Sitemap: https://www.banahub.com/sitemap.xml</textarea></div>
 ════════════════════════════════════════════════════════════ -->
 <script src="config.js"></script>
 <script src="api.js"></script>
-<script src="admin-v3.js?v=3.5.0"></script>
+<script src="admin-v3.js?v=3.6.0"></script>
 <script>
 
 // ── State ────────────────────────────────────────────────────
@@ -2721,6 +2723,10 @@ const SOURCE_LABELS = {
   program_request:  { label: 'Program',  color: '#1a6a6a' },
   contact_form:     { label: 'Contact',  color: '#444' },
   event_interest:   { label: 'Event',    color: '#8a1a1a' },
+  growth_diagnostic:   { label: 'Growth plan',     color: '#0a5c40' },
+  capital_review:      { label: 'Capital review',  color: '#7a4a1a' },
+  investor_network:    { label: 'Investor network', color: '#1a4d7a' },
+  partnership_enquiry: { label: 'Partnership',     color: '#5a3e7a' },
 };
 
 // ── Activity Logs ────────────────────────────────────────────

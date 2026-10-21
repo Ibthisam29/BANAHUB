@@ -1,125 +1,74 @@
-// Shared navigation and footer injected into every public page
-// Usage: <script src="nav.js"></script> at bottom of body
-// Expects: <div id="site-nav"></div> and <div id="site-footer"></div>
+// BANAHUB shared navigation + footer (site v4)
+// Usage: <div id="site-nav"></div> … <div id="site-footer"></div> <script src="nav.js"></script>
+(function () {
+  // Load the v4 stylesheet on every page that uses the shared nav
+  if (!document.querySelector('link[href*="bh.css"]')) {
+    var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'bh.css?v=4.0.0'; document.head.appendChild(l);
+  }
+  var page = (location.pathname.replace(/\/+$/, '').split('/').pop() || 'index').replace(/\.html$/, '') || 'index';
+  var ITEMS = [
+    ['index', 'Home', 'index.html'],
+    ['market-entry', 'Market Entry & GTM', 'market-entry.html'],
+    ['capital-access', 'Capital Access', 'capital-access.html'],
+    ['investors', 'Investors', 'investors.html'],
+    ['partnerships', 'Strategic Partnerships', 'partnerships.html'],
+    ['insights', 'Insights & Events', 'insights.html', ['events', 'event', 'programs', 'capital-growth-exchange']],
+    ['about', 'About', 'about.html'],
+  ];
+  function isOn(it) { return page === it[0] || (it[3] || []).indexOf(page) >= 0 || (page === 'capital-review' && it[0] === 'capital-access') || (page === 'investor-network' && it[0] === 'investors'); }
 
-(function() {
-  const current = window.location.pathname.split('/').pop() || 'index.html';
-  function active(href) { return current === href ? 'active' : ''; }
-
-  // ── Navigation ──────────────────────────────────────────────
-  const navEl = document.getElementById('site-nav');
+  var navEl = document.getElementById('site-nav');
   if (navEl) {
-    navEl.innerHTML = `
-      <nav class="site-nav" role="navigation" aria-label="Main navigation">
-        <div class="container nav-inner">
-          <a href="index.html" class="nav-logo" aria-label="BANAHub — Home">
-            <img src="logo-icon-512.png" alt="" width="28" height="28"/>
-            BANAHUB
-          </a>
-
-          <ul class="nav-links" id="nav-links-list" role="list">
-            <li class="nav-dropdown">
-              <button aria-haspopup="true" aria-expanded="false" id="nav-services-btn">
-                Services <span class="material-symbols-outlined" style="font-size:16px;opacity:.6">expand_more</span>
-              </button>
-              <ul class="nav-dropdown-menu" role="menu" aria-labelledby="nav-services-btn">
-                <li><a href="services.html" role="menuitem">Overview</a></li>
-                <li><a href="service-gtm.html" role="menuitem">GTM &amp; Market Entry</a></li>
-                <li><a href="service-readiness.html" role="menuitem">Investor Readiness</a></li>
-                <li><a href="service-introductions.html" role="menuitem">Investor Introductions</a></li>
-                <li><a href="service-portfolio.html" role="menuitem">Portfolio Advisory</a></li>
-              </ul>
-            </li>
-            <li><a href="programs.html" class="${active('programs.html')}">Programs</a></li>
-            <li><a href="events.html" class="${active('events.html')}">Events</a></li>
-            <li><a href="about.html" class="${active('about.html')}">About</a></li>
-            <li><a href="insights.html" class="${active('insights.html')}">Insights</a></li>
-            <li><a href="contact.html" class="${active('contact.html')}">Contact</a></li>
-          </ul>
-
-          <div class="nav-cta">
-            <a href="login.html" class="btn btn-ghost btn-sm">Sign In</a>
-            <a href="contact.html" class="btn btn-primary btn-sm">Book a Call</a>
-          </div>
-
-          <button class="nav-mob-toggle" id="mob-toggle" aria-label="Open navigation menu" aria-controls="nav-links-list" aria-expanded="false">
-            <span class="material-symbols-outlined" aria-hidden="true">menu</span>
-          </button>
-        </div>
-      </nav>`;
-
-    // Mobile toggle
-    const toggle = document.getElementById('mob-toggle');
-    const nav = navEl.querySelector('.site-nav');
-    toggle && toggle.addEventListener('click', function() {
-      const open = nav.classList.toggle('nav-mobile-open');
-      this.setAttribute('aria-expanded', open);
-      this.querySelector('.material-symbols-outlined').textContent = open ? 'close' : 'menu';
+    navEl.innerHTML =
+      '<header class="bh-nav" role="banner"><div class="bh-wrap bh-nav-in">' +
+        '<a href="index.html" class="bh-logo" aria-label="BANAHUB home"><img src="logo-icon-512.png" alt="" width="30" height="30"/><span>BANAHUB<small>SINGAPORE</small></span></a>' +
+        '<nav aria-label="Main"><ul class="bh-menu">' + ITEMS.map(function (it) {
+          return '<li><a href="' + it[2] + '"' + (isOn(it) ? ' class="on" aria-current="page"' : '') + '>' + it[1].replace('&', '&amp;') + '</a></li>';
+        }).join('') + '</ul></nav>' +
+        '<div class="bh-nav-cta"><a href="login.html" class="bh-signin">Sign in</a><a href="growth-plan.html" class="bh-btn bh-btn-primary bh-btn-sm">Discuss Your Growth Plan</a></div>' +
+        '<button type="button" class="bh-burger" id="bh-burger" aria-label="Open menu" aria-expanded="false" aria-controls="bh-drawer"><span class="material-symbols-outlined" aria-hidden="true">menu</span></button>' +
+      '</div>' +
+      '<div class="bh-drawer" id="bh-drawer">' + ITEMS.map(function (it) {
+          return '<a class="item' + (isOn(it) ? ' on' : '') + '" href="' + it[2] + '">' + it[1].replace('&', '&amp;') + '<span class="material-symbols-outlined" aria-hidden="true">chevron_right</span></a>';
+        }).join('') +
+        '<div class="bh-actions"><a href="growth-plan.html" class="bh-btn bh-btn-primary">Discuss Your Growth Plan</a><a href="capital-review.html" class="bh-btn bh-btn-secondary">Apply for Capital Review</a><a href="investor-network.html" class="bh-btn bh-btn-secondary">Join Investor Network</a><a href="login.html" class="bh-btn bh-btn-secondary">Member sign in</a></div>' +
+      '</div></header>';
+    var btn = document.getElementById('bh-burger'), drawer = document.getElementById('bh-drawer');
+    btn.addEventListener('click', function () {
+      var open = drawer.classList.toggle('open');
+      btn.setAttribute('aria-expanded', open); btn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+      btn.firstChild.textContent = open ? 'close' : 'menu';
+      document.body.classList.toggle('bh-locked', open);
     });
-
-    // Close on outside click
-    document.addEventListener('click', function(e) {
-      if (!navEl.contains(e.target)) {
-        nav.classList.remove('nav-mobile-open');
-        toggle && toggle.setAttribute('aria-expanded', 'false');
-        toggle && (toggle.querySelector('.material-symbols-outlined').textContent = 'menu');
-      }
-    });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && drawer.classList.contains('open')) btn.click(); });
   }
 
-  // ── Footer ──────────────────────────────────────────────────
-  const footerEl = document.getElementById('site-footer');
+  // Mobile sticky CTA (not on form, auth or member pages)
+  var NO_MCTA = ['growth-plan', 'capital-review', 'investor-network', 'login', 'register', 'dashboard', 'reset-password', 'reset-password-confirm', 'payment-success', 'contact'];
+  if (navEl && NO_MCTA.indexOf(page) < 0 && !document.body.hasAttribute('data-no-mcta')) {
+    var m = document.createElement('div'); m.className = 'bh-mcta';
+    m.innerHTML = page === 'investors'
+      ? '<a href="investor-network.html" class="bh-btn bh-btn-primary">Join Investor Network</a>'
+      : page === 'capital-access'
+        ? '<a href="capital-review.html" class="bh-btn bh-btn-primary">Apply for Capital Review</a>'
+        : '<a href="growth-plan.html" class="bh-btn bh-btn-primary">Discuss Your Growth Plan</a>';
+    document.body.appendChild(m); document.body.classList.add('bh-has-mcta');
+  }
+
+  var footerEl = document.getElementById('site-footer');
   if (footerEl) {
-    footerEl.innerHTML = `
-      <footer class="site-footer" role="contentinfo">
-        <div class="container">
-          <div class="footer-grid">
-            <div>
-              <p class="footer-logo">BANAHub</p>
-              <p class="footer-tagline">GTM advisory, market expansion, and capital readiness for growth-stage companies across Southeast Asia, the Gulf, and North Asia.</p>
-              <p style="margin-top:1.25rem;font-size:0.8125rem;color:rgba(255,255,255,0.40)">Bana Private Limited<br/>UEN 201933473Z · Singapore</p>
-            </div>
-            <div class="footer-col">
-              <h4>Services</h4>
-              <ul>
-                <li><a href="services.html">Overview</a></li>
-                <li><a href="service-gtm.html">GTM &amp; Market Entry</a></li>
-                <li><a href="service-readiness.html">Investor Readiness</a></li>
-                <li><a href="service-introductions.html">Investor Introductions</a></li>
-                <li><a href="service-portfolio.html">Portfolio Advisory</a></li>
-              </ul>
-            </div>
-            <div class="footer-col">
-              <h4>Platform</h4>
-              <ul>
-                <li><a href="programs.html">Programs</a></li>
-                <li><a href="events.html">Events</a></li>
-                <li><a href="membership.html">Membership</a></li>
-                <li><a href="fundraise.html">Raise Capital</a></li>
-                <li><a href="insights.html">Insights</a></li>
-              </ul>
-            </div>
-            <div class="footer-col">
-              <h4>Company</h4>
-              <ul>
-                <li><a href="about.html">About</a></li>
-                <li><a href="contact.html">Contact</a></li>
-                <li><a href="privacy.html">Privacy Policy</a></li>
-                <li><a href="terms.html">Terms of Use</a></li>
-                <li><a href="disclosures.html">Disclosures</a></li>
-              </ul>
-            </div>
-          </div>
-          <div class="footer-bottom">
-            <p>© ${new Date().getFullYear()} Bana Private Limited. All rights reserved.</p>
-            <div class="footer-legal">
-              <a href="privacy.html">Privacy</a>
-              <a href="terms.html">Terms</a>
-              <a href="disclosures.html">Disclosures</a>
-              <a href="mailto:hello@banahub.com">hello@banahub.com</a>
-            </div>
-          </div>
-        </div>
-      </footer>`;
+    footerEl.innerHTML =
+      '<footer class="bh-foot" role="contentinfo"><div class="bh-wrap">' +
+        '<div class="bh-foot-top">' +
+          '<div><div class="brand">BANAHUB</div><p style="margin-top:12px;max-width:340px">Singapore-based cross-border growth, market access and capital advisory for growth-stage companies, investors and ecosystem partners.</p>' +
+          '<p style="margin-top:14px">Bana Private Limited<br/>UEN 201933473Z · Singapore<br/><a href="mailto:hello@banahub.com">hello@banahub.com</a></p></div>' +
+          '<div><h4>Companies</h4><ul><li><a href="market-entry.html">Market Entry &amp; GTM</a></li><li><a href="capital-access.html">Capital Access</a></li><li><a href="growth-plan.html">Discuss Your Growth Plan</a></li><li><a href="capital-review.html">Apply for Capital Review</a></li></ul></div>' +
+          '<div><h4>Investors</h4><ul><li><a href="investors.html">For Investors</a></li><li><a href="investor-network.html">Join Investor Network</a></li><li><a href="growth-plan.html?focus=portfolio">Portfolio Advisory</a></li></ul></div>' +
+          '<div><h4>Partners</h4><ul><li><a href="partnerships.html">Strategic Partnerships</a></li><li><a href="partnerships.html#partner-form">Propose a Collaboration</a></li><li><a href="programs.html">Programmes</a></li><li><a href="insights.html#events">Events</a></li></ul></div>' +
+          '<div><h4>Company</h4><ul><li><a href="about.html">About</a></li><li><a href="insights.html">Insights</a></li><li><a href="contact.html">Contact</a></li><li><a href="login.html">Member sign in</a></li></ul></div>' +
+        '</div>' +
+        '<div class="bh-foot-legal"><p>BANAHUB provides advisory services only. Bana Private Limited is not licensed by the Monetary Authority of Singapore as a financial adviser, capital markets services licensee or exempt financial institution, and does not provide financial advice, make investment recommendations, deal in securities or arrange the offer of securities. Nothing on this website is an offer or solicitation to buy or sell any security. Investor introductions are made only to parties who meet applicable eligibility requirements, and do not guarantee any investment, meeting or commercial outcome. Any success fee is payable only where contractually agreed and permitted by law. See <a href="disclosures.html">Disclosures</a>.</p>' +
+        '<div class="bh-foot-bottom"><span>© ' + new Date().getFullYear() + ' Bana Private Limited. All rights reserved.</span><span><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="disclosures.html">Disclosures</a></span></div></div>' +
+      '</div></footer>';
   }
 })();
