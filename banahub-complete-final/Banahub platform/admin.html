@@ -426,6 +426,31 @@ body::before {
 
 /* ── Scrollbar ── */
 * { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+
+/* Investor directory facets */
+.fc-panel{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:0 0 12px}
+@media(max-width:1200px){.fc-panel{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:640px){.fc-panel{grid-template-columns:minmax(0,1fr)}}
+.fc-col{background:#fff;border:1px solid var(--border);border-radius:var(--r);display:flex;flex-direction:column;min-width:0}
+.fc-head{display:flex;align-items:center;gap:6px;padding:10px 12px;border-bottom:1px solid var(--border);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--emerald-deep)}
+.fc-head .material-symbols-outlined{font-size:16px;color:var(--emerald)}
+.fc-body{padding:8px 12px 12px;max-height:280px;overflow:auto}
+.fc-group{margin-top:8px}
+.fc-gname{background:none;border:0;padding:0;font:600 12px var(--font-ui);color:var(--ink);cursor:pointer;display:flex;gap:6px;align-items:center}
+.fc-gname span{font-weight:500;color:var(--white-muted);font-size:11px}
+.fc-gname:hover,.fc-gname.on{color:var(--emerald)}
+.fc-chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+.fc-chip{border:1px solid var(--border);background:var(--bg);border-radius:999px;padding:3px 9px;font:500 11.5px var(--font-ui);color:var(--ink);cursor:pointer;display:inline-flex;gap:5px;align-items:center}
+.fc-chip span{color:var(--white-muted);font-size:10.5px}
+.fc-chip:hover{border-color:var(--emerald)}
+.fc-chip.on{background:var(--emerald);border-color:var(--emerald);color:#fff}.fc-chip.on span{color:rgba(255,255,255,.75)}
+.fc-chip.zero{opacity:.45}
+.fc-clear{margin-left:auto;background:none;border:0;color:var(--emerald);font:600 11px var(--font-ui);cursor:pointer;text-transform:none;letter-spacing:0}
+.fc-active{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:12px}
+.fc-active:empty{display:none}
+.fc-pill{display:inline-flex;align-items:center;gap:4px;background:rgba(10,92,64,.08);border:1px solid rgba(10,92,64,.2);color:var(--emerald-deep);border-radius:999px;padding:3px 6px 3px 10px;font:600 12px var(--font-ui);cursor:pointer}
+.fc-pill small{font-weight:500;color:var(--white-dim)}.fc-pill .material-symbols-outlined{font-size:14px}
+#inv-refine-btn.active{border-color:var(--emerald);color:var(--emerald)}
 </style>
 <link rel="stylesheet" href="brand-glass.css">
 <style>
@@ -918,15 +943,14 @@ body::before {
         </div>
       </div>
       <div class="filter-bar" style="flex-wrap:wrap">
-        <input id="inv-search" class="f-input" placeholder="Search name, firm, email, notes…" style="max-width:260px" oninput="inv.page=0;renderInvestors()"/>
-        <select id="inv-type" class="f-input f-select" style="width:160px" onchange="inv.page=0;renderInvestors()"><option value="">All types</option></select>
-        <input id="inv-sector" class="f-input" placeholder="Sector" style="width:130px" oninput="inv.page=0;renderInvestors()"/>
-        <select id="inv-stage" class="f-input f-select" style="width:130px" onchange="inv.page=0;renderInvestors()"><option value="">All stages</option><option>Pre-seed</option><option>Seed</option><option>Series A</option><option>Series B</option><option>Series C</option><option>Growth</option><option>Pre-IPO</option><option>Buyout</option><option>Debt</option></select>
-        <input id="inv-geo" class="f-input" placeholder="Geography" style="width:130px" oninput="inv.page=0;renderInvestors()"/>
-        <select id="inv-status" class="f-input f-select" style="width:130px" onchange="inv.page=0;renderInvestors()"><option value="">All statuses</option><option value="directory">Directory</option><option value="approved">Approved</option><option value="pending">Pending</option></select>
+        <input id="inv-search" class="f-input" placeholder="Search name, firm, email, phone, sector…" style="max-width:300px" oninput="inv.page=0;renderInvestors()"/>
+        <button type="button" id="inv-refine-btn" class="btn btn-ghost active" onclick="invToggleFacets()"><span class="material-symbols-outlined" style="font-size:15px">tune</span>Refine <span id="inv-refine-n"></span></button>
+        <select id="inv-status" class="f-input f-select" style="width:140px" onchange="inv.page=0;renderInvestors()"><option value="">All statuses</option><option value="directory">Directory</option><option value="approved">Approved</option><option value="pending">Pending</option></select>
         <select id="inv-sort" class="f-input f-select" style="width:170px" onchange="inv.sort=this.value;inv.page=0;renderInvestors()"><option value="type">Group by type</option><option value="org">Organisation A–Z</option><option value="name">Name A–Z</option><option value="ticket">Largest ticket</option><option value="recent">Recently added</option></select>
         <span id="inv-count" style="font-size:12px;color:var(--white-muted);margin-left:auto"></span>
       </div>
+      <div id="inv-facets" class="fc-panel"></div>
+      <div id="inv-active" class="fc-active"></div>
       <div class="card" style="overflow:auto"><div id="investors-table"></div></div>
     </div>
 
@@ -1894,7 +1918,7 @@ Sitemap: https://www.banahub.com/sitemap.xml</textarea></div>
 ════════════════════════════════════════════════════════════ -->
 <script src="config.js"></script>
 <script src="api.js"></script>
-<script src="admin-v3.js?v=3.4.1"></script>
+<script src="admin-v3.js?v=3.5.0"></script>
 <script>
 
 // ── State ────────────────────────────────────────────────────

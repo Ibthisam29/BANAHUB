@@ -339,20 +339,86 @@ async function loadInvestors() {
   const d = await api('/api/admin/investors').catch(() => ({}));
   if (d && d.error) { $('investors-table').innerHTML = emptyRow('Could not load investors: ' + esc(d.error) + '<br/>Run SQL migration 08 if columns are missing.'); return; }
   inv.all = (d && d.investors) || []; inv.page = 0;
-  const types = [...new Set(inv.all.map(i => i.investor_type).filter(Boolean).concat(INVESTOR_TYPES))];
-  $('inv-type').innerHTML = '<option value="">All types</option>' + types.map(t => `<option>${esc(t)}</option>`).join('');
+  inv.all.forEach(i => { i._f = invFacetValues(i); });
+  if (!inv.f) inv.f = { type: new Set(), stage: new Set(), sector: new Set(), geo: new Set() };
   renderInvestors();
 }
-function invFiltered() {
-  const q = ($('inv-search').value || '').toLowerCase(), t = $('inv-type').value, sec = ($('inv-sector').value || '').toLowerCase(),
-        stg = $('inv-stage').value.toLowerCase(), geo = ($('inv-geo').value || '').toLowerCase(), st = $('inv-status').value;
+// ── Directory taxonomy: funding category, stage, industry → sector, region ──
+const INV_FACETS = {
+  type: { label: 'Funding category', icon: 'account_balance', groups: [
+    ['Venture & early-stage', ['VC', 'Angel', 'Accelerator', 'Corporate VC']],
+    ['Private capital', ['Family Office', 'Private Equity', 'Hedge Fund']],
+    ['Institutional', ['LP / Fund of Funds', 'Sovereign / Government']],
+    ['Debt & credit', ['Bank / Debt']]] },
+  stage: { label: 'Investment stage', icon: 'stairs', groups: [
+    ['Early stage', ['Pre-seed', 'Seed', 'Series A']],
+    ['Growth stage', ['Series B', 'Series C+', 'Growth']],
+    ['Late & special situations', ['Pre-IPO', 'Buyout', 'Debt']]] },
+  sector: { label: 'Industry & sector', icon: 'category', groups: [
+    ['Technology', ['SaaS / Software', 'AI / Data', 'Cybersecurity', 'Deep Tech', 'Web3 / Digital Assets', 'Telecom']],
+    ['Financial services', ['Fintech']],
+    ['Healthcare', ['Healthcare / Life Sciences']],
+    ['Consumer & lifestyle', ['Consumer / E-commerce', 'Media / Gaming', 'Travel / Hospitality', 'Education']],
+    ['Industrial & infrastructure', ['Industrial / Hardware', 'Logistics / Mobility', 'Real Estate / PropTech']],
+    ['Sustainability & food', ['Climate / Energy', 'Agri / Food Tech']],
+    ['Business services', ['HR / Future of Work']],
+    ['Sector-agnostic', ['Generalist']]] },
+  geo: { label: 'Region', icon: 'public', groups: [
+    ['Southeast Asia', ['Singapore', 'Malaysia', 'Indonesia', 'Vietnam', 'Thailand', 'Philippines', 'Southeast Asia']],
+    ['Middle East', ['UAE', 'Saudi Arabia', 'Qatar', 'Middle East / GCC']],
+    ['North Asia', ['Hong Kong', 'China', 'Japan', 'South Korea']],
+    ['South Asia & Oceania', ['India', 'Australia / NZ']],
+    ['Americas & Europe', ['United States', 'United Kingdom', 'Europe', 'Latin America']],
+    ['Global', ['Global', 'Asia Pacific', 'Africa']]] },
+};
+const INV_UNSPEC = 'Not specified';
+function invFacetValues(i) {
+  const t = i.investor_type ? normType(i.investor_type) : null;
+  const st = normStages(arr(i.preferred_stages).join(';'));
+  const se = normSectors(arr(i.focus_sectors).join(';'));
+  const g = (normGeo(i.geography) || '').split(', ').filter(Boolean);
+  return { type: [t || INV_UNSPEC], stage: st.length ? st : [INV_UNSPEC], sector: se.length ? se : [INV_UNSPEC], geo: g.length ? g : [INV_UNSPEC] };
+}
+function invMatch(i, skip) {
+  const f = inv.f || {}, v = i._f || (i._f = invFacetValues(i));
+  return Object.keys(INV_FACETS).every(k => k === skip || !f[k] || !f[k].size || v[k].some(x => f[k].has(x)));
+}
+function invFiltered(skip) {
+  const q = ($('inv-search').value || '').toLowerCase(), st = $('inv-status').value;
   return inv.all.filter(i =>
-    (!q || [i.full_name, i.organization, i.email, i.phone, i.notes, i.investor_type, i.geography, i.website].join(' ').toLowerCase().includes(q)) &&
-    (!t || i.investor_type === t) &&
-    (!sec || arr(i.focus_sectors).some(s => s.toLowerCase().includes(sec))) &&
-    (!stg || arr(i.preferred_stages).some(s => s.toLowerCase().includes(stg))) &&
-    (!geo || (i.geography || '').toLowerCase().includes(geo)) &&
-    (!st || i.status === st));
+    (!q || [i.full_name, i.organization, i.email, i.phone, i.notes, i.investor_type, i.geography, i.website, arr(i.focus_sectors).join(' '), arr(i.preferred_stages).join(' ')].join(' ').toLowerCase().includes(q)) &&
+    (!st || i.status === st) && invMatch(i, skip));
+}
+function invToggle(facet, values, on) {
+  const set = inv.f[facet]; values = [].concat(values);
+  const all = values.every(v => set.has(v));
+  values.forEach(v => (on === undefined ? !all : on) ? set.add(v) : set.delete(v));
+  inv.page = 0; renderInvestors();
+}
+function invClear(facet) { Object.keys(inv.f).forEach(k => { if (!facet || k === facet) inv.f[k].clear(); }); inv.page = 0; renderInvestors(); }
+function invToggleFacets() { const p = $('inv-facets'); p.style.display = p.style.display === 'none' ? '' : 'none'; $('inv-refine-btn').classList.toggle('active', p.style.display !== 'none'); }
+function renderInvFacets() {
+  const box = $('inv-facets'); if (!box || !inv.f) return;
+  const enc = v => esc(JSON.stringify(v));
+  box.innerHTML = Object.entries(INV_FACETS).map(([k, F]) => {
+    const pool = invFiltered(k), count = {};
+    pool.forEach(i => new Set(i._f[k]).forEach(v => { count[v] = (count[v] || 0) + 1; }));
+    const known = new Set(F.groups.flatMap(g => g[1]));
+    const extra = Object.keys(count).filter(v => !known.has(v) && v !== INV_UNSPEC).sort();
+    const groups = F.groups.concat(extra.length ? [['Other', extra]] : []).concat(count[INV_UNSPEC] || inv.f[k].has(INV_UNSPEC) ? [['', [INV_UNSPEC]]] : []);
+    const chip = v => { const on = inv.f[k].has(v), n = count[v] || 0;
+      return `<button type="button" class="fc-chip${on ? ' on' : ''}${!n && !on ? ' zero' : ''}" onclick='invToggle("${k}", ${enc(v)})'>${esc(v)}<span>${n}</span></button>`; };
+    return `<div class="fc-col"><div class="fc-head"><span class="material-symbols-outlined">${F.icon}</span>${F.label}
+        ${inv.f[k].size ? `<button type="button" class="fc-clear" onclick="invClear('${k}')">Clear</button>` : ''}</div>
+      <div class="fc-body">${groups.map(([g, vals]) => {
+        const n = pool.filter(i => i._f[k].some(x => vals.includes(x))).length;
+        return `<div class="fc-group">${g ? `<button type="button" class="fc-gname${vals.every(v => inv.f[k].has(v)) ? ' on' : ''}" onclick='invToggle("${k}", ${enc(vals)})' title="Select whole group">${esc(g)} <span>${n}</span></button>` : ''}
+          <div class="fc-chips">${vals.map(chip).join('')}</div></div>`; }).join('')}</div></div>`;
+  }).join('');
+  const act = Object.entries(inv.f).flatMap(([k, set]) => [...set].map(v => `<button type="button" class="fc-pill" onclick='invToggle("${k}", ${enc(v)}, false)'><small>${INV_FACETS[k].label}:</small> ${esc(v)} <span class="material-symbols-outlined">close</span></button>`));
+  $('inv-active').innerHTML = act.length ? act.join('') + `<button type="button" class="fc-clear" onclick="invClear()">Clear all filters</button>` : '';
+  const n = Object.values(inv.f).reduce((a, s) => a + s.size, 0);
+  $('inv-refine-n').textContent = n ? `(${n})` : '';
 }
 function openInvestorModal(id) {
   const i = id ? inv.all.find(x => x.id === id) || {} : {};
@@ -1273,7 +1339,7 @@ const SECTOR_RULES = [
   [/logistic|supply chain|transport|mobility|shipping|automotive|\bev\b/, 'Logistics / Mobility'],
   [/industrial|manufactur|hardware|robotic|\biot\b|automation/, 'Industrial / Hardware'],
   [/media|entertainment|gaming|games|content|creator|sports/, 'Media / Gaming'],
-  [/hr ?tech|future of work|workforce|recruit/, 'HR / Future of Work'],
+  [/hr ?tech|^hr$|human resources|future of work|workforce|recruit|talent/, 'HR / Future of Work'],
   [/travel|hospitality|tourism/, 'Travel / Hospitality'],
   [/telecom|connectivity|5g/, 'Telecom'],
 ];
@@ -1298,16 +1364,19 @@ const GEO_RULES = [
   [/\buae\b|dubai|abu dhabi|emirates/, 'UAE'], [/saudi|\bksa\b|riyadh/, 'Saudi Arabia'], [/qatar|doha/, 'Qatar'],
   [/\bgcc\b|gulf|middle east|\bmena\b/, 'Middle East / GCC'],
   [/hong ?kong|^hk$/, 'Hong Kong'], [/^(cn|china|prc|shanghai|beijing|shenzhen)$/, 'China'], [/japan|tokyo|^jp$/, 'Japan'], [/korea|seoul|^kr$/, 'South Korea'],
-  [/^(in|india|mumbai|bangalore|bengaluru|delhi)$/, 'India'], [/australia|\banz\b|sydney|melbourne|new zealand/, 'Australia / NZ'],
+  [/^(in|india|mumbai|bangalore|bengaluru|delhi)$/, 'India'], [/australia|\banz\b|sydney|melbourne|new zealand|^nz$/, 'Australia / NZ'],
   [/^(us|usa|united states|america|north america|new york|san francisco|silicon valley)$/, 'United States'],
   [/^(uk|united kingdom|london|britain|england)$/, 'United Kingdom'], [/europe|^eu$|emea/, 'Europe'], [/africa/, 'Africa'], [/latin america|latam/, 'Latin America'],
   [/^asia$|^apac$|asia pacific|asia-pacific/, 'Asia Pacific'],
 ];
 const FREE_MAIL = /@(gmail|yahoo|hotmail|outlook|live|icloud|me|aol|proton|protonmail|gmx|qq|163)\./i;
 function normType(v) { const t = _n(v); if (!t) return null; for (const [re, c] of TYPE_RULES) if (re.test(t)) return c; return _fixCase(v); }
+const SECTOR_CANON = () => new Set(SECTOR_RULES.map(r => r[1]));
+const _canonSplit = (v, canon) => String(v || '').split(/[;,|\n]+/).map(x => x.trim()).filter(Boolean)
+  .flatMap(x => canon.has(x) || [...canon].some(c => c.toLowerCase() === x.toLowerCase()) ? [[...canon].find(c => c.toLowerCase() === x.toLowerCase())] : x.split(/\s*\/\s*|\s+and\s+|\s*&\s*/i));
 function normSectors(v) {
   const out = [];
-  String(v || '').split(/[;,|\n\/]+| and /i).map(x => x.trim()).filter(Boolean).forEach(x => {
+  _canonSplit(v, SECTOR_CANON()).map(x => x.trim()).filter(Boolean).forEach(x => {
     const t = _n(x); const hit = SECTOR_RULES.find(([re]) => re.test(t));
     const c = hit ? hit[1] : _fixCase(x); if (c && !out.includes(c)) out.push(c);
   });
@@ -1325,7 +1394,7 @@ function normStages(v) {
 }
 function normGeo(v) {
   const out = [];
-  String(v || '').split(/[;,|\n\/]+| and /i).map(x => x.trim()).filter(Boolean).forEach(x => {
+  _canonSplit(v, new Set(GEO_RULES.map(r => r[1]))).map(x => x.trim()).filter(Boolean).forEach(x => {
     const t = _n(x); const hit = GEO_RULES.find(([re]) => re.test(t));
     const c = hit ? hit[1] : _fixCase(x); if (c && !out.includes(c)) out.push(c);
   });
@@ -1540,6 +1609,7 @@ function invSorted(rows) {
   return list;
 }
 function renderInvestors() {
+  renderInvFacets();
   const rows = invSorted(invFiltered()), start = inv.page * inv.per, page = rows.slice(start, start + inv.per);
   $('inv-count').textContent = `${rows.length} investor${rows.length === 1 ? '' : 's'}${rows.length !== inv.all.length ? ` (of ${inv.all.length})` : ''}`;
   const grouped = (inv.sort || 'type') === 'type';
@@ -1549,10 +1619,10 @@ function renderInvestors() {
       ? `<tr><td colspan="9" style="background:var(--surface);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--emerald);padding:8px 12px">${esc((lastType = invGroup(i)))} · ${rows.filter(x => invGroup(x) === lastType).length}</td></tr>` : '';
     return head + `<tr>
       <td><div style="font-weight:600;color:var(--ink)">${esc(i.full_name || '—')}</div><div style="font-size:12px;color:var(--white-muted)">${esc(i.organization || '')}</div></td>
-      <td style="font-size:12px">${esc(i.investor_type || '—')}</td>
-      <td>${chips(i.focus_sectors)}</td>
-      <td>${chips(i.preferred_stages, 2)}</td>
-      <td style="font-size:12px">${esc(i.geography || '—')}</td>
+      <td style="font-size:12px">${esc(i.investor_type ? invGroup(i) : '—')}</td>
+      <td>${chips(i._f.sector.filter(x => x !== INV_UNSPEC))}</td>
+      <td>${chips(i._f.stage.filter(x => x !== INV_UNSPEC), 2)}</td>
+      <td style="font-size:12px">${esc(i._f.geo.filter(x => x !== INV_UNSPEC).join(', ') || '—')}</td>
       <td style="font-size:12px;white-space:nowrap">${esc(i.check_size || fmtTicket(i.check_min, i.check_max) || '—')}</td>
       <td style="font-size:12px;line-height:1.5">${i.email ? `<div style="white-space:nowrap"><a href="mailto:${esc(i.email)}" style="color:var(--emerald)">${esc(i.email)}</a></div>` : ''}
         ${i.phone ? `<div style="white-space:nowrap"><a href="tel:${esc(String(i.phone).replace(/[^\d+]/g, ''))}" style="color:var(--ink)">${esc(i.phone)}</a>${/^\+?\d/.test(i.phone) ? ` <a href="https://wa.me/${esc(String(i.phone).replace(/\D/g, ''))}" target="_blank" rel="noopener noreferrer" style="color:var(--emerald);font-size:11px">WhatsApp</a>` : ''}</div>` : ''}
