@@ -384,6 +384,10 @@ window.fetch = async function(input, opts) {
     }
 
     // ── Investor directory (admin) ──────────────────────────────────────────
+    if (_path === '/taxonomy' && method === 'GET') {
+      const { data, error } = await sb.from('industry_taxonomy').select('*').order('industry_ord').order('sector_ord');
+      return _resp({ taxonomy: error ? [] : (data || []) });
+    }
     if (_path === '/admin/investors' && method === 'GET') {
       let q = sb.from('investors').select('*').order('created_at', { ascending: false }).limit(2000);
       const s = (_q.get('search') || '').replace(/[,()]/g, ' ').trim();

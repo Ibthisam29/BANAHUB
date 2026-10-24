@@ -946,6 +946,7 @@ body::before {
         <input id="inv-search" class="f-input" placeholder="Search name, firm, email, phone, sector…" style="max-width:300px" oninput="inv.page=0;renderInvestors()"/>
         <button type="button" id="inv-refine-btn" class="btn btn-ghost active" onclick="invToggleFacets()"><span class="material-symbols-outlined" style="font-size:15px">tune</span>Refine <span id="inv-refine-n"></span></button>
         <select id="inv-status" class="f-input f-select" style="width:140px" onchange="inv.page=0;renderInvestors()"><option value="">All statuses</option><option value="directory">Directory</option><option value="approved">Approved</option><option value="pending">Pending</option></select>
+        <select id="inv-secsrc" class="f-input f-select" style="width:170px" onchange="inv.page=0;renderInvestors()" title="Where the sector data came from"><option value="">All sector data</option><option value="stated">Stated (import / form)</option><option value="manual">Edited by admin</option><option value="inferred">Inferred — to verify</option><option value="missing">No sector yet</option></select>
         <select id="inv-sort" class="f-input f-select" style="width:170px" onchange="inv.sort=this.value;inv.page=0;renderInvestors()"><option value="type">Group by type</option><option value="org">Organisation A–Z</option><option value="name">Name A–Z</option><option value="ticket">Largest ticket</option><option value="recent">Recently added</option></select>
         <span id="inv-count" style="font-size:12px;color:var(--white-muted);margin-left:auto"></span>
       </div>
@@ -1639,7 +1640,7 @@ Sitemap: https://www.banahub.com/sitemap.xml</textarea></div>
         <div class="f-group"><label class="f-label">Investor type</label><select id="im-type" class="f-input f-select"></select></div>
         <div class="f-group"><label class="f-label">Geography focus</label><input id="im-geo" class="f-input" placeholder="Singapore, SEA, Gulf, Global"/></div>
       </div>
-      <div class="f-group"><label class="f-label">Focus sectors (comma separated)</label><input id="im-sectors" class="f-input" placeholder="Fintech, SaaS, Climate, Healthcare"/></div>
+      <div class="f-group"><label class="f-label">Focus sectors (comma separated)</label><input id="im-sectors" class="f-input" placeholder="Fintech, SaaS, Climate, Healthcare" oninput="imIndustryPreview()"/><div id="im-industry" style="font-size:11px;color:var(--white-muted);margin-top:5px"></div></div>
       <div class="f-group"><label class="f-label">Preferred stages (comma separated)</label><input id="im-stages" class="f-input" placeholder="Seed, Series A"/></div>
       <div class="f-grid">
         <div class="f-group"><label class="f-label">Ticket size (text)</label><input id="im-check" class="f-input" placeholder="$250k – $2M"/></div>
@@ -1920,7 +1921,7 @@ Sitemap: https://www.banahub.com/sitemap.xml</textarea></div>
 ════════════════════════════════════════════════════════════ -->
 <script src="config.js"></script>
 <script src="api.js"></script>
-<script src="admin-v3.js?v=3.6.0"></script>
+<script src="admin-v3.js?v=3.7.0"></script>
 <script>
 
 // ── State ────────────────────────────────────────────────────
