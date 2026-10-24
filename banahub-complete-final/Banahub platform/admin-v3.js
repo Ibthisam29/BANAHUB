@@ -335,6 +335,7 @@ let inv = { all: [], page: 0, per: 100 };
 const INVESTOR_TYPES = ['VC', 'Angel', 'Family Office', 'Private Equity', 'Corporate VC', 'Hedge Fund', 'LP / Fund of Funds', 'Accelerator', 'Bank / Debt', 'Sovereign / Government', 'Other'];
 const STAGES = ['Pre-seed', 'Seed', 'Series A', 'Series B', 'Series C+', 'Growth', 'Pre-IPO', 'Buyout', 'Debt'];
 async function loadInvestors() {
+  await loadTaxonomy();
   $('investors-table').innerHTML = emptyRow('Loading investors…');
   const d = await api('/api/admin/investors').catch(() => ({}));
   if (d && d.error) { $('investors-table').innerHTML = emptyRow('Could not load investors: ' + esc(d.error) + '<br/>Run SQL migration 08 if columns are missing.'); return; }
@@ -354,15 +355,7 @@ const INV_FACETS = {
     ['Early stage', ['Pre-seed', 'Seed', 'Series A']],
     ['Growth stage', ['Series B', 'Series C+', 'Growth']],
     ['Late & special situations', ['Pre-IPO', 'Buyout', 'Debt']]] },
-  sector: { label: 'Industry & sector', icon: 'category', groups: [
-    ['Technology', ['SaaS / Software', 'AI / Data', 'Cybersecurity', 'Deep Tech', 'Web3 / Digital Assets', 'Telecom']],
-    ['Financial services', ['Fintech']],
-    ['Healthcare', ['Healthcare / Life Sciences']],
-    ['Consumer & lifestyle', ['Consumer / E-commerce', 'Media / Gaming', 'Travel / Hospitality', 'Education']],
-    ['Industrial & infrastructure', ['Industrial / Hardware', 'Logistics / Mobility', 'Real Estate / PropTech']],
-    ['Sustainability & food', ['Climate / Energy', 'Agri / Food Tech']],
-    ['Business services', ['HR / Future of Work']],
-    ['Sector-agnostic', ['Generalist']]] },
+  sector: { label: 'Industry & sector', icon: 'category', groups: (window.__taxonomy ? [...new Set(window.__taxonomy.map(r => r.industry))].map(ind => [ind, window.__taxonomy.filter(r => r.industry === ind).map(r => r.sector)]) : []) },
   geo: { label: 'Region', icon: 'public', groups: [
     ['Southeast Asia', ['Singapore', 'Malaysia', 'Indonesia', 'Vietnam', 'Thailand', 'Philippines', 'Southeast Asia']],
     ['Middle East', ['UAE', 'Saudi Arabia', 'Qatar', 'Middle East / GCC']],
@@ -377,16 +370,17 @@ function invFacetValues(i) {
   const st = normStages(arr(i.preferred_stages).join(';'));
   const se = normSectors(arr(i.focus_sectors).join(';'));
   const g = (normGeo(i.geography) || '').split(', ').filter(Boolean);
-  return { type: [t || INV_UNSPEC], stage: st.length ? st : [INV_UNSPEC], sector: se.length ? se : [INV_UNSPEC], geo: g.length ? g : [INV_UNSPEC] };
+  return { type: [t || INV_UNSPEC], stage: st.length ? st : [INV_UNSPEC], sector: se.length ? se : [INV_UNSPEC], geo: g.length ? g : [INV_UNSPEC],
+    industry: (arr(i.focus_industries).length ? arr(i.focus_industries) : sectorsToIndustries(se)), src: i.sector_source || (se.length ? 'stated' : 'missing') };
 }
 function invMatch(i, skip) {
   const f = inv.f || {}, v = i._f || (i._f = invFacetValues(i));
   return Object.keys(INV_FACETS).every(k => k === skip || !f[k] || !f[k].size || v[k].some(x => f[k].has(x)));
 }
 function invFiltered(skip) {
-  const q = ($('inv-search').value || '').toLowerCase(), st = $('inv-status').value;
-  return inv.all.filter(i =>
-    (!q || [i.full_name, i.organization, i.email, i.phone, i.notes, i.investor_type, i.geography, i.website, arr(i.focus_sectors).join(' '), arr(i.preferred_stages).join(' ')].join(' ').toLowerCase().includes(q)) &&
+  const q = ($('inv-search').value || '').toLowerCase(), st = $('inv-status').value, ss = ($('inv-secsrc') || {}).value || '';
+  return inv.all.filter(i => (!ss || (i._f || (i._f = invFacetValues(i))).src === ss) &&
+    (!q || [i.full_name, i.organization, i.email, i.phone, i.notes, i.investor_type, i.geography, i.website, arr(i.focus_sectors).join(' '), arr(i.focus_industries).join(' '), arr(i.preferred_stages).join(' ')].join(' ').toLowerCase().includes(q)) &&
     (!st || i.status === st) && invMatch(i, skip));
 }
 function invToggle(facet, values, on) {
@@ -420,6 +414,11 @@ function renderInvFacets() {
   const n = Object.values(inv.f).reduce((a, s) => a + s.size, 0);
   $('inv-refine-n').textContent = n ? `(${n})` : '';
 }
+function imIndustryPreview() {
+  const el = $('im-industry'); if (!el) return;
+  const se = normSectors($('im-sectors').value.replace(/,/g, ';')), ind = sectorsToIndustries(se);
+  el.innerHTML = se.length ? `Industry: <b style="color:var(--emerald-deep)">${esc(ind.join(' · '))}</b> · Sectors: ${esc(se.join(', '))}` : 'Industry is set automatically from the sectors.';
+}
 function openInvestorModal(id) {
   const i = id ? inv.all.find(x => x.id === id) || {} : {};
   $('im-id').value = id || '';
@@ -431,6 +430,8 @@ function openInvestorModal(id) {
   $('im-type').value = i.investor_type || 'VC';
   $('im-sectors').value = arr(i.focus_sectors).join(', ');
   $('im-stages').value = arr(i.preferred_stages).join(', ');
+  imIndustryPreview();
+  if (i.sector_source === 'inferred') $('im-industry').innerHTML += ' <span style="color:#7a5c00">— inferred, please verify</span>';
   $('im-status').value = i.status || 'directory';
   $('modal-investor').style.display = 'flex';
 }
@@ -444,6 +445,9 @@ async function saveInvestor() {
     linkedin_url: $('im-li').value.trim() || null, notes: $('im-notes').value.trim() || null, status: $('im-status').value,
   };
   if (!p.full_name && !p.organization) { toast('Name or organisation required', 'warn'); return; }
+  p.focus_sectors = normSectors(p.focus_sectors.join(';'));
+  const orig = id ? inv.all.find(x => x.id === id) || {} : {};
+  if (p.focus_sectors.join('|') !== arr(orig.focus_sectors).join('|')) p.sector_source = p.focus_sectors.length ? 'manual' : null;
   if ((p.check_min == null || p.check_max == null) && p.check_size) { const [a, b] = parseRange(p.check_size); if (p.check_min == null) p.check_min = a; if (p.check_max == null) p.check_max = b; }
   const r = id ? await api(`/api/admin/investors/${id}`, 'PATCH', p) : await api('/api/admin/investors', 'POST', p);
   if (!r || r.error) { toast('Save failed: ' + ((r && r.error) || ''), 'warn'); return; }
@@ -525,7 +529,7 @@ function renderBusinesses() {
     ${rows.map(c => `<tr>
       <td><div style="font-weight:600;color:var(--ink)">${esc(c.company_name || '—')}</div>${c.website ? `<a href="${esc(c.website)}" target="_blank" rel="noopener" style="font-size:11px;color:var(--emerald)">${esc(c.website)}</a>` : ''}</td>
       <td style="font-size:12px">${esc(c.contact_name || '')}<div style="font-family:var(--font-mono);font-size:11px;color:var(--white-muted)">${esc(c.email || '')}</div></td>
-      <td>${chips(c.industry)}</td><td style="font-size:12px">${esc(c.stage || '—')}</td>
+      <td>${(arr(c.industries).length ? arr(c.industries) : sectorsToIndustries(c.industry)).length ? `<div style="font-size:11px;font-weight:700;color:var(--emerald-deep);margin-bottom:2px">${esc((arr(c.industries).length ? arr(c.industries) : sectorsToIndustries(c.industry)).join(' · '))}</div>` : ''}${chips(c.industry)}</td><td style="font-size:12px">${esc(c.stage || '—')}</td>
       <td><span class="pill pill-${c.status === 'approved' ? 'live' : c.status === 'pending' ? 'pending' : 'draft'}">${esc(c.status || '')}</span></td>
       <td style="font-size:12px;color:var(--white-muted)">${fmtD(c.created_at)}</td>
       <td style="white-space:nowrap"><button class="btn btn-primary btn-sm" onclick="openRaiseModal(null,'${c.id}')">Create raise</button>
@@ -585,7 +589,7 @@ function renderCapital() {
   $('cap-table').innerHTML = rows.length ? `<table class="data-table"><thead><tr><th>Raise</th><th>Sectors</th><th>Stage</th><th>Target</th><th>Progress</th><th>Status</th><th>Dashboard</th><th></th></tr></thead><tbody>
     ${rows.map(r => { const pct = r.target_raise && r.raised_amount ? Math.min(100, Math.round(r.raised_amount / r.target_raise * 100)) : 0; return `<tr>
       <td><div style="font-weight:600;color:var(--ink)">${esc(raiseName(r))}</div><div style="font-size:12px;color:var(--white-muted)">${esc(r.company_name || (r.companies && r.companies.company_name) || '')}${r.close_date ? ' · closes ' + fmtD(r.close_date) : ''}</div></td>
-      <td>${chips(arr(r.sectors).length ? r.sectors : r.industry)}</td>
+      <td>${(arr(r.industries).length ? arr(r.industries) : sectorsToIndustries(r.sectors)).length ? `<div style="font-size:11px;font-weight:700;color:var(--emerald-deep);margin-bottom:2px">${esc((arr(r.industries).length ? arr(r.industries) : sectorsToIndustries(r.sectors)).join(' · '))}</div>` : ''}${chips(arr(r.sectors).length ? r.sectors : r.industry)}</td>
       <td style="font-size:12px">${esc(r.stage || '—')}<div style="color:var(--white-muted)">${esc(r.investment_type || '')}</div></td>
       <td style="font-size:12px;white-space:nowrap">${money(r.target_raise, r.currency)}</td>
       <td style="min-width:90px"><div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="height:100%;width:${pct}%;background:var(--emerald)"></div></div><div style="font-size:11px;color:var(--white-muted);margin-top:3px">${pct}%</div></td>
@@ -674,12 +678,19 @@ function tokens(s) { return String(s || '').toLowerCase().split(/[^a-z0-9]+/).fi
 function scoreInvestor(i, r) {
   const reasons = []; let score = 0;
   // Sector fit (40)
-  const rs = arr(r.sectors).concat(arr(r.industry)).map(s => s.toLowerCase());
-  const is = arr(i.focus_sectors).map(s => s.toLowerCase());
-  if (!is.length) { score += 12; reasons.push('Sector-agnostic'); }
+  const _inds = new Set((window.__taxonomy || []).map(x => x.industry));
+  const rs = arr(r.sectors).concat(arr(r.industry).filter(x => !_inds.has(x))).map(s => s.toLowerCase());
+  const isRaw = arr(i.focus_sectors), is = isRaw.filter(x => !/^generalist$/i.test(x)).map(s => s.toLowerCase());
+  if (!is.length) { score += 12; reasons.push(isRaw.length ? 'Sector-agnostic (generalist)' : 'Sector not recorded'); }
   else if (rs.length) {
-    const hit = rs.filter(a => is.some(b => a.includes(b) || b.includes(a) || tokens(a).some(t => tokens(b).includes(t))));
+    const rCanon = normSectors(rs.join(';')), iCanon = normSectors(is.join(';'));
+    const hit = rCanon.filter(a => iCanon.includes(a)).concat(rs.filter(a => is.some(b => a.includes(b) || b.includes(a))));
     if (hit.length) { score += Math.min(40, 25 + hit.length * 8); reasons.push('Sector: ' + [...new Set(hit)].slice(0, 3).join(', ')); }
+    else {
+      const ri = sectorsToIndustries(rs).filter(x => x !== 'Other'), ii = arr(i.focus_industries).length ? arr(i.focus_industries) : sectorsToIndustries(is);
+      const ih = ri.filter(x => ii.includes(x));
+      if (ih.length) { score += 18; reasons.push('Industry: ' + ih.join(', ')); }
+    }
   }
   // Stage fit (25)
   const st = arr(i.preferred_stages).map(normStage), rst = normStage(r.stage);
@@ -1341,27 +1352,66 @@ const TYPE_RULES = [
   [/angel|individual|\bhnwi?\b|syndicate|super angel/, 'Angel'],
   [/venture|\bvc\b|micro ?vc|seed fund|early stage fund/, 'VC'],
 ];
-const SECTOR_RULES = [
-  [/generalist|agnostic|all sectors|sector neutral|^any$|^all$/, 'Generalist'],
-  [/web ?3|crypto|blockchain|defi|digital asset|\bnft/, 'Web3 / Digital Assets'],
-  [/fin ?tech|financial (services|tech)|payment|banking|insur ?tech|wealth ?tech|lending|regtech|neobank/, 'Fintech'],
-  [/\bai\b|artificial intelligence|machine learning|\bml\b|gen ?ai|\bllm|data (science|analytics)|\bdata\b/, 'AI / Data'],
-  [/cyber|security/, 'Cybersecurity'],
-  [/deep ?tech|semiconductor|quantum|space ?tech|\bspace\b|advanced material/, 'Deep Tech'],
-  [/saas|software|b2b|enterprise|cloud|dev ?tools|productivity/, 'SaaS / Software'],
-  [/health|med ?tech|bio ?tech|life science|pharma|medical|wellness|femtech|digital health/, 'Healthcare / Life Sciences'],
-  [/climate|clean ?tech|energy|renewable|sustainab|\besg\b|green|carbon|solar|battery|circular/, 'Climate / Energy'],
-  [/prop ?tech|real estate|property|construction|con ?tech/, 'Real Estate / PropTech'],
-  [/agri|ag ?tech|food ?tech|aquaculture|farming/, 'Agri / Food Tech'],
-  [/consumer|e ?commerce|retail|d2c|\bdtc\b|fmcg|\bf ?b\b|food|beverage|lifestyle|fashion|beauty|marketplace/, 'Consumer / E-commerce'],
-  [/ed ?tech|education|learning/, 'Education'],
-  [/logistic|supply chain|transport|mobility|shipping|automotive|\bev\b/, 'Logistics / Mobility'],
-  [/industrial|manufactur|hardware|robotic|\biot\b|automation/, 'Industrial / Hardware'],
-  [/media|entertainment|gaming|games|content|creator|sports/, 'Media / Gaming'],
-  [/hr ?tech|^hr$|human resources|future of work|workforce|recruit|talent/, 'HR / Future of Work'],
-  [/travel|hospitality|tourism/, 'Travel / Hospitality'],
-  [/telecom|connectivity|5g/, 'Telecom'],
+// Industry taxonomy (mirrors public.industry_taxonomy; the DB copy is loaded at runtime and wins)
+// [sector, industry, prio, keywords] — keyword ending in "." = whole word only
+const TAXONOMY_DEFAULT = [
+  ['SaaS / Software', 'Technology', 10, 'saas,software,b2b,enterprise,cloud,dev tools,devtools,productivity,it services,it.,hosting,digital transformation'],
+  ['AI / Data', 'Technology', 5, 'ai.,artificial intelligence,machine learning,ml.,gen ai,genai,llm,data,analytics'],
+  ['Cybersecurity', 'Technology', 4, 'cyber,security.,identity,infosec'],
+  ['Electronics / Semiconductors', 'Technology', 8, 'semiconductor,electronic,chip,display,optical'],
+  ['Deep Tech', 'Technology', 9, 'deep tech,deeptech,quantum,space tech,space.,advanced material,photonics'],
+  ['Web3 / Digital Assets', 'Technology', 2, 'web3,web 3,crypto,blockchain,defi,digital asset,nft,tokeni'],
+  ['Telecom', 'Technology', 24, 'telecom,telco,connectivity,5g.,wireless,network operator'],
+  ['Fintech', 'Financial Services', 3, 'fintech,fin tech,payment,neobank,regtech,wealthtech,wealth tech,insurtech,insur tech,lending,embedded finance'],
+  ['Banking / Insurance', 'Financial Services', 25, 'bank,insurance,insurer,reinsurance,financial services,mutual,retirement,pension'],
+  ['Asset Management', 'Financial Services', 26, 'asset manag,investment manag,wealth manag,fund of funds,funds of funds,private markets,family office'],
+  ['MedTech / Devices', 'Healthcare', 6, 'medtech,med tech,medical device,medical,diagnostic,surgical'],
+  ['Healthcare / Life Sciences', 'Healthcare', 7, 'health,biotech,bio tech,life science,pharma,wellness,femtech,therapeutic,clinical,hospital'],
+  ['Consumer / E-commerce', 'Consumer & Lifestyle', 17, 'consumer,e commerce,ecommerce,retail,d2c,dtc,fmcg,beverage,fashion,beauty,marketplace,lifestyle,luxury,cpg'],
+  ['Media / Gaming', 'Consumer & Lifestyle', 21, 'media,entertainment,gaming,games,content,creator,sports,music,advertising,adtech,marketing tech,martech'],
+  ['Travel / Hospitality', 'Consumer & Lifestyle', 23, 'travel,hospitality,tourism,hotel'],
+  ['Education', 'Consumer & Lifestyle', 18, 'edtech,ed tech,education,learning,school'],
+  ['Industrial / Hardware', 'Industrial & Infrastructure', 20, 'industrial,manufactur,hardware,robotic,iot.,automation,aerospace,defence,defense,machinery,engineering'],
+  ['Logistics / Mobility', 'Industrial & Infrastructure', 19, 'logistic,supply chain,transport,mobility,shipping,automotive,ev.,freight,aviation,maritime'],
+  ['Real Estate / PropTech', 'Industrial & Infrastructure', 15, 'proptech,prop tech,real estate,property,construction,contech,con tech,infrastructure,built environment'],
+  ['Climate / Energy', 'Energy & Resources', 11, 'climate,cleantech,clean tech,energy,renewable,sustainab,esg.,green,carbon,solar,battery,circular,utilit,hydrogen,water'],
+  ['Oil & Gas', 'Energy & Resources', 12, 'oil.,gas.,petroleum,lng.,upstream,refin'],
+  ['Mining / Metals', 'Energy & Resources', 13, 'mining,mine.,metal,iron ore,copper,gold.,silver.,lithium,nickel,mineral,steel,coal,emerald,gemstone'],
+  ['Chemicals / Materials', 'Energy & Resources', 14, 'chemical,materials,plastic,polymer,packaging'],
+  ['Agri / Food Tech', 'Energy & Resources', 16, 'agri,agtech,ag tech,food,aquaculture,farming,farm.,fishery,alternative protein'],
+  ['HR / Future of Work', 'Business Services', 22, 'hr.,hrtech,hr tech,human resources,future of work,workforce,recruit,talent,staffing'],
+  ['Professional Services', 'Business Services', 27, 'consulting,professional services,legal,law firm,accounting,advisory,outsourcing,bpo.'],
+  ['Generalist', 'Sector-agnostic', 1, 'generalist,agnostic,all sectors,sector neutral,multi sector,diversified,any.,all.'],
 ];
+const SECTOR_RULES = [];
+const SECTOR_INDUSTRY = {};
+const _kwRe = kws => new RegExp('(^|[^a-z0-9])(' + kws.map(k => k.endsWith('.') ? k.slice(0, -1) + '(?![a-z0-9])' : k).join('|') + ')');
+function applyTaxonomy(rows) {
+  // rows: [{sector, industry, industry_ord, sector_ord, prio, keywords[]}]
+  rows = rows.slice().sort((a, b) => a.industry_ord - b.industry_ord || a.sector_ord - b.sector_ord);
+  SECTOR_RULES.length = 0; Object.keys(SECTOR_INDUSTRY).forEach(k => delete SECTOR_INDUSTRY[k]);
+  rows.slice().sort((a, b) => a.prio - b.prio).forEach(r => SECTOR_RULES.push([_kwRe(r.keywords), r.sector]));
+  rows.forEach(r => { SECTOR_INDUSTRY[r.sector] = r.industry; });
+  const groups = [];
+  rows.forEach(r => { const g = groups.find(x => x[0] === r.industry); g ? g[1].push(r.sector) : groups.push([r.industry, [r.sector]]); });
+  if (typeof INV_FACETS !== 'undefined') INV_FACETS.sector.groups = groups;
+  window.__taxonomy = rows;
+}
+applyTaxonomy(TAXONOMY_DEFAULT.map(([sector, industry, prio, kw], i, all) => {
+  const inds = [...new Set(all.map(x => x[1]))];
+  return { sector, industry, prio, keywords: kw.split(','), industry_ord: inds.indexOf(industry) + 1, sector_ord: all.filter(x => x[1] === industry).findIndex(x => x[0] === sector) + 1 };
+}));
+let _taxLoaded = false;
+async function loadTaxonomy() {
+  if (_taxLoaded) return; _taxLoaded = true;
+  const d = await api('/api/taxonomy').catch(() => null);
+  if (d && Array.isArray(d.taxonomy) && d.taxonomy.length) applyTaxonomy(d.taxonomy);
+}
+function sectorsToIndustries(list) {
+  const out = []; normSectors(arr(list).join(';')).forEach(s => { const ind = SECTOR_INDUSTRY[s] || 'Other'; if (!out.includes(ind)) out.push(ind); });
+  const order = [...new Set((window.__taxonomy || []).map(r => r.industry))].concat('Other');
+  return out.sort((a, b) => order.indexOf(a) - order.indexOf(b));
+}
 const STAGE_RULES = [
   [/pre ?seed|idea|concept/, ['Pre-seed']],
   [/early stage|early/, ['Seed', 'Series A']],
@@ -1508,7 +1558,12 @@ async function handleImportFile(file) {
   $('imp-preview').innerHTML = '<div style="color:var(--white-muted)">Reading and arranging…</div>';
   try {
     const XLSX = await loadXLSX();
-    const wb = XLSX.read(await file.arrayBuffer(), { type: 'array', cellDates: false });
+    const buf = await file.arrayBuffer();
+    let wb;
+    if (/\.(csv|txt|tsv)$/i.test(file.name || '') || /text\/csv/.test(file.type || '')) {
+      let text; try { text = new TextDecoder('utf-8', { fatal: true }).decode(buf); } catch (e) { text = new TextDecoder('windows-1252').decode(buf); }
+      wb = XLSX.read(text.replace(/^\uFEFF/, ''), { type: 'string', cellDates: false });
+    } else wb = XLSX.read(buf, { type: 'array', cellDates: false });
     // pick the sheet + header row with the most recognisable column names
     let best = null;
     wb.SheetNames.forEach(sn => {
@@ -1639,7 +1694,7 @@ function renderInvestors() {
     return head + `<tr>
       <td><div style="font-weight:600;color:var(--ink)">${esc(i.full_name || '—')}</div><div style="font-size:12px;color:var(--white-muted)">${esc(i.organization || '')}</div></td>
       <td style="font-size:12px">${esc(i.investor_type ? invGroup(i) : '—')}</td>
-      <td>${chips(i._f.sector.filter(x => x !== INV_UNSPEC))}</td>
+      <td>${i._f.industry.length ? `<div style="font-size:12px;font-weight:700;color:var(--emerald-deep);margin-bottom:3px">${esc(i._f.industry.join(' · '))}${i._f.src === 'inferred' ? ' <span title="Inferred from the firm or its corporate parent — please verify" style="font-weight:600;font-size:10px;color:#7a5c00;background:#fff4d6;border-radius:4px;padding:1px 5px;margin-left:4px">inferred</span>' : ''}</div>` : ''}${chips(i._f.sector.filter(x => x !== INV_UNSPEC))}</td>
       <td>${chips(i._f.stage.filter(x => x !== INV_UNSPEC), 2)}</td>
       <td style="font-size:12px">${esc(i._f.geo.filter(x => x !== INV_UNSPEC).join(', ') || '—')}</td>
       <td style="font-size:12px;white-space:nowrap">${esc(i.check_size || fmtTicket(i.check_min, i.check_max) || '—')}</td>
@@ -1654,7 +1709,7 @@ function renderInvestors() {
         <button class="btn btn-danger btn-sm" onclick="deleteInvestor('${esc(i.id)}')">✕</button></td></tr>`;
   };
   $('investors-table').innerHTML = rows.length ? `<div style="overflow-x:auto"><table class="data-table"><thead><tr>
-      <th>Investor</th><th>Type</th><th>Sectors</th><th>Stages</th><th>Geography</th><th>Ticket</th><th>Contact</th><th>Status</th><th></th></tr></thead><tbody>
+      <th>Investor</th><th>Type</th><th>Industry &amp; sectors</th><th>Stages</th><th>Geography</th><th>Ticket</th><th>Contact</th><th>Status</th><th></th></tr></thead><tbody>
     ${page.map(rowHtml).join('')}</tbody></table></div>
     ${rows.length > inv.per ? `<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;font-size:12px;color:var(--white-muted)">
       <span>Showing ${start + 1}–${Math.min(start + inv.per, rows.length)}</span>
