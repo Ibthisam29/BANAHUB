@@ -241,7 +241,7 @@ a.bh-card:hover { border-color: var(--bh-em-2); box-shadow: 0 8px 28px rgba(0, 5
 
 /* ── Forms ──────────────────────────────────────────────── */
 .bh-form-shell { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, .8fr); gap: clamp(28px, 4vw, 56px); align-items: start; }
-@media (max-width: 960px) { .bh-form-shell { grid-template-columns: minmax(0, 1fr); } .bh-form-aside { order: -1; } }
+@media (max-width: 960px) { .bh-form-shell { grid-template-columns: minmax(0, 1fr); } }
 .bh-form { background: #fff; border: 1px solid var(--bh-line); border-radius: 14px; padding: clamp(20px, 3vw, 36px); }
 .bh-progress { display: flex; gap: 6px; margin-bottom: 26px; }
 .bh-progress span { flex: 1; height: 4px; border-radius: 4px; background: var(--bh-line); }
