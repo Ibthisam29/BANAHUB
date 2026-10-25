@@ -12,6 +12,7 @@
     capital:  { source: 'capital_review',      type: 'company',  label: 'Capital review' },
     investor: { source: 'investor_network',    type: 'investor', label: 'Investor network' },
     partner:  { source: 'partnership_enquiry', type: 'partner',  label: 'Strategic partnership' },
+    general:  { source: 'contact_form',        type: 'contact',  label: 'General enquiry' },
   };
 
   // First-touch attribution (kept for the session)
@@ -102,7 +103,7 @@
       if (back) back.hidden = i === 0;
       if (next) next.hidden = i === steps.length - 1;
       if (submit) submit.hidden = i !== steps.length - 1;
-      var h = steps[i].querySelector('.bh-step-h span'); if (h) h.textContent = 'Step ' + (i + 1) + ' of ' + steps.length;
+      var h = steps[i].querySelector('.bh-step-h span'); if (h) h.textContent = steps.length > 1 ? 'Step ' + (i + 1) + ' of ' + steps.length : '';
       if (err) err.style.display = 'none';
     }
     function validate(scope) {
@@ -144,7 +145,7 @@
       var payload = Object.assign({}, d, {
         source: C.source, type: C.type, reference: ref, pathway: C.label,
         company: d.company || d.organisation || '', title: d.role || d.title || '',
-        service: [].concat(d.focus || d.collaboration || (kind === 'capital' ? ['Capital review'] : kind === 'investor' ? ['Investor network'] : [])).join(', '),
+        service: [].concat(d.focus || d.collaboration || d.topic || (kind === 'capital' ? ['Capital review'] : kind === 'investor' ? ['Investor network'] : [])).join(', '),
         message: C.label.toUpperCase() + '\n\n' + lines.join('\n'),
         lead_score: score, lead_tier: tierOf(score), qualification_signals: sc[1].join(', '),
       }, attribution());

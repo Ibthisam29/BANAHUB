@@ -24,10 +24,7 @@ body{font-family:'Manrope',system-ui,sans-serif;}
 </head>
 <body class="min-h-screen bg-background ivory-texture antialiased">
 
-<header class="px-10 py-5 flex items-center justify-between border-b border-outline-variant/20 bg-surface/80 backdrop-blur-md sticky top-0 z-10">
-  <a href="index.html" class="font-display font-semibold text-xl text-primary">BANAHUB</a>
-  <a href="programs.html" class="font-sans text-sm text-on-surface-variant hover:text-primary transition-colors">← Back to Programs</a>
-</header>
+<div id="site-nav"></div>
 
 <main class="max-w-xl mx-auto px-6 py-14 anim-up">
   <div id="form-view">
@@ -39,18 +36,18 @@ body{font-family:'Manrope',system-ui,sans-serif;}
 
     <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-8 flex flex-col gap-5">
       <input type="hidden" id="prog-title-hidden"/>
-      <div><label class="f-label">Full Name *</label><input id="prog-name" class="f-input" placeholder="Legal name" required/></div>
-      <div><label class="f-label">Email Address *</label><input id="prog-email" class="f-input" type="email" placeholder="name@institution.com" required/></div>
-      <div><label class="f-label">Company / Institution</label><input id="prog-company" class="f-input" placeholder="Fund, family office, company…"/></div>
+      <div><label for="prog-name" class="f-label">Full Name *</label><input id="prog-name" class="f-input" placeholder="Legal name" required/></div>
+      <div><label for="prog-email" class="f-label">Email Address *</label><input id="prog-email" class="f-input" type="email" placeholder="name@institution.com" required/></div>
+      <div><label for="prog-company" class="f-label">Company / Institution</label><input id="prog-company" class="f-input" placeholder="Fund, family office, company…"/></div>
       <div>
-        <label class="f-label">Program of Interest *</label>
+        <label for="prog-select" class="f-label">Program of Interest *</label>
         <select id="prog-select" class="f-input">
           <option value="">Loading programs…</option>
         </select>
       </div>
-      <div><label class="f-label">Message / Background</label><textarea id="prog-message" class="f-input" rows="4" style="resize:vertical" placeholder="Tell us about your interest in this program and what you're looking to achieve…"></textarea></div>
+      <div><label for="prog-message" class="f-label">Message / Background</label><textarea id="prog-message" class="f-input" rows="4" style="resize:vertical" placeholder="Tell us about your interest in this program and what you're looking to achieve…"></textarea></div>
       <div>
-        <label class="f-label">How did you hear about us?</label>
+        <label for="prog-source" class="f-label">How did you hear about us?</label>
         <select id="prog-source" class="f-input">
           <option>LinkedIn</option><option>Referral</option><option>Event</option>
           <option>Search</option><option>Newsletter</option><option>Other</option>
@@ -60,7 +57,6 @@ body{font-family:'Manrope',system-ui,sans-serif;}
         Submit Registration Request
       </button>
     </div>
-    <p class="text-center font-sans text-xs text-on-surface-variant mt-5">Not a member yet? <a href="membership.html" class="text-primary font-semibold hover:underline">Join BANAHUB →</a></p>
   </div>
 
   <div id="success-view" class="hidden text-center py-16">
@@ -73,7 +69,9 @@ body{font-family:'Manrope',system-ui,sans-serif;}
   </div>
 </main>
 
+<div id="site-footer"></div>
 <script src="config.js"></script>
+<script src="nav.js?v=4.1.0"></script>
 <script src="api.js"></script>
 <script>
 // Pre-fill program from URL param ?program=Title

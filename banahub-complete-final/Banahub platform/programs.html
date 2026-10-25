@@ -10,8 +10,8 @@
   <meta property="og:description" content="Cohort-based acceleration and expansion programs." />
   <meta property="og:url" content="https://www.BANAHUB.com/programs.html" />
   <meta property="og:type" content="website" />
-  <link rel="canonical" href="https://www.BANAHUB.com/programs.html" />
-  <title>Programs | BANAHUB</title>
+  <link rel="canonical" href="https://www.banahub.com/programs"/>
+  <title>Programmes | BANAHUB</title>
 
   <link rel="icon" type="image/x-icon" href="favicon.ico" />
   <link rel="icon" type="image/png" sizes="512x512" href="logo-icon-512.png" />
@@ -21,7 +21,6 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Manrope:wght@300;400;500;600;700&family=Material+Symbols+Outlined:wght,FILL@400,0&display=swap"
     rel="stylesheet" />
-  <link rel="stylesheet" href="glass-theme.css" />
 
   <style>
     *, *::before, *::after { box-sizing: border-box; }
@@ -33,12 +32,11 @@
     .pg-card { transition: transform .2s ease, box-shadow .2s ease; }
     .pg-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,53,39,.12); }
     /* Glass status badges */
-    .badge-glass { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); background: rgba(255,255,255,0.55); border: 1px solid rgba(191,201,195,0.4); }
+    .badge-glass { background: #fff; border: 1px solid rgba(191,201,195,0.4); }
   </style>
 </head>
 
 <body class="bg-background text-on-surface antialiased">
-  <div class="glass-bg-layer"></div>
 
   <!-- NAV -->
   <div id="site-nav"></div>
@@ -47,10 +45,10 @@
 
     <!-- HERO -->
     <section class="relative py-20 px-10 max-w-container-max mx-auto text-center">
-      <p class="font-sans font-bold text-label-caps text-secondary tracking-widest mb-4">STRUCTURED ACCELERATION</p>
-      <h1 class="font-display font-semibold text-display-md text-primary max-w-3xl mx-auto leading-tight">Programs</h1>
+      <p class="font-sans font-bold text-label-caps text-secondary tracking-widest mb-4">PROGRAMMES</p>
+      <h1 class="font-display font-semibold text-display-md text-primary max-w-3xl mx-auto leading-tight">Programmes</h1>
       <p class="font-sans text-body-lg text-on-surface-variant mt-5 max-w-xl mx-auto">
-        Cohort-based programs taking founders and SMEs from concept to commercial traction — GTM advisory, market entry, and investor access.
+        Structured programmes for growth-stage companies and SMEs: market entry, go-to-market and capital readiness, delivered with partner organisations.
       </p>
     </section>
 
@@ -65,7 +63,7 @@
     <!-- PROGRAMS GRID -->
     <section class="px-10 max-w-container-max mx-auto pb-24">
       <div id="programs-grid" class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div class="col-span-full text-center py-16 text-on-surface-variant font-sans">Loading programs…</div>
+        <div class="col-span-full text-center py-16 text-on-surface-variant font-sans">Loading programmes…</div>
       </div>
     </section>
 
@@ -75,7 +73,7 @@
   <div id="site-footer"></div>
 
   <script src="config.js"></script>
-  <script src="nav.js?v=4.0.0"></script>
+  <script src="nav.js?v=4.1.0"></script>
   <script src="api.js"></script>
   <script>
 
@@ -101,8 +99,8 @@
           ${p.max_participants ? `<p class="font-sans text-body-sm text-on-surface-variant mb-2">Max ${p.max_participants} participants</p>` : ''}
           <p class="font-sans text-headline-sm font-display text-primary mb-4">${p.price_amount > 0 ? `${esc(p.currency||'SGD')} $${Number(p.price_amount).toLocaleString()}` : 'Free'}</p>
           ${p.price_amount > 0
-            ? `<button onclick="startCheckout('program','${p.id}',this)" class="w-full bg-primary text-on-primary px-4 py-2.5 rounded font-sans font-semibold text-body-md hover:bg-primary-container transition-colors">Enroll — Pay Now</button>`
-            : `<a href="program-register.html?program=${encodeURIComponent(p.title)}" class="block text-center bg-primary text-on-primary px-4 py-2.5 rounded font-sans font-semibold text-body-md hover:bg-primary-container transition-colors">Apply</a>`}
+            ? `<button onclick="startCheckout('program','${p.id}',this)" class="w-full bg-primary text-on-primary px-4 py-2.5 rounded font-sans font-semibold text-body-md hover:bg-primary-container transition-colors">Enrol</button>`
+            : `<a href="program-register.html?program=${encodeURIComponent(p.title)}" class="block text-center bg-primary text-on-primary px-4 py-2.5 rounded font-sans font-semibold text-body-md hover:bg-primary-container transition-colors">Apply to Participate</a>`}
         </div>`;
     }
 

@@ -41,16 +41,13 @@ body{font-family:'Manrope',system-ui,sans-serif;}
 </head>
 <body class="min-h-screen bg-background ivory-texture antialiased">
 
-<header class="px-10 py-5 flex items-center justify-between border-b border-outline-variant/20 bg-surface/80 backdrop-blur-md sticky top-0 z-10">
-  <a href="index.html" class="font-display font-semibold text-xl text-primary">BANAHub</a>
-  <a href="login.html" class="font-sans text-sm text-on-surface-variant hover:text-primary transition-colors">Already a member? Sign in →</a>
-</header>
+<div id="site-nav"></div>
 
 <main class="max-w-3xl mx-auto px-6 py-14 anim-up">
   <div class="text-center mb-10">
-    <span class="block font-sans font-bold text-xs text-on-surface-variant tracking-[0.15em] uppercase mb-3">Get Access</span>
-    <h1 class="font-display font-semibold text-4xl md:text-5xl text-primary mb-4">Join BANAHub</h1>
-    <p class="font-sans text-base text-on-surface-variant max-w-lg mx-auto">Access events, programmes, and the member community. Choose the plan that fits you.</p>
+    <span class="block font-sans font-bold text-xs text-on-surface-variant tracking-[0.15em] uppercase mb-3">Membership</span>
+    <h1 class="font-display font-semibold text-4xl md:text-5xl text-primary mb-4">Join BANAHUB</h1>
+    <p class="font-sans text-base text-on-surface-variant max-w-lg mx-auto">Events, programmes and member resources from BANAHUB. Membership is separate from our advisory engagements.</p>
   </div>
 
   <!-- Billing toggle -->
@@ -71,28 +68,29 @@ body{font-family:'Manrope',system-ui,sans-serif;}
   <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-8 mb-8">
     <p class="font-sans font-bold text-xs tracking-widest uppercase text-on-surface-variant mb-6">What's included</p>
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-      <div class="check-item"><span class="material-symbols-outlined">check_circle</span><p>Priority access to BANAHub network events and investor-facing programmes</p></div>
-      <div class="check-item"><span class="material-symbols-outlined">check_circle</span><p>Priority registration for all events and summits</p></div>
-      <div class="check-item"><span class="material-symbols-outlined">check_circle</span><p>Program applications and advisory briefings</p></div>
-      <div class="check-item"><span class="material-symbols-outlined">check_circle</span><p>FundMatch introductions on request</p></div>
-      <div class="check-item"><span class="material-symbols-outlined">check_circle</span><p>Founder Pitch Readiness Audit (discounted)</p></div>
-      <div class="check-item"><span class="material-symbols-outlined">check_circle</span><p>Deal room access for open mandates</p></div>
-      <div class="check-item"><span class="material-symbols-outlined">check_circle</span><p>Member-only newsletter and market intelligence</p></div>
-      <div class="check-item" id="annual-bonus" style="display:none"><span class="material-symbols-outlined" style="color:#003527">star</span><p><strong>Annual only:</strong> 30-min advisory call with the BANAHub team</p></div>
+      <div class="check-item"><span class="material-symbols-outlined">check_circle</span><p>Priority registration for BANAHUB events and roundtables</p></div>
+      <div class="check-item"><span class="material-symbols-outlined">check_circle</span><p>Programme applications and advisory briefings</p></div>
+      <div class="check-item"><span class="material-symbols-outlined">check_circle</span><p>Member portal: profile, resources and event history</p></div>
+      <div class="check-item"><span class="material-symbols-outlined">check_circle</span><p>Founder Pitch Readiness Audit at a member rate</p></div>
+      <div class="check-item"><span class="material-symbols-outlined">check_circle</span><p>Member newsletter: notes on market entry and capital readiness</p></div>
+      <div class="check-item"><span class="material-symbols-outlined">check_circle</span><p>Invitations to member sessions, where scheduled</p></div>
+      <div class="check-item" id="annual-bonus" style="display:none"><span class="material-symbols-outlined" style="color:#003527">star</span><p><strong>Annual only:</strong> 30-min advisory call with the BANAHUB team</p></div>
     </div>
   </div>
 
+  <p class="font-sans text-xs text-on-surface-variant text-center mb-6">Membership does not include investor introductions, deal access or financial advice. Advisory work is agreed separately — <a href="growth-plan.html" class="text-primary underline">Discuss Your Growth Plan</a>.</p>
   <!-- CTA -->
   <div id="error-msg" class="hidden mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700"></div>
   <button class="btn-pay" id="pay-btn" onclick="startCheckout()">
     <span class="material-symbols-outlined" style="font-size:18px">lock</span>
-    <span id="pay-label">Get Started — $8 / month</span>
+    <span id="pay-label">Become a member — $8 / month</span>
   </button>
   <p class="text-center font-sans text-xs text-on-surface-variant mt-4">Secure payment via Stripe. Cancel monthly plans anytime. Membership provides platform access only — investor introductions and advisory work are separate engagements with separate eligibility criteria. Annual plans are non-refundable after 14 days.</p>
-  <p class="text-center font-sans text-xs text-on-surface-variant mt-2">Need institutional access instead? <a href="register.html" class="text-primary font-semibold hover:underline">Apply as an institution →</a></p>
 </main>
 
+<div id="site-footer"></div>
 <script src="config.js"></script>
+<script src="nav.js?v=4.1.0"></script>
 <script src="api.js"></script>
 <script>
 let _billing = 'monthly';
@@ -104,7 +102,7 @@ function setBilling(b) {
   const isAnnual = b === 'annual';
   document.getElementById('price-display').textContent = isAnnual ? '$88' : '$8';
   document.getElementById('price-sub').textContent = isAnnual ? 'per year, billed annually — ~$7.33/mo' : 'per month, billed monthly';
-  document.getElementById('pay-label').textContent = isAnnual ? 'Get Started — $88 / year' : 'Get Started — $8 / month';
+  document.getElementById('pay-label').textContent = isAnnual ? 'Become a member — $88 / year' : 'Become a member — $8 / month';
   document.getElementById('annual-bonus').style.display = isAnnual ? 'flex' : 'none';
 }
 
@@ -127,7 +125,7 @@ async function startCheckout() {
     errEl.textContent = e.message;
     errEl.classList.remove('hidden');
     btn.disabled = false;
-    btn.innerHTML = `<span class="material-symbols-outlined" style="font-size:18px">lock</span><span>${_billing==='annual'?'Get Started — $88 / year':'Get Started — $8 / month'}</span>`;
+    btn.innerHTML = `<span class="material-symbols-outlined" style="font-size:18px">lock</span><span>${_billing==='annual'?'Become a member — $88 / year':'Become a member — $8 / month'}</span>`;
   }
 }
 </script>

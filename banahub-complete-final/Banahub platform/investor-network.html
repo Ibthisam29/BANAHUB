@@ -4,17 +4,18 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Join Investor Network | BANAHUB</title>
-<meta name="description" content="Join the BANAHUB investor network to receive opportunities matched to your sectors, stages, regions and ticket size. Free, with no obligation."/>
+<meta name="description" content="Join the BANAHUB investor network to receive opportunities relevant to your sectors, stages, regions and ticket size. Free, with no obligation."/>
 <link rel="canonical" href="https://www.banahub.com/investor-network"/>
 <meta property="og:type" content="website"/><meta property="og:site_name" content="BANAHUB"/>
-<meta property="og:title" content="Join Investor Network | BANAHUB"/><meta property="og:description" content="Join the BANAHUB investor network to receive opportunities matched to your sectors, stages, regions and ticket size. Free, with no obligation."/>
+<meta property="og:title" content="Join Investor Network | BANAHUB"/><meta property="og:description" content="Join the BANAHUB investor network to receive opportunities relevant to your sectors, stages, regions and ticket size. Free, with no obligation."/>
 <meta property="og:url" content="https://www.banahub.com/investor-network"/><meta property="og:image" content="https://www.banahub.com/logo-icon-512.png"/>
 <meta name="theme-color" content="#00281e"/>
+
 <link rel="icon" href="favicon.ico"/><link rel="icon" type="image/png" sizes="512x512" href="logo-icon-512.png"/><link rel="apple-touch-icon" href="apple-touch-icon.png"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Manrope:wght@400;500;600;700;800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0,0&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="site.css"/>
-<link rel="stylesheet" href="bh.css?v=4.0.0"/>
+<link rel="stylesheet" href="bh.css?v=4.1.0"/>
 </head>
 <body>
 <a href="#main" class="bh-skip">Skip to content</a>
@@ -25,7 +26,7 @@
     <div class="bh-crumb"><a href="index.html">Home</a> / <a href="investors.html">Investors</a> / Join Investor Network</div>
     <span class="bh-eyebrow">Investor network</span>
     <h1 class="bh-h1" style="max-width:860px">Join the investor network</h1>
-    <p class="bh-lead">Tell us what you invest in. We share opportunities only when they match your mandate. Free, with no obligation to review or invest.</p>
+    <p class="bh-lead">Tell us what you invest in. We share opportunities only when they fit your mandate. Free, with no obligation to review or invest.</p>
   </div>
 </section>
 
@@ -36,7 +37,7 @@
         <div class="bh-progress"></div>
 
         <section class="bh-fstep">
-          <div class="bh-step-h"><h2>Your profile</h2><span></span></div>
+          <div class="bh-step-h"><h2>Investor profile</h2><span></span></div>
           <div class="bh-fgrid">
             <div class="bh-field"><label for="i-name">Full name *</label><input id="i-name" name="name" type="text" autocomplete="name" required/><div class="emsg">Please enter your name.</div></div>
             <div class="bh-field"><label for="i-title">Title *</label><input id="i-title" name="title" type="text" autocomplete="organization-title" required/><div class="emsg">Please enter your title.</div></div>
@@ -51,7 +52,7 @@
         </section>
 
         <section class="bh-fstep">
-          <div class="bh-step-h"><h2>Your mandate</h2><span></span></div>
+          <div class="bh-step-h"><h2>Deal preferences</h2><span></span></div>
           <div class="bh-fgrid">
             <div class="bh-field full" data-required><span class="lbl">Sectors *</span>
               <div class="bh-opts">
@@ -68,6 +69,9 @@
                 <label class="bh-opt"><input type="checkbox" name="sectors" value="Agri / Food Tech"/><span>Agri / Food</span></label>
                 <label class="bh-opt"><input type="checkbox" name="sectors" value="Deep Tech"/><span>Deep Tech</span></label>
                 <label class="bh-opt"><input type="checkbox" name="sectors" value="Education"/><span>Education</span></label>
+                <label class="bh-opt"><input type="checkbox" name="sectors" value="Banking / Insurance"/><span>Banking / Insurance</span></label>
+                <label class="bh-opt"><input type="checkbox" name="sectors" value="Mining / Metals"/><span>Mining / Metals</span></label>
+                <label class="bh-opt"><input type="checkbox" name="sectors" value="Oil &amp; Gas"/><span>Oil &amp; Gas</span></label>
               </div><div class="emsg">Please choose at least one.</div></div>
             <div class="bh-field full" data-required><span class="lbl">Stages *</span>
               <div class="bh-opts">
@@ -102,7 +106,7 @@
                 <label class="bh-opt"><input type="checkbox" name="interests" value="Co-investment" data-key="co-invest"/><span>Co-investment</span></label>
                 <label class="bh-opt"><input type="checkbox" name="interests" value="Private sessions and events" data-key="events"/><span>Private sessions and events</span></label>
               </div></div>
-            <div class="bh-field full"><label for="i-notes">Anything else about your mandate? <span class="opt">(optional)</span></label><textarea id="i-notes" name="mandate_notes" style="min-height:90px" placeholder="Thesis, exclusions, preferred structures, co-investors you often work with"></textarea></div>
+            <div class="bh-field full"><label for="i-notes">Anything else about your deal preferences? <span class="opt">(optional)</span></label><textarea id="i-notes" name="mandate_notes" style="min-height:90px" placeholder="Thesis, exclusions, preferred structures, co-investors you often work with"></textarea></div>
           </div>
         </section>
 
@@ -116,7 +120,7 @@
             <div class="full">
               <label class="bh-check"><input type="checkbox" name="ack_no_advice" required/><span>I understand BANAHUB does not provide investment advice or recommendations, and that I must make my own assessment of any opportunity.</span></label>
               <label class="bh-check"><input type="checkbox" name="ack_confidential" required/><span>I will keep any opportunity information shared with me confidential.</span></label>
-              <label class="bh-check"><input type="checkbox" name="consent" required/><span>I agree that BANAHUB may use these details to match and send relevant opportunities and event invitations, in line with the <a href="privacy.html" style="text-decoration:underline">Privacy Policy</a>. I can opt out at any time.</span></label>
+              <label class="bh-check"><input type="checkbox" name="consent" required/><span>I agree that BANAHUB may use these details to screen and send relevant opportunities and event invitations, in line with the <a href="privacy.html" style="text-decoration:underline">Privacy Policy</a>. I can opt out at any time.</span></label>
             </div>
           </div>
         </section>
@@ -135,7 +139,7 @@
       <div class="bh-card">
         <h3 class="bh-h3">What you will receive</h3>
         <ul class="bh-ticks">
-          <li>Short opportunity briefs matched to your sectors, stages, regions and ticket size</li>
+          <li>Short opportunity briefs relevant to your sectors, stages, regions and ticket size</li>
           <li>Full materials only with the company's consent</li>
           <li>Invitations to private sessions, where relevant</li>
         </ul>
@@ -148,7 +152,7 @@
 </main>
 <div id="site-footer"></div>
 <script src="config.js"></script>
-<script src="nav.js?v=4.0.0"></script>
-<script src="forms.js?v=4.0.0"></script>
+<script src="nav.js?v=4.1.0"></script>
+<script src="forms.js?v=4.1.0"></script>
 </body>
 </html>

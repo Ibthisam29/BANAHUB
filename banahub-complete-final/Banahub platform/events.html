@@ -5,12 +5,12 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description"
-    content="BANAHUB Events — Capital, Growth and Market Access forums, summits, and roundtables connecting investible businesses with investors across Singapore, ASEAN, the Gulf, and beyond." />
+    content="BANAHUB events: roundtables, briefings and programmes on market entry, go-to-market and capital readiness in Singapore and ASEAN." />
   <meta property="og:title" content="Events | BANAHUB" />
   <meta property="og:description" content="Capital and Growth Exchange forums, summits, and roundtables." />
   <meta property="og:url" content="https://www.banahub.com/events.html" />
   <meta property="og:type" content="website" />
-  <link rel="canonical" href="https://www.banahub.com/events.html" />
+  <link rel="canonical" href="https://www.banahub.com/events"/>
   <title>Events | BANAHUB</title>
 
   <link rel="icon" type="image/x-icon" href="favicon.ico" />
@@ -21,7 +21,6 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Manrope:wght@300;400;500;600;700&family=Material+Symbols+Outlined:wght,FILL@400,0&display=swap"
     rel="stylesheet" />
-  <link rel="stylesheet" href="glass-theme.css" />
 
   <style>
     *, *::before, *::after { box-sizing: border-box; }
@@ -37,7 +36,6 @@
 </head>
 
 <body class="bg-background text-on-surface antialiased">
-  <div class="glass-bg-layer"></div>
 
   <!-- NAV (same as index.html) -->
   <div id="site-nav"></div>
@@ -46,10 +44,10 @@
 
     <!-- HERO -->
     <section class="relative py-20 px-10 max-w-container-max mx-auto text-center">
-      <p class="font-sans font-bold text-label-caps text-secondary tracking-widest mb-4">CAPITAL · COMMERCE · GLOBAL GROWTH</p>
+      <p class="font-sans font-bold text-label-caps text-secondary tracking-widest mb-4">INSIGHTS &amp; EVENTS</p>
       <h1 class="font-display font-semibold text-display-md text-primary max-w-3xl mx-auto leading-tight">Events</h1>
       <p class="font-sans text-body-lg text-on-surface-variant mt-5 max-w-xl mx-auto">
-        Invitation-led forums, summits, and roundtables connecting investible businesses with investors, corporate buyers, and strategic partners.
+        Roundtables, briefings and programmes on market entry, go-to-market and capital readiness in Singapore and ASEAN.
       </p>
     </section>
 
@@ -69,7 +67,7 @@
     <!-- SPONSORSHIP OPPORTUNITIES -->
     <section id="sponsorship-wrap" class="hidden px-10 max-w-container-max mx-auto pb-24">
       <h2 class="font-display font-semibold text-headline-lg text-primary mb-3">Sponsorship Opportunities</h2>
-      <p class="font-sans text-body-md text-on-surface-variant mb-8 max-w-2xl">Partner with BANAHub's events — virtual and in-person sponsorship, speaking slots, and booth space.</p>
+      <p class="font-sans text-body-md text-on-surface-variant mb-8 max-w-2xl">Partner with BANAHUB's events — virtual and in-person sponsorship, speaking slots, and booth space.</p>
       <div id="sponsorship-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
     </section>
 
@@ -79,7 +77,7 @@
   <div id="site-footer"></div>
 
   <script src="config.js"></script>
-  <script src="nav.js?v=4.0.0"></script>
+  <script src="nav.js?v=4.1.0"></script>
   <script src="api.js"></script>
   <script>
 
@@ -140,7 +138,7 @@
       } else if (e.luma_url) {
         cta = `<a href="${esc(e.luma_url)}" target="_blank" class="block text-center bg-primary text-on-primary px-4 py-2.5 rounded font-sans font-semibold text-body-md hover:bg-primary-container transition-colors">RSVP on Luma</a>`;
       } else if (e.price_amount > 0) {
-        cta = `<button onclick="startCheckout('event','${e.id}',this)" class="w-full bg-primary text-on-primary px-4 py-2.5 rounded font-sans font-semibold text-body-md hover:bg-primary-container transition-colors">Register — Pay Now</button>`;
+        cta = `<button onclick="startCheckout('event','${e.id}',this)" class="w-full bg-primary text-on-primary px-4 py-2.5 rounded font-sans font-semibold text-body-md hover:bg-primary-container transition-colors">Register</button>`;
       } else if (e.registration_url) {
         cta = `<a href="${esc(e.registration_url)}" target="_blank" class="block text-center bg-primary text-on-primary px-4 py-2.5 rounded font-sans font-semibold text-body-md hover:bg-primary-container transition-colors">Register</a>`;
       } else { cta = ''; }
@@ -218,7 +216,7 @@
           ${slotsFull
             ? `<button disabled class="w-full bg-outline-variant/40 text-on-surface-variant px-4 py-2.5 rounded font-sans font-semibold text-body-md cursor-not-allowed">Sold Out</button>`
             : priced
-            ? `<button onclick="startSponsorshipCheckout('${p.id}',this)" class="w-full bg-primary text-on-primary px-4 py-2.5 rounded font-sans font-semibold text-body-md hover:bg-primary-container transition-colors">Sponsor — Pay Now</button>`
+            ? `<button onclick="startSponsorshipCheckout('${p.id}',this)" class="w-full bg-primary text-on-primary px-4 py-2.5 rounded font-sans font-semibold text-body-md hover:bg-primary-container transition-colors">Sponsor</button>`
             : `<a href="mailto:hello@banahub.com?subject=${encodeURIComponent('Sponsorship enquiry: '+p.name)}" class="block text-center border border-primary text-primary px-4 py-2.5 rounded font-sans font-semibold text-body-md hover:bg-primary hover:text-on-primary transition-colors">Enquire</a>`}
         </div>`;
     }

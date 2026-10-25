@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<meta name="description" content="BANAHub Member Dashboard — Memberships, Compliance, Capital Flows"/>
-<title>Dashboard | BANAHub</title>
+<meta name="description" content="BANAHUB Member Dashboard — Memberships, Compliance, Capital Flows"/>
+<title>Dashboard | BANAHUB</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico"/>
 <link rel="icon" type="image/png" sizes="512x512" href="logo-icon-512.png"/>
 <link rel="apple-touch-icon" href="apple-touch-icon.png"/>
@@ -179,7 +179,7 @@ body.is-pending [data-members-only]{display:none!important}
 <aside class="sidebar glass-sidebar" id="sidebar">
   <div style="padding:18px 16px 14px;border-bottom:1px solid rgba(0,53,39,0.08)">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:2px">
-      <img src="logo-icon-512.png" alt="BANAHub" style="width:28px;height:28px;border-radius:7px"/>
+      <img src="logo-icon-512.png" alt="BANAHUB" style="width:28px;height:28px;border-radius:7px"/>
       <span style="font-family:'Manrope',sans-serif;font-weight:800;font-size:12px;letter-spacing:.1em;color:#003527">BANAHUB</span>
     </div>
     <p style="font-family:'Newsreader',Georgia,serif;font-size:15px;font-weight:500;color:#1b1c1a;margin-top:6px;line-height:1.2">Member Portal</p>
@@ -264,7 +264,7 @@ body.is-pending [data-members-only]{display:none!important}
     <div style="margin-bottom:28px">
       <p style="font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:rgba(27,28,26,0.40);margin-bottom:4px">Welcome back</p>
       <h1 id="dash-welcome" style="font-family:'Newsreader',Georgia,serif;font-size:34px;font-weight:600;color:#1b1c1a;line-height:1.15">Institutional Member</h1>
-      <p style="font-size:13px;color:rgba(27,28,26,0.50);margin-top:4px">Singapore HQ · BANAHub Platform</p>
+      <p style="font-size:13px;color:rgba(27,28,26,0.50);margin-top:4px">Singapore HQ · BANAHUB Platform</p>
     </div>
 
     <!-- Status notice (shown if pending) -->
@@ -273,7 +273,7 @@ body.is-pending [data-members-only]{display:none!important}
         <span class="material-symbols-outlined" style="color:#7a5000;font-size:18px;flex-shrink:0;margin-top:1px">pending</span>
         <div>
           <p style="font-size:13px;font-weight:700;color:#7a5000;margin-bottom:2px">Account pending approval</p>
-          <p id="status-notice-text" style="font-size:12px;color:#7a5000;opacity:.8">Your application is under review. You'll receive full member access once approved by the BANAHub team.</p>
+          <p id="status-notice-text" style="font-size:12px;color:#7a5000;opacity:.8">Your application is under review. You'll receive full member access once approved by the BANAHUB team.</p>
           <div id="profile-progress" style="margin-top:10px"></div>
         </div>
       </div>
@@ -404,7 +404,7 @@ body.is-pending [data-members-only]{display:none!important}
   <!-- ════ PROFILE PANEL ═══════════════════════════════════════ -->
   <div class="panel" id="panel-profile">
     <div style="margin-bottom:22px"><h2 style="font-family:'Newsreader',Georgia,serif;font-size:26px;font-weight:600;color:#1b1c1a">My Profile</h2>
-      <p style="font-size:13px;color:rgba(27,28,26,0.5)">This is what the BANAHub team reviews when approving your membership and making introductions.</p></div>
+      <p style="font-size:13px;color:rgba(27,28,26,0.5)">This is what the BANAHUB team reviews when approving your membership and making introductions.</p></div>
     <form id="profile-form" onsubmit="saveProfile(event)">
       <div class="glass-card sect">
         <div style="display:flex;align-items:center;gap:18px;margin-bottom:20px">
@@ -422,7 +422,7 @@ body.is-pending [data-members-only]{display:none!important}
           <div><label class="f-lab" for="pf-linkedin">LinkedIn URL</label><input id="pf-linkedin" class="f-in" maxlength="300" placeholder="linkedin.com/in/…"/></div>
           <div><label class="f-lab" for="pf-website">Website</label><input id="pf-website" class="f-in" maxlength="300" placeholder="yourcompany.com"/></div>
         </div>
-        <div style="margin-top:16px"><label class="f-lab" for="pf-bio">About you / your mandate</label><textarea id="pf-bio" class="f-in" rows="4" maxlength="2000" placeholder="What you're building or investing in, markets of interest, what you're looking for from BANAHub."></textarea></div>
+        <div style="margin-top:16px"><label class="f-lab" for="pf-bio">About you / your mandate</label><textarea id="pf-bio" class="f-in" rows="4" maxlength="2000" placeholder="What you're building or investing in, markets of interest, what you're looking for from BANAHUB."></textarea></div>
         <div style="margin-top:18px;display:flex;align-items:center"><button class="btn-p" id="pf-save" type="submit">Save profile</button><span id="save-msg"></span></div>
       </div>
     </form>
@@ -448,7 +448,7 @@ body.is-pending [data-members-only]{display:none!important}
       </form>
     </div>
     <div class="glass-card sect">
-      <h3>Notifications</h3><p class="d">Choose what BANAHub emails you about.</p>
+      <h3>Notifications</h3><p class="d">Choose what BANAHUB emails you about.</p>
       <div class="tgl"><span>Event invitations &amp; programme updates</span><input type="checkbox" id="pref-events"/></div>
       <div class="tgl"><span>New capital raises &amp; deal flow (approved members)</span><input type="checkbox" id="pref-capital"/></div>
       <div class="tgl"><span>Insights newsletter</span><input type="checkbox" id="pref-newsletter"/></div>
@@ -534,7 +534,7 @@ let _dashUser = null;
       document.getElementById('status-notice').style.display='block';
       document.getElementById('notif-dot').style.display='block';
       if(user.status==='rejected') document.getElementById('status-notice-text').textContent='Your membership application was not approved. Contact hello@banahub.com if you think this is a mistake.';
-      else document.getElementById('status-notice-text').textContent='Thanks for signing up. The BANAHub team reviews every account. Complete your profile below so we can approve you faster — member features unlock automatically once approved.';
+      else document.getElementById('status-notice-text').textContent='Thanks for signing up. The BANAHUB team reviews every account. Complete your profile below so we can approve you faster — member features unlock automatically once approved.';
     }
     loadProfile(true);
 
@@ -713,7 +713,7 @@ async function loadProfile(quiet){
     const roleSel=document.getElementById('pf-role');
     roleSel.value = ['founder','investor','advisor','partner','provider','member'].includes(_me.role)?_me.role:'';
     roleSel.disabled = _me.role && _me.role!=='applicant';
-    roleSel.title = roleSel.disabled ? 'Contact BANAHub to change your member type' : '';
+    roleSel.title = roleSel.disabled ? 'Contact BANAHUB to change your member type' : '';
     if(_me.avatar_url) setAvatar(_me.avatar_url);
     document.getElementById('st-email').value = _me.email||'';
     const st=_me.status||'pending';
@@ -783,12 +783,12 @@ async function savePrefs(){
   if(r.ok && _me) _me.preferences=prefs;
 }
 async function signOutEverywhere(){
-  if(!confirm('Sign out of BANAHub on every device?')) return;
+  if(!confirm('Sign out of BANAHUB on every device?')) return;
   try{ const sb=await window.getBanaSupabaseClient(); await sb.auth.signOut({scope:'global'}); }catch(e){}
   localStorage.removeItem('bana_user'); localStorage.removeItem('bana_access_token'); window.location.href='login.html';
 }
 async function requestDeletion(){
-  if(!confirm('Send a request to delete your BANAHub account and personal data? The team will confirm by email.')) return;
+  if(!confirm('Send a request to delete your BANAHUB account and personal data? The team will confirm by email.')) return;
   const r=await fetch('/api/enquiries',{method:'POST',body:JSON.stringify({ source:'account_deletion', type:'account_deletion', name:(_me&&_me.full_name)||'', email:(_me&&_me.email)||'',
     message:'Member requested account and data deletion from Settings.' })});
   document.getElementById('del-msg').textContent = r.ok ? 'Request sent. We will confirm by email within 5 business days.' : 'Could not send — email hello@banahub.com.';
