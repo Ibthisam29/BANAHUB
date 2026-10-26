@@ -673,6 +673,7 @@ window.fetch = async function(input, opts) {
       if (error || !user) return _resp({ success: false, detail: 'Not authenticated', error: 'Not authenticated' }, 401);
       const { data: p } = await sb.from('users').select('*').eq('id', user.id).maybeSingle();
       const merged = Object.assign({}, { id: user.id, email: user.email, auth_provider: user.app_metadata && user.app_metadata.provider }, p || { role: 'applicant', status: 'pending' });
+      try { const { data: osr } = await sb.rpc('os_role'); if (osr) merged.os_role = osr; } catch (e) { /* Commercial OS not installed yet */ }
       return _resp({ success: true, user: merged });
     }
 

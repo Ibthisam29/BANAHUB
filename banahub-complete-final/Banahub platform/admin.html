@@ -1749,7 +1749,7 @@ Sitemap: https://www.banahub.com/sitemap.xml</textarea></div>
         <div class="f-group"><label class="f-label">Priority</label><select id="eq-priority" class="f-input f-select"><option value="high">High</option><option value="normal">Normal</option><option value="low">Low</option></select></div>
         <div class="f-group"><label class="f-label">Assigned to</label><input id="eq-assigned" class="f-input" placeholder="Name or email"/></div>
         <div class="f-group"><label class="f-label">Internal notes</label><textarea id="eq-notes" class="f-input" rows="6" style="resize:vertical" placeholder="Call notes, next steps… (never shown to the sender)"></textarea></div>
-        <button class="btn btn-ghost" onclick="enquiryToCrm()"><span class="material-symbols-outlined" style="font-size:15px">contacts</span>Add to CRM</button>
+        <button class="btn btn-primary" onclick="osEnquiryToOpp(document.getElementById('eq-id').value)"><span class="material-symbols-outlined" style="font-size:15px">trending_up</span>Create opportunity</button>
         <button class="btn btn-ghost" id="eq-to-inv" onclick="enquiryToInvestor()"><span class="material-symbols-outlined" style="font-size:15px">account_balance</span>Add to Investor Directory</button>
         <a id="eq-reply" class="btn btn-ghost" target="_blank" rel="noopener"><span class="material-symbols-outlined" style="font-size:15px">reply</span>Reply by email</a>
         <div id="eq-timeline" style="font-size:11px;color:var(--white-muted);line-height:1.7"></div>
@@ -1961,11 +1961,11 @@ async function apiFetch(path, opts = {}) {
     const data = await fetch(`${API_BASE}/api/auth/me`, { credentials: 'include' });
     if (!data.ok) { showLogin(); return; }
     const { user } = await data.json();
-    if (user.role !== 'admin') {
+    if (user.role !== 'admin' && !user.os_role) {
       showLogin();
       const n = document.getElementById('auth-notadmin');
       n.style.display = 'block';
-      n.innerHTML = 'Signed in as <b>' + esc(user.email || '') + '</b>, which is not an admin account. <a href="#" onclick="adminSignOut();return false" style="color:var(--emerald);font-weight:700">Sign out</a> to switch account, or go to the <a href="/dashboard" style="color:var(--emerald);font-weight:700">member portal</a>.';
+      n.innerHTML = 'Signed in as <b>' + esc(user.email || '') + '</b>, which has no Admin OS access. <a href="#" onclick="adminSignOut();return false" style="color:var(--emerald);font-weight:700">Sign out</a> to switch account, or go to the <a href="/dashboard" style="color:var(--emerald);font-weight:700">member portal</a>.';
       return;
     }
     ADMIN_USER = user;
@@ -2007,7 +2007,7 @@ async function doLogin() {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || 'Invalid credentials');
-    if (data.user?.role !== 'admin') throw new Error('This account does not have admin access.');
+    if (data.user?.role !== 'admin' && !data.user?.os_role) throw new Error('This account does not have Admin OS access.');
 
     ADMIN_USER = data.user;
     CSRF_TOKEN = data.csrf_token || '';
@@ -3332,5 +3332,6 @@ document.addEventListener('keydown', e => {
 });
 
 </script>
+<script src="admin-os.js?v=1.0.0"></script>
 </body>
 </html>
