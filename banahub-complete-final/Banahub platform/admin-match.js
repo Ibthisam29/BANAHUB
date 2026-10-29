@@ -19,8 +19,9 @@
   const CRITERIA = [['sector', 'Sector', 20], ['stage', 'Stage', 15], ['cheque', 'Cheque', 15], ['geography', 'Geography', 15], ['instrument', 'Instrument', 10], ['traction', 'Traction', 10], ['mandate', 'Mandate / appetite', 10], ['relationship', 'Relationship', 5]];
   const BANDS = [['Exceptional match', 90, '#0a5c40'], ['Strong match', 80, '#1a6b4a'], ['Possible match', 70, '#7a5c00'], ['Do not recommend initially', 0, '#8c1d18']];
   const bandOf = n => (BANDS.find(b => (n || 0) >= b[1]) || BANDS[3]);
-  const STATUS = { suggested: 'Suggested', shortlisted: 'Shortlisted', approved: 'Approved for outreach', contacted: 'Sent', interested: 'Interested', meeting: 'Meeting', declined: 'Declined', no_response: 'No response', invested: 'Invested', not_pursued: 'Not pursued', do_not_contact: 'Do not contact' };
-  const SENT = ['contacted', 'interested', 'meeting', 'declined', 'no_response', 'invested'];
+  const STATUS = { suggested: 'Suggested', shortlisted: 'Shortlisted', approved: 'Approved for outreach', contacted: 'Sent', interested: 'Interested', meeting: 'Meeting', due_diligence: 'Due diligence', term_sheet: 'Term sheet', declined: 'Declined', no_response: 'No response', invested: 'Invested', not_pursued: 'Not pursued', do_not_contact: 'Do not contact' };
+  const SENT = ['contacted', 'interested', 'meeting', 'due_diligence', 'term_sheet', 'declined', 'no_response', 'invested'];
+  const POSITIVE = ['interested', 'meeting', 'due_diligence', 'term_sheet', 'invested'];
   const DECLINE = [['sector', 'Sector outside mandate'], ['stage', 'Stage'], ['cheque_size', 'Cheque size'], ['geography', 'Geography'], ['traction', 'Not enough traction'], ['valuation', 'Valuation'], ['team', 'Team'], ['timing', 'Timing'], ['fund_capacity', 'Fund capacity / deployment'], ['conflict', 'Portfolio conflict'], ['no_reason', 'No reason given'], ['other', 'Other']];
   const INSTRUMENTS = ['Equity', 'Convertible / SAFE', 'Preferred equity', 'Venture debt', 'Revenue-based financing', 'Private credit', 'Secondary'];
   const TRACTION = [['', '—'], ['none', 'No requirement'], ['pre_revenue', 'Pre-revenue'], ['early_revenue', 'Early revenue'], ['product_market_fit', 'Product–market fit'], ['scaling', 'Scaling revenue'], ['profitable', 'Profitable']];
@@ -29,7 +30,7 @@
   // ── UI injection ──────────────────────────────────────────────────────────
   function inject() {
     if ($('panel-os-matching')) return;
-    const g = $('os-nav-group'); if (!g) return;
+    const g = $('os-cap-nav-group') || $('os-nav-group'); if (!g) return;
     const b = document.createElement('button'); b.className = 'nav-item'; b.setAttribute('onclick', "nav('os-matching')"); b.setAttribute('data-os-nav', 'os-matching');
     b.innerHTML = '<span class="nav-icon material-symbols-outlined">join_inner</span>Investor Matching<span class="nav-badge" id="nb-os-approve" style="display:none"></span>';
     g.appendChild(b); b.style.display = can('matches.read') ? '' : 'none';
@@ -75,6 +76,7 @@
     await loadMatches();
   }
   async function loadMatches() {
+    if (!M.raiseId || !$('mt-body')) return;
     const rows = await q(sb().from('os_investor_matches').select('*').eq('raise_id', M.raiseId));
     M.matches = rows;
     const ids = [...new Set(rows.map(r => r.investor_id))].filter(i => !M.investors[i]);
@@ -105,7 +107,7 @@
   function render() {
     const all = M.matches, cnt = b => all.filter(m => m.band === b).length;
     $('mt-summary').innerHTML = all.length ? BANDS.map(([b, , c]) => `<button class="mt-band${M.filter.band === b ? ' on' : ''}" style="--c:${c}" onclick="mtFilter('band','${M.filter.band === b ? '' : b}')"><b>${cnt(b)}</b>${b}</button>`).join('')
-      + `<span class="mt-sum-s">${all.filter(m => m.status === 'approved').length} awaiting send · ${all.filter(m => SENT.includes(m.status)).length} sent · ${all.filter(m => ['interested', 'meeting', 'invested'].includes(m.status)).length} positive</span>` : '';
+      + `<span class="mt-sum-s">${all.filter(m => m.status === 'approved').length} awaiting send · ${all.filter(m => SENT.includes(m.status)).length} sent · ${all.filter(m => POSITIVE.includes(m.status)).length} positive</span>` : '';
     const list = rows();
     if (!all.length) { $('mt-body').innerHTML = `<div class="os-empty">No scores yet for this raise. ${can('matches.write') ? 'Click <b>Run matching</b> to score every investor in the directory.' : ''}</div>`; return; }
     $('mt-body').innerHTML = list.length ? `<div style="overflow-x:auto"><table class="data-table os-table"><thead><tr><th style="width:150px">Match score</th><th>Investor</th><th>Breakdown</th><th>Why / flags</th><th>Status</th><th></th></tr></thead><tbody>${list.map(rowHtml).join('')}</tbody></table></div>`
@@ -129,12 +131,13 @@
     if (['suggested', 'shortlisted'].includes(m.status)) { if (ap) out.push(b('Approve outreach…', `mtApprove('${m.id}')`, 'btn-primary')); if (w) out.push(b('Not pursued', `mtStatus('${m.id}','not_pursued')`)); }
     if (m.status === 'approved' && w) { out.push(b('Draft intro', `mtDraft('${m.id}')`)); out.push(b('Mark as sent…', `mtSent('${m.id}')`, 'btn-primary')); }
     if (['contacted', 'no_response'].includes(m.status) && w) out.push(b('Record response…', `mtResponse('${m.id}')`, 'btn-primary'));
-    if (['interested', 'meeting'].includes(m.status) && w) out.push(b('Update…', `mtResponse('${m.id}')`));
+    if (['interested', 'meeting', 'due_diligence', 'term_sheet'].includes(m.status) && w) out.push(b('Update…', `mtResponse('${m.id}')`));
+    if (m.contacted_at && !['declined', 'invested', 'do_not_contact'].includes(m.status) && w && window.capNewMeeting) out.push(b('Meeting…', `capNewMeeting({match_id:'${m.id}'})`));
     out.push(b('History', `mtHistory('${m.id}')`));
     return out.join(' ');
   }
   async function setStatus(id, status, extra) {
-    try { await q(sb().from('os_investor_matches').update(Object.assign({ status }, extra || {})).eq('id', id)); notify(STATUS[status] || 'Updated'); await loadMatches(); pendingBadge(); return true; }
+    try { await q(sb().from('os_investor_matches').update(Object.assign({ status }, extra || {})).eq('id', id)); notify(STATUS[status] || 'Updated'); await loadMatches(); pendingBadge(); if (window.capRefresh) window.capRefresh(); return true; }
     catch (e) { notify(e.message, 'warn'); return false; }
   }
 
@@ -171,13 +174,30 @@
     $('md-mail').style.display = i.email ? '' : 'none';
     $('modal-mt-draft').style.display = 'flex';
   }
-  function openSent(id) { $('ms-id').value = id; $('ms-channel').value = 'email'; $('ms-note').value = ''; $('modal-mt-sent').style.display = 'flex'; }
-  async function doSent() { const id = $('ms-id').value; if (await setStatus(id, 'contacted', { channel: $('ms-channel').value, notes: $('ms-note').value.trim() || null })) closeModal('modal-mt-sent'); }
-  function openResponse(id) { $('mr-id').value = id; $('mr-status').value = 'interested'; $('mr-detail').value = ''; toggleDecline(); $('modal-mt-response').style.display = 'flex'; }
-  function toggleDecline() { $('mr-decline-wrap').style.display = $('mr-status').value === 'declined' ? '' : 'none'; }
+  function openSent(id) { $('ms-id').value = id; $('ms-channel').value = 'email'; $('ms-note').value = ''; $('ms-intro').value = ''; sentToggle(); $('modal-mt-sent').style.display = 'flex'; }
+  function sentToggle() { $('ms-intro-wrap').style.display = $('ms-channel').value === 'introducer' ? '' : 'none'; }
+  // recorded as the first outreach touch: the database moves the record to "contacted" through the approval guard
+  async function doSent() {
+    const id = $('ms-id').value, ch = $('ms-channel').value, intro = $('ms-intro').value.trim();
+    if (ch === 'introducer' && !intro) return notify('Name the introducer', 'warn');
+    try {
+      await q(sb().from('os_outreach').insert({ match_id: id, step_no: 0, channel: ch, status: 'sent', body: $('ms-note').value.trim() || null, introducer: ch === 'introducer' ? intro : null }));
+      notify('Recorded as sent'); closeModal('modal-mt-sent'); await loadMatches(); pendingBadge(); if (window.capRefresh) window.capRefresh();
+    } catch (e) { notify(e.message, 'warn'); }
+  }
+  function openResponse(id) {
+    const m = M.matches.find(x => x.id === id) || ((window.__CAP || {}).matches || []).find(x => x.id === id) || {};
+    const next = { contacted: 'interested', no_response: 'interested', interested: 'meeting', meeting: 'due_diligence', due_diligence: 'term_sheet', term_sheet: 'invested' }[m.status] || 'interested';
+    $('mr-id').value = id; $('mr-status').value = next; $('mr-detail').value = ''; $('mr-amount').value = '';
+    const r = (M.raises || []).find(x => x.id === m.raise_id) || {}; $('mr-cur').value = r.currency || 'USD';
+    toggleDecline(); $('modal-mt-response').style.display = 'flex';
+  }
+  function toggleDecline() { $('mr-decline-wrap').style.display = $('mr-status').value === 'declined' ? '' : 'none'; $('mr-amount-wrap').style.display = $('mr-status').value === 'invested' ? '' : 'none'; }
   async function doResponse() {
     const id = $('mr-id').value, s = $('mr-status').value, extra = { notes: $('mr-detail').value.trim() || null };
     if (s === 'declined') { extra.decline_reason = $('mm-decline').value; extra.decline_detail = $('mr-detail').value.trim() || null; }
+    if (s === 'invested') { const a = $('mr-amount').value.trim(); extra.committed_amount = a ? (typeof parseMoney === 'function' ? parseMoney(a) : Number(a)) : null; extra.committed_currency = $('mr-cur').value;
+      if (!(extra.committed_amount > 0)) return notify('Record the amount committed', 'warn'); }
     if (await setStatus(id, s, extra)) closeModal('modal-mt-response');
   }
   async function history(id) {
@@ -260,7 +280,7 @@
   Object.assign(window, {
     mtSelectRaise: selectRaise, mtRun: run, mtFilter: (k, v) => { M.filter[k] = v; if (k === 'band') { const s = $('mt-band'); if (s) s.value = v; } render(); },
     mtStatus: (id, s) => setStatus(id, s), mtApprove: openApprove, mtDoApprove: doApprove, mtDraft: draft, mtSent: openSent, mtDoSent: doSent,
-    mtResponse: openResponse, mtDoResponse: doResponse, mtToggleDecline: toggleDecline, mtHistory: history,
+    mtResponse: openResponse, mtSentToggle: sentToggle, mtDoResponse: doResponse, mtToggleDecline: toggleDecline, mtHistory: history,
     mtOpenInvestor: openInvestor, mtSaveInvestor: saveInvestor, mtEditRaise: editRaise, mtSaveRaise: saveRaise, __MT: M,
   });
 
@@ -294,14 +314,16 @@
   <div id="modal-mt-sent" class="modal-overlay" style="display:none;z-index:1100" onclick="if(event.target===this)closeModal('modal-mt-sent')"><div class="modal" style="max-width:460px">
     <div class="modal-header"><div class="modal-title">Record outreach</div><button class="modal-close" onclick="closeModal('modal-mt-sent')">✕</button></div>
     <div class="modal-body" style="display:flex;flex-direction:column;gap:10px"><input type="hidden" id="ms-id"/>
-      <div class="f-group"><label class="f-label" for="ms-channel">Sent via</label><select id="ms-channel" class="f-input f-select"><option value="email">Email</option><option value="linkedin">LinkedIn</option><option value="call">Call</option><option value="meeting">Meeting</option><option value="event">Event</option><option value="other">Other</option></select></div>
+      <div class="f-group"><label class="f-label" for="ms-channel">Sent via</label><select id="ms-channel" class="f-input f-select" onchange="mtSentToggle()"><option value="email">Email</option><option value="linkedin">LinkedIn</option><option value="call">Call</option><option value="meeting">Meeting</option><option value="event">Event</option><option value="introducer">Introducer</option><option value="other">Other</option></select></div>
+      <div class="f-group" id="ms-intro-wrap"><label class="f-label" for="ms-intro">Introducer</label><input id="ms-intro" class="f-input" placeholder="Who made the introduction"/></div>
       <div class="f-group"><label class="f-label" for="ms-note">Note</label><input id="ms-note" class="f-input" placeholder="What was shared"/></div>
       <div style="font-size:11px;color:var(--white-muted)">Once recorded, this company cannot be sent to this investor again without a new, reasoned approval.</div></div>
     <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('modal-mt-sent')">Cancel</button><button class="btn btn-primary" onclick="mtDoSent()">Record as sent</button></div></div></div>
   <div id="modal-mt-response" class="modal-overlay" style="display:none;z-index:1100" onclick="if(event.target===this)closeModal('modal-mt-response')"><div class="modal" style="max-width:460px">
     <div class="modal-header"><div class="modal-title">Investor response</div><button class="modal-close" onclick="closeModal('modal-mt-response')">✕</button></div>
     <div class="modal-body" style="display:flex;flex-direction:column;gap:10px"><input type="hidden" id="mr-id"/>
-      <div class="f-group"><label class="f-label" for="mr-status">Outcome</label><select id="mr-status" class="f-input f-select" onchange="mtToggleDecline()"><option value="interested">Interested</option><option value="meeting">Meeting arranged</option><option value="declined">Declined</option><option value="no_response">No response</option><option value="invested">Invested</option></select></div>
+      <div class="f-group"><label class="f-label" for="mr-status">Outcome</label><select id="mr-status" class="f-input f-select" onchange="mtToggleDecline()"><option value="interested">Interested</option><option value="meeting">Meeting arranged</option><option value="due_diligence">Due diligence</option><option value="term_sheet">Term sheet</option><option value="invested">Invested</option><option value="declined">Declined</option><option value="no_response">No response</option></select></div>
+      <div class="f-group" id="mr-amount-wrap"><label class="f-label" for="mr-amount">Amount committed</label><div style="display:flex;gap:6px"><select id="mr-cur" class="f-input f-select" style="width:84px"><option>USD</option><option>SGD</option><option>EUR</option><option>GBP</option><option>AED</option><option>AUD</option><option>HKD</option></select><input id="mr-amount" class="f-input" placeholder="1.5m"/></div></div>
       <div class="f-group" id="mr-decline-wrap"><label class="f-label" for="mm-decline">Decline reason</label><select id="mm-decline" class="f-input f-select"></select></div>
       <div class="f-group"><label class="f-label" for="mr-detail">Detail</label><input id="mr-detail" class="f-input" placeholder="What they said"/></div></div>
     <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('modal-mt-response')">Cancel</button><button class="btn btn-primary" onclick="mtDoResponse()">Save</button></div></div></div>
@@ -368,7 +390,7 @@
   .mt-bars i{display:block;width:12px;background:var(--emerald);border-radius:2px 2px 0 0;min-height:2px}.mt-bars span{font-size:8.5px;color:var(--white-muted);margin-top:2px}
   .mt-status{display:inline-block;font-size:10.5px;font-weight:700;border-radius:4px;padding:2px 7px;background:var(--surface-2,#eee);color:var(--ink)}
   .mt-s-shortlisted{background:#e8f0f8;color:#1a4d7a}.mt-s-approved{background:#fff4d6;color:#7a5c00}.mt-s-contacted{background:#e8f0ec;color:#0a5c40}
-  .mt-s-interested,.mt-s-meeting,.mt-s-invested{background:#0a5c40;color:#fff}.mt-s-declined,.mt-s-do_not_contact{background:#fdecea;color:#8c1d18}.mt-s-not_pursued,.mt-s-no_response{opacity:.7}
+  .mt-s-interested,.mt-s-meeting,.mt-s-due_diligence,.mt-s-term_sheet,.mt-s-invested{background:#0a5c40;color:#fff}.mt-s-declined,.mt-s-do_not_contact{background:#fdecea;color:#8c1d18}.mt-s-not_pursued,.mt-s-no_response{opacity:.7}
   .mt-warn{background:#fff8e6;border:1px solid #f0dca0;color:#6b5000;border-radius:8px;padding:8px 10px;font-size:12px;margin:8px 0}
   .mt-opts{display:flex;flex-wrap:wrap;gap:6px}.mt-opt{font-size:12px;display:flex;gap:4px;align-items:center;border:1px solid var(--border);border-radius:6px;padding:4px 8px}
   .mt-acts{display:flex;flex-direction:column;gap:4px;min-width:150px}.mt-acts .btn{justify-content:center;white-space:nowrap}
