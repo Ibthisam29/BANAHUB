@@ -54,7 +54,7 @@
     },
     investor: function (d) {
       var s = 0, why = [];
-      s += pick(d.investor_type, { 'Venture Capital': 20, 'Family Office': 22, 'Private Equity': 22, 'Corporate': 20, 'Institutional': 22, 'Angel': 12, 'Other': 6 });
+      s += pick(d.investor_type, { 'Venture Capital': 20, 'Family Office': 22, 'Multi-Family Office': 22, 'Private Equity': 22, 'Hedge Fund': 18, 'Fund of Funds': 22, 'Corporate': 20, 'LP': 22, 'Institutional': 22, 'Angel': 12, 'Other': 6 });
       s += pick(d.investor_status, { 'Institutional': 24, 'Accredited': 22, 'Expert': 18, 'Not sure': 6, 'None': 0 });
       var dp = pick(d.deployment, { 'Actively deploying': 24, 'Selectively': 16, 'Not currently': 4 }); s += dp; if (dp >= 16) why.push('deploying');
       if ((d.ticket_min || '') && !/^Under/.test(d.ticket_min)) s += 12;

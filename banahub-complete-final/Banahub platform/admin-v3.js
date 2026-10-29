@@ -332,7 +332,8 @@ function exportMemberships() {
 // 5. INVESTOR DIRECTORY + IMPORT
 // ═════════════════════════════════════════════════════════════════════════
 let inv = { all: [], page: 0, per: 100 };
-const INVESTOR_TYPES = ['VC', 'Angel', 'Family Office', 'Private Equity', 'Corporate VC', 'Hedge Fund', 'LP / Fund of Funds', 'Accelerator', 'Bank / Debt', 'Sovereign / Government', 'Other'];
+const INVESTOR_TYPES = ['VC', 'Angel', 'Family Office', 'Multi-Family Office', 'Private Equity', 'Hedge Fund', 'Fund of Funds', 'LP', 'Other'];
+const INVESTOR_SUBTYPES = ['Corporate VC', 'Accelerator', 'Syndicate', 'Growth equity', 'Buyout', 'Secondaries', 'Fund of hedge funds', 'Wealth manager', 'Pension', 'Endowment / Foundation', 'Insurance', 'Sovereign / Government', 'Asset manager', 'Investment consultant', 'Bank / Debt', 'Digital assets'];
 const STAGES = ['Pre-seed', 'Seed', 'Series A', 'Series B', 'Series C+', 'Growth', 'Pre-IPO', 'Buyout', 'Debt'];
 async function loadInvestors() {
   await loadTaxonomy();
@@ -347,10 +348,11 @@ async function loadInvestors() {
 // ── Directory taxonomy: funding category, stage, industry → sector, region ──
 const INV_FACETS = {
   type: { label: 'Funding category', icon: 'account_balance', groups: [
-    ['Venture & early-stage', ['VC', 'Angel', 'Accelerator', 'Corporate VC']],
-    ['Private capital', ['Family Office', 'Private Equity', 'Hedge Fund']],
-    ['Institutional', ['LP / Fund of Funds', 'Sovereign / Government']],
-    ['Debt & credit', ['Bank / Debt']]] },
+    ['Venture', ['VC', 'Angel']],
+    ['Families & private wealth', ['Family Office', 'Multi-Family Office']],
+    ['Private markets', ['Private Equity', 'Hedge Fund']],
+    ['Institutional', ['Fund of Funds', 'LP']],
+    ['Other', ['Other']]] },
   stage: { label: 'Investment stage', icon: 'stairs', groups: [
     ['Early stage', ['Pre-seed', 'Seed', 'Series A']],
     ['Growth stage', ['Series B', 'Series C+', 'Growth']],
@@ -427,7 +429,8 @@ function openInvestorModal(id) {
   [['im-name', 'full_name'], ['im-org', 'organization'], ['im-email', 'email'], ['im-phone', 'phone'], ['im-geo', 'geography'],
    ['im-check', 'check_size'], ['im-min', 'check_min'], ['im-max', 'check_max'], ['im-web', 'website'], ['im-li', 'linkedin_url'], ['im-notes', 'notes']]
     .forEach(([el, k]) => $(el).value = i[k] == null ? '' : i[k]);
-  $('im-type').value = i.investor_type || 'VC';
+  $('im-type').value = INVESTOR_TYPES.includes(i.investor_type) ? i.investor_type : (normType(i.investor_type || '') || 'VC');
+  if ($('im-subtype')) { $('im-subtype').value = i.investor_subtype || ''; $('im-type-note').textContent = i.type_needs_review ? 'Category is a best guess — please confirm' : i.type_source === 'inferred' ? 'Category inferred from the firm name' : ''; }
   $('im-sectors').value = arr(i.focus_sectors).join(', ');
   $('im-stages').value = arr(i.preferred_stages).join(', ');
   imIndustryPreview();
@@ -439,7 +442,7 @@ async function saveInvestor() {
   const id = $('im-id').value;
   const p = {
     full_name: $('im-name').value.trim(), organization: $('im-org').value.trim(), email: $('im-email').value.trim() || null,
-    phone: $('im-phone').value.trim() || null, investor_type: $('im-type').value, focus_sectors: arr($('im-sectors').value),
+    phone: $('im-phone').value.trim() || null, investor_type: $('im-type').value, investor_subtype: ($('im-subtype') && $('im-subtype').value.trim()) || null, focus_sectors: arr($('im-sectors').value),
     preferred_stages: arr($('im-stages').value), geography: $('im-geo').value.trim() || null, check_size: $('im-check').value.trim() || null,
     check_min: parseMoney($('im-min').value), check_max: parseMoney($('im-max').value), website: $('im-web').value.trim() || null,
     linkedin_url: $('im-li').value.trim() || null, notes: $('im-notes').value.trim() || null, status: $('im-status').value,
@@ -827,8 +830,8 @@ function renderEnquiries() {
 async function enquiryToInvestor() {
   const e = enquiries_db.find(x => x.id === $('eq-id').value); if (!e) return;
   const d = e.data || {}, split = v => String(v || '').split(/;\s*/).filter(Boolean);
-  const tmap = { 'Venture Capital': 'VC', 'Family Office': 'Family Office', 'Private Equity': 'Private Equity', 'Corporate': 'Corporate VC', 'Institutional': 'LP / Fund of Funds', 'Angel': 'Angel' };
-  const tkey = Object.keys(tmap).find(k => String(d.investor_type || '').startsWith(k));
+  const tmap = { 'Venture Capital': 'VC', 'Corporate': 'VC', 'Multi-Family': 'Multi-Family Office', 'Family Office': 'Family Office', 'Private Equity': 'Private Equity', 'Hedge': 'Hedge Fund', 'Fund of Funds': 'Fund of Funds', 'Institutional': 'LP', 'LP': 'LP', 'Angel': 'Angel' };
+  const tkey = Object.keys(tmap).find(k => String(d.investor_type || '').includes(k));
   const mn = parseMoney(d.ticket_min), mx = parseMoney(d.ticket_max);
   const row = { full_name: e.name || null, organization: e.company || d.organisation || null, email: e.email || null, phone: e.phone || null,
     investor_type: tkey ? tmap[tkey] : 'Other', focus_sectors: split(d.sectors), preferred_stages: split(d.stages), geography: split(d.regions).join(', ') || null,
@@ -1340,17 +1343,18 @@ const HEADER_SYNONYMS = {
 // keep the older name working for anything still referencing it
 const IMPORT_FIELDS_ALL = HEADER_SYNONYMS;
 
+// eight investor categories (+ Other); the database trigger applies the same rules and keeps the detail in investor_subtype
 const TYPE_RULES = [
-  [/sovereign|\bswf\b|government|\bgov\b|state fund|public fund/, 'Sovereign / Government'],
-  [/venture debt|\bbank\b|lender|lending|private credit|\bdebt\b|credit fund/, 'Bank / Debt'],
-  [/family office|\bs?m?fo\b|single family|multi family/, 'Family Office'],
-  [/corporate|\bcvc\b|strategic/, 'Corporate VC'],
-  [/fund of funds|\bfof\b|\blps?\b|limited partner|pension|endowment|insurance|asset manag|institutional/, 'LP / Fund of Funds'],
-  [/private equity|\bpe\b|buy ?out|growth equity/, 'Private Equity'],
+  [/^lp \/ fund of funds$/, 'LP'],
+  [/multi ?family|\bmfo\b|wealth manag|private bank|private wealth/, 'Multi-Family Office'],
+  [/family office|\bs?fo\b|single family/, 'Family Office'],
+  [/fund of (hedge )?funds|\bfofs?\b|secondar/, 'Fund of Funds'],
   [/hedge/, 'Hedge Fund'],
-  [/accelerator|incubator|venture studio|\bstudio\b/, 'Accelerator'],
+  [/private equity|\bpe\b|buy ?out|growth equity/, 'Private Equity'],
   [/angel|individual|\bhnwi?\b|syndicate|super angel/, 'Angel'],
-  [/venture|\bvc\b|micro ?vc|seed fund|early stage fund/, 'VC'],
+  [/corporate|\bcvc\b|strategic|accelerator|incubator|venture studio|\bstudio\b|venture|\bvc\b|micro ?vc|seed fund|early stage fund/, 'VC'],
+  [/sovereign|\bswf\b|government|state fund|pension|endowment|foundation|insurance|consultan|asset manag|\blps?\b|limited partner|institution/, 'LP'],
+  [/venture debt|\bbank\b|lender|lending|private credit|\bdebt\b|credit fund/, 'Other'],
 ];
 // Industry taxonomy (mirrors public.industry_taxonomy; the DB copy is loaded at runtime and wins)
 // [sector, industry, prio, keywords] — keyword ending in "." = whole word only
@@ -1693,7 +1697,7 @@ function renderInvestors() {
       ? `<tr><td colspan="9" style="background:var(--surface);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--emerald);padding:8px 12px">${esc((lastType = invGroup(i)))} · ${rows.filter(x => invGroup(x) === lastType).length}</td></tr>` : '';
     return head + `<tr>
       <td><div style="font-weight:600;color:var(--ink)">${esc(i.full_name || '—')}</div><div style="font-size:12px;color:var(--white-muted)">${esc(i.organization || '')}</div></td>
-      <td style="font-size:12px">${esc(i.investor_type ? invGroup(i) : '—')}</td>
+      <td style="font-size:12px">${esc(i.investor_type ? invGroup(i) : '—')}${i.investor_subtype ? `<div style="font-size:11px;color:var(--white-muted)">${esc(i.investor_subtype)}</div>` : ''}${i.type_needs_review ? '<div style="font-size:10px;font-weight:700;color:#7a5c00">Confirm category</div>' : ''}</td>
       <td>${i._f.industry.length ? `<div style="font-size:12px;font-weight:700;color:var(--emerald-deep);margin-bottom:3px">${esc(i._f.industry.join(' · '))}${i._f.src === 'inferred' ? ' <span title="Inferred from the firm or its corporate parent — please verify" style="font-weight:600;font-size:10px;color:#7a5c00;background:#fff4d6;border-radius:4px;padding:1px 5px;margin-left:4px">inferred</span>' : ''}</div>` : ''}${chips(i._f.sector.filter(x => x !== INV_UNSPEC))}</td>
       <td>${chips(i._f.stage.filter(x => x !== INV_UNSPEC), 2)}</td>
       <td style="font-size:12px">${esc(i._f.geo.filter(x => x !== INV_UNSPEC).join(', ') || '—')}</td>

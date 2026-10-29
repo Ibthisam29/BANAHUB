@@ -1637,7 +1637,8 @@ Sitemap: https://www.banahub.com/sitemap.xml</textarea></div>
         <div class="f-group"><label class="f-label">Organisation / Fund</label><input id="im-org" class="f-input"/></div>
         <div class="f-group"><label class="f-label">Email</label><input id="im-email" class="f-input" type="email"/></div>
         <div class="f-group"><label class="f-label">Phone</label><input id="im-phone" class="f-input"/></div>
-        <div class="f-group"><label class="f-label">Investor type</label><select id="im-type" class="f-input f-select"></select></div>
+        <div class="f-group"><label class="f-label">Investor category</label><select id="im-type" class="f-input f-select"></select><div id="im-type-note" style="font-size:11px;color:#7a5c00;margin-top:3px"></div></div>
+        <div class="f-group"><label class="f-label">Sub-type</label><input id="im-subtype" class="f-input" list="im-subtypes" placeholder="e.g. Corporate VC, Pension, Wealth manager"/><datalist id="im-subtypes"><option>Corporate VC</option><option>Accelerator</option><option>Syndicate</option><option>Growth equity</option><option>Buyout</option><option>Secondaries</option><option>Fund of hedge funds</option><option>Wealth manager</option><option>Pension</option><option>Endowment / Foundation</option><option>Insurance</option><option>Sovereign / Government</option><option>Asset manager</option><option>Investment consultant</option><option>Bank / Debt</option><option>Digital assets</option></datalist></div>
         <div class="f-group"><label class="f-label">Geography focus</label><input id="im-geo" class="f-input" placeholder="Singapore, SEA, Gulf, Global"/></div>
       </div>
       <div class="f-group"><label class="f-label">Focus sectors (comma separated)</label><input id="im-sectors" class="f-input" placeholder="Fintech, SaaS, Climate, Healthcare" oninput="imIndustryPreview()"/><div id="im-industry" style="font-size:11px;color:var(--white-muted);margin-top:5px"></div></div>
@@ -1921,7 +1922,7 @@ Sitemap: https://www.banahub.com/sitemap.xml</textarea></div>
 ════════════════════════════════════════════════════════════ -->
 <script src="config.js"></script>
 <script src="api.js"></script>
-<script src="admin-v3.js?v=3.7.0"></script>
+<script src="admin-v3.js?v=3.8.0"></script>
 <script>
 
 // ── State ────────────────────────────────────────────────────
@@ -3333,7 +3334,7 @@ document.addEventListener('keydown', e => {
 
 </script>
 <script src="admin-os.js?v=1.0.0"></script>
-<script src="admin-capital.js?v=1.0.0"></script>
-<script src="admin-match.js?v=1.1.0"></script>
+<script src="admin-capital.js?v=1.1.0"></script>
+<script src="admin-match.js?v=1.2.0"></script>
 </body>
 </html>

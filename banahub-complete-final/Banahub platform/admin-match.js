@@ -220,7 +220,7 @@
     M.investors[id] = i;
     $('im2-id').value = id; $('im2-h').textContent = i.organization || i.full_name || 'Investor';
     const set = (k, v) => { $('im2-' + k).value = v == null ? '' : v; };
-    set('type', i.investor_type); set('sectors', arr(i.focus_sectors).join(', ')); set('sub', arr(i.sub_sectors).join(', ')); set('stages', arr(i.preferred_stages).join(', '));
+    set('type', i.investor_type); set('subtype', i.investor_subtype); set('sectors', arr(i.focus_sectors).join(', ')); set('sub', arr(i.sub_sectors).join(', ')); set('stages', arr(i.preferred_stages).join(', '));
     set('geos', arr(i.invest_geographies).join(', ')); set('hq', i.geography); set('min', i.check_min); set('max', i.check_max); set('cur', i.check_currency || 'USD');
     set('rev', i.min_revenue); set('traction', i.traction_requirement || ''); set('lead', i.lead_follow || ''); set('coinvest', i.co_invest || '');
     set('esg', arr(i.esg_preferences).join(', ')); set('excl', arr(i.esg_exclusions).join(', ')); set('mandate', i.current_mandate); set('appetite', i.appetite || '');
@@ -240,7 +240,7 @@
   async function saveInvestor() {
     const id = $('im2-id').value, v = k => $('im2-' + k).value.trim(), num = k => v(k) === '' ? null : (typeof parseMoney === 'function' ? parseMoney(v(k)) : Number(v(k)));
     const norm = typeof normSectors === 'function' ? s => normSectors(arr(s).join(';')) : arr;
-    const p = { investor_type: v('type') || null, focus_sectors: norm(v('sectors')), sub_sectors: arr(v('sub')), preferred_stages: arr(v('stages')), invest_geographies: arr(v('geos')),
+    const p = { investor_type: v('type') || null, investor_subtype: v('subtype') || null, focus_sectors: norm(v('sectors')), sub_sectors: arr(v('sub')), preferred_stages: arr(v('stages')), invest_geographies: arr(v('geos')),
       geography: v('hq') || null, check_min: num('min'), check_max: num('max'), check_currency: v('cur') || 'USD', min_revenue: num('rev'), traction_requirement: v('traction') || null,
       lead_follow: v('lead') || null, co_invest: v('coinvest') || null, esg_preferences: arr(v('esg')), esg_exclusions: arr(v('excl')), current_mandate: v('mandate') || null,
       appetite: v('appetite') || null, portfolio: arr(v('portfolio')), relationship_strength: Math.max(0, Math.min(5, +v('rel') || 0)), last_interaction_at: v('last') || null,
@@ -333,7 +333,8 @@
     <div class="modal-header"><div><div class="modal-title" id="im2-h">Investor</div><div class="modal-sub">Mandate, relationship and response history — drives the match score</div></div><button class="modal-close" onclick="closeModal('modal-mt-investor')">✕</button></div>
     <div class="modal-body os-split"><div style="display:flex;flex-direction:column;gap:10px;min-width:0"><input type="hidden" id="im2-id"/>
       <div class="f-grid">
-        <div class="f-group"><label class="f-label" for="im2-type">Type</label><select id="im2-type" class="f-input f-select"><option value="">—</option><option>VC</option><option>Angel</option><option>Family Office</option><option>Private Equity</option><option>Corporate VC</option><option>Hedge Fund</option><option>LP / Fund of Funds</option><option>Accelerator</option><option>Bank / Debt</option><option>Sovereign / Government</option><option>Other</option></select></div>
+        <div class="f-group"><label class="f-label" for="im2-type">Type</label><select id="im2-type" class="f-input f-select"><option value="">—</option><option>VC</option><option>Angel</option><option>Family Office</option><option>Multi-Family Office</option><option>Private Equity</option><option>Hedge Fund</option><option>Fund of Funds</option><option>LP</option><option>Other</option></select></div>
+        <div class="f-group"><label class="f-label" for="im2-subtype">Sub-type</label><input id="im2-subtype" class="f-input" list="im-subtypes" placeholder="e.g. Corporate VC, Pension"/></div>
         <div class="f-group"><label class="f-label" for="im2-appetite">Current appetite</label><select id="im2-appetite" class="f-input f-select"><option value="">Unknown</option><option value="active">Actively deploying</option><option value="selective">Selective</option><option value="paused">Paused</option><option value="not_deploying">Not deploying</option></select></div>
         <div class="f-group"><label class="f-label" for="im2-sectors">Sectors</label><input id="im2-sectors" class="f-input"/></div>
         <div class="f-group"><label class="f-label" for="im2-sub">Sub-sectors</label><input id="im2-sub" class="f-input" placeholder="e.g. payments, B2B lending"/></div>
