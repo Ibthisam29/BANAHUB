@@ -104,3 +104,12 @@ alter table public.investors drop constraint if exists investors_type_check;
 alter table public.investors add constraint investors_type_check check (investor_type is null or investor_type in
   ('VC','Angel','Family Office','Multi-Family Office','Private Equity','Hedge Fund','Fund of Funds','LP','Other'));
 create index if not exists investors_type_idx on public.investors (investor_type);
+
+-- indicative FX: add the currencies used by Nordic / Swiss / CEE / LatAm investors
+create or replace function public.os_to_usd(amount numeric, cur text) returns numeric language sql immutable as $$
+  select case when amount is null then null else amount * case upper(coalesce(cur, 'USD'))
+    when 'USD' then 1 when 'SGD' then 0.74 when 'EUR' then 1.08 when 'GBP' then 1.27 when 'AED' then 0.272 when 'AUD' then 0.66
+    when 'HKD' then 0.128 when 'JPY' then 0.0066 when 'MYR' then 0.22 when 'IDR' then 0.000063 when 'INR' then 0.012
+    when 'CHF' then 1.13 when 'DKK' then 0.145 when 'NOK' then 0.093 when 'SEK' then 0.095 when 'PLN' then 0.25 when 'BRL' then 0.18
+    when 'TRY' then 0.029 when 'CNY' then 0.14 else 1 end end;
+$$;

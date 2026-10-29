@@ -18,7 +18,7 @@
   const iso = d => { const x = new Date(d); return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}-${String(x.getDate()).padStart(2, '0')}`; };
   const fmtD = d => d ? new Date(d).toLocaleDateString('en-SG', { day: 'numeric', month: 'short' }) : '—';
   const fmtDT = d => d ? new Date(d).toLocaleString('en-SG', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—';
-  const FX = { USD: 1, SGD: 0.74, EUR: 1.08, GBP: 1.27, AED: 0.272, AUD: 0.66, HKD: 0.128, JPY: 0.0066, MYR: 0.22, IDR: 0.000063, INR: 0.012 };
+  const FX = { USD: 1, SGD: 0.74, EUR: 1.08, GBP: 1.27, AED: 0.272, AUD: 0.66, HKD: 0.128, JPY: 0.0066, MYR: 0.22, IDR: 0.000063, INR: 0.012, CHF: 1.13, DKK: 0.145, NOK: 0.093, SEK: 0.095, PLN: 0.25, BRL: 0.18, TRY: 0.029, CNY: 0.14 };
   const usd = (n, c) => n == null || n === '' ? 0 : Number(n) * (FX[String(c || 'USD').toUpperCase()] || 1);
   const short = n => { n = Number(n) || 0; const a = Math.abs(n); return a >= 1e9 ? (n / 1e9).toFixed(1).replace(/\.0$/, '') + 'B' : a >= 1e6 ? (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M' : a >= 1e3 ? Math.round(n / 1e3) + 'k' : String(Math.round(n)); };
   const money = (n, c) => n == null || n === '' ? '—' : `${c || 'USD'} ${short(n)}`;
