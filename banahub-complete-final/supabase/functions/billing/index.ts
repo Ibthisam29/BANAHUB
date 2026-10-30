@@ -97,6 +97,9 @@ Deno.serve(async (req) => {
         }
         // never paid (abandoned first PayNow invoice): replace it with the new choice
         if (["pending_payment", "incomplete"].includes(m.status) && !m.access_until) {
+          const old = await stripe.subscriptions.retrieve(m.stripe_subscription_id, { expand: ["latest_invoice"] }).catch(() => null);
+          const oldInv = old?.latest_invoice as Stripe.Invoice | null | undefined;
+          if (oldInv?.status === "open") await stripe.invoices.voidInvoice(oldInv.id).catch(() => null); // the old QR can no longer be paid
           await stripe.subscriptions.cancel(m.stripe_subscription_id, { invoice_now: false, prorate: false }).catch(() => null);
           await db.from("memberships").update({ status: "canceled", stripe_subscription_id: null, updated_at: new Date().toISOString() }).eq("user_id", user.id);
         } else {

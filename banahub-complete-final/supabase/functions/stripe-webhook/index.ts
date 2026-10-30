@@ -47,7 +47,8 @@ async function syncSubscription(sub: Stripe.Subscription, deleted = false) {
     : sub.status === "incomplete_expired" ? "expired"
     : sub.status === "incomplete" ? "incomplete"
     : sub.status === "past_due" || sub.status === "unpaid" ? "past_due"
-    : method === "paynow" && !paidCurrent ? (cur?.access_until ? "past_due" : "pending_payment")
+    // PayNow renewal invoice open: still active during the 7-day payment window, then past due
+    : method === "paynow" && !paidCurrent ? (!cur?.access_until ? "pending_payment" : new Date(cur.access_until).getTime() + 7 * 864e5 > Date.now() ? "active" : "past_due")
     : "active";
   await db.from("memberships").upsert({
     user_id: uid, plan_code: plan, status,
