@@ -320,3 +320,17 @@ a.bh-card:hover { border-color: var(--bh-em-2); box-shadow: 0 8px 28px rgba(0, 5
 .bh-menu a { padding: 10px 9px; font-size: .84rem; }
 @media (max-width: 1260px) { .bh-menu a { padding: 10px 7px; font-size: .8rem; } .bh-signin { display: none; } }
 .bh-foot-legal p a { font-size: inherit; text-decoration: underline; }
+
+/* home: audience pathways */
+.bh-paths-more { display: flex; gap: 6px; align-items: center; padding: 12px 16px 14px; border-top: 1px solid var(--bh-line); font-size: .84rem; color: var(--bh-muted); }
+.bh-paths-more:hover { color: var(--bh-em); }
+.bh-paths-more .material-symbols-outlined { font-size: 16px; width: 16px; overflow: hidden; }
+.bh-aud { display: flex; flex-direction: column; }
+.bh-aud .bh-ticks { margin: 14px 0 0; }
+.bh-aud .bh-ticks li { font-size: .9rem; padding: 5px 0 5px 26px; }
+.bh-aud .bh-ticks li::before { top: 9px; }
+.bh-aud-cta { margin-top: auto; padding-top: 18px; display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
+.bh-aud-more { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--bh-line); font-size: .9rem; }
+.bh-aud-more span { font: 700 .72rem 'Manrope', sans-serif; letter-spacing: .14em; text-transform: uppercase; color: var(--bh-muted); }
+.bh-aud-more a { color: var(--bh-em); font-weight: 600; }
+.bh-aud-more a:hover { text-decoration: underline; }
