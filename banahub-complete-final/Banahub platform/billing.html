@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en-SG">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Billing | BANAHUB</title>
+<meta name="robots" content="noindex"/>
+<meta name="theme-color" content="#00281e"/>
+<link rel="icon" href="favicon.ico"/><link rel="icon" type="image/png" sizes="512x512" href="logo-icon-512.png"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Manrope:wght@400;500;600;700;800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0,0&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="site.css"/>
+<link rel="stylesheet" href="bh.css?v=4.3.0"/>
+</head>
+<body>
+<a href="#main" class="bh-skip">Skip to content</a>
+<div id="site-nav"></div>
+<main id="main">
+<section class="bh-hero" style="padding-bottom:24px">
+  <div class="bh-wrap">
+    <div class="bh-crumb"><a href="dashboard.html">Member portal</a> / Billing</div>
+    <span class="bh-eyebrow">Billing</span>
+    <h1 class="bh-h1">Membership &amp; billing</h1>
+  </div>
+</section>
+<section class="bh-sec" style="padding-top:8px">
+  <div class="bh-wrap">
+    <div id="bl-alert" class="mb-alert" hidden></div>
+    <div class="bl-grid">
+      <div class="bh-card" id="bl-plan"><div class="mb-loading">Loading…</div></div>
+      <div class="bh-card">
+        <h2 class="bh-h3">Payment</h2>
+        <div id="bl-pay"><div class="mb-loading">Loading…</div></div>
+      </div>
+    </div>
+    <div class="bh-card" style="margin-top:20px">
+      <h2 class="bh-h3">Invoices &amp; receipts</h2>
+      <div id="bl-inv" style="overflow-x:auto"><div class="mb-loading">Loading…</div></div>
+    </div>
+    <p class="bh-legal-line" style="max-width:none">Questions about a payment? Email <a href="mailto:hello@banahub.com" style="text-decoration:underline">hello@banahub.com</a>. Card details are held by Stripe; BANAHUB never stores them.</p>
+  </div>
+</section>
+</main>
+<div id="site-footer"></div>
+<script src="config.js"></script>
+<script src="nav.js?v=4.2.0"></script>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+  var d = function (v) { if (!v) return '—'; var x = typeof v === 'number' ? new Date(v * 1000) : new Date(v); return x.toLocaleDateString('en-SG', { day: 'numeric', month: 'short', year: 'numeric' }); };
+  var Q = new URLSearchParams(location.search), sb;
+  function alertBox(msg, kind) { var a = $('bl-alert'); a.className = 'mb-alert' + (kind ? ' ' + kind : ''); a.innerHTML = msg; a.hidden = !msg; }
+  async function fn(action) {
+    var r = await sb.functions.invoke('billing', { body: { action: action } });
+    var data = r.data || {}; if (r.error) { try { data = await r.error.context.json(); } catch (e) { data = { error: 'Billing is temporarily unavailable.' }; } }
+    return data;
+  }
+  var STATUS = { active: ['Active', 'ok'], pending_payment: ['Awaiting first payment', 'warn'], past_due: ['Payment due', 'bad'], canceled: ['Cancelled', 'muted'], expired: ['Expired', 'muted'], incomplete: ['Incomplete', 'warn'] };
+
+  async function load() {
+    var mm = await sb.rpc('my_membership'); var m = mm.data;
+    if (!m) { $('bl-plan').innerHTML = '<p>No membership record yet.</p><a class="bh-btn bh-btn-primary" href="membership.html">View membership plans</a>'; $('bl-pay').innerHTML = '—'; $('bl-inv').innerHTML = '—'; return m; }
+    var paid = m.plan_code === 'growth' || m.plan_code === 'scale', st = STATUS[m.status] || [m.status, 'muted'];
+    $('bl-plan').innerHTML = '<span class="bh-eyebrow">Your plan</span><h2 class="bh-h2" style="font-size:1.7rem;margin:4px 0 8px">' + esc(m.plan_name) + '</h2>' +
+      (paid ? '<p><span class="bl-pill ' + st[1] + '">' + st[0] + '</span> ' + (m.billing_period ? esc(m.billing_period === 'annual' ? 'Annual' : 'Monthly') + ' · ' : '') + (m.payment_method === 'paynow' ? 'PayNow invoices' : 'Card, auto-renews') + '</p>' +
+        '<dl class="bl-dl"><dt>Access until</dt><dd>' + d(m.access_until) + '</dd><dt>' + (m.cancel_at_period_end ? 'Ends' : 'Next renewal') + '</dt><dd>' + d(m.current_period_end) + '</dd></dl>' +
+        (m.cancel_at_period_end ? '<p class="bl-note">Your membership will not renew. You keep access until ' + d(m.access_until || m.current_period_end) + '.</p>' : '') +
+        (m.effective_plan !== m.plan_code ? '<p class="bl-note bad">Member benefits are paused until the open invoice is paid.</p>' : '')
+        : '<p>' + (m.plan_code === 'investor_circle' ? 'Investor Circle — approved by the BANAHUB team.' : 'Free BANAHUB Network: newsletter, public briefings and selected invitations.') + '</p>') +
+      '<ul class="bh-ticks" style="margin-top:12px">' + (m.benefits || []).map(function (b) { return '<li>' + esc(b) + '</li>'; }).join('') + '</ul>' +
+      (m.plan_code !== 'scale' && m.plan_code !== 'investor_circle' ? '<div style="margin-top:16px"><a class="bh-btn bh-btn-secondary bh-btn-sm" href="membership.html">' + (paid ? 'Compare plans' : 'Upgrade membership') + '</a></div>' : '');
+    return m;
+  }
+
+  async function loadStripe(m) {
+    if (!m || !m.has_billing) { $('bl-pay').innerHTML = '<p>No payments yet.</p>'; $('bl-inv').innerHTML = '<p class="mb-loading" style="padding:0">No invoices yet.</p>'; return; }
+    var s = await fn('summary');
+    if (s.error) { $('bl-pay').innerHTML = '<p>' + esc(s.error) + '</p>'; $('bl-inv').innerHTML = ''; return; }
+    var inv = s.invoices || [], open = inv.filter(function (i) { return i.status === 'open'; });
+    $('bl-pay').innerHTML = (open.length ? open.map(function (i) { return '<div class="bl-due"><div><b>' + esc(i.currency) + ' ' + Number(i.amount_due).toLocaleString('en-SG') + ' due</b><span>' + (i.due_date ? 'by ' + d(i.due_date) : '') + ' · ' + esc(i.number || '') + '</span></div><a class="bh-btn bh-btn-primary bh-btn-sm" href="' + esc(i.hosted_invoice_url) + '" target="_blank" rel="noopener">Pay with PayNow or card</a></div>'; }).join('') : '<p>Nothing due right now.</p>') +
+      '<button type="button" class="bh-btn bh-btn-secondary bh-btn-sm" id="bl-portal" style="margin-top:14px">Manage billing' + (m.payment_method === 'paynow' ? ' & cancel' : ', card & cancel') + '</button>' +
+      (m.payment_method === 'paynow' ? '<p class="bl-note">PayNow can’t be charged automatically: we email an invoice each period and you scan the QR to pay.</p>' : '');
+    $('bl-inv').innerHTML = inv.length ? '<table class="bl-table"><thead><tr><th>Date</th><th>Invoice</th><th>Period</th><th>Amount</th><th>Status</th><th></th></tr></thead><tbody>' + inv.map(function (i) {
+      return '<tr><td>' + d(i.created) + '</td><td>' + esc(i.number || i.id) + '</td><td>' + d(i.period_start) + ' – ' + d(i.period_end) + '</td><td>' + esc(i.currency) + ' ' + Number(i.total).toLocaleString('en-SG') + '</td><td><span class="bl-pill ' + (i.status === 'paid' ? 'ok' : i.status === 'open' ? 'warn' : 'muted') + '">' + esc(i.status) + '</span></td><td>' +
+        (i.status === 'open' ? '<a href="' + esc(i.hosted_invoice_url) + '" target="_blank" rel="noopener">Pay</a> · ' : '') + (i.invoice_pdf ? '<a href="' + esc(i.invoice_pdf) + '" target="_blank" rel="noopener">PDF</a>' : '') + '</td></tr>';
+    }).join('') + '</tbody></table>' : '<p class="mb-loading" style="padding:0">No invoices yet.</p>';
+    var p = $('bl-portal');
+    if (p) p.onclick = async function () { p.disabled = true; p.textContent = 'Opening…'; var r = await fn('portal'); if (r.url) location.href = r.url; else { p.disabled = false; p.textContent = 'Manage billing'; alertBox(esc(r.error || 'Could not open billing.'), 'err'); } };
+  }
+
+  (async function init() {
+    sb = await window.getBanaSupabaseClient();
+    var s = sb && (await sb.auth.getSession()).data.session;
+    if (!s) { location.replace('login.html?next=' + encodeURIComponent('/billing.html' + location.search)); return; }
+    if (Q.get('notice') === 'existing') alertBox('You already have a membership. Change or cancel it from <b>Manage billing</b>, or email hello@banahub.com to switch plans.', 'info');
+    var m = await load();
+    if (Q.get('status') === 'success') {
+      alertBox('Payment received — activating your membership…', 'info');
+      for (var i = 0; i < 10 && !(m && m.status === 'active' && m.effective_plan === m.plan_code && m.plan_code !== 'free'); i++) { await new Promise(function (r) { setTimeout(r, 2000); }); m = await load(); }
+      alertBox(m && m.status === 'active' && m.plan_code !== 'free' ? 'Welcome to ' + esc(m.plan_name) + '. Your member benefits are active.' : 'Payment received. Activation can take a minute — refresh this page shortly.', 'ok');
+      try { (window.dataLayer = window.dataLayer || []).push({ event: 'membership_purchase', plan: m && m.plan_code }); } catch (e) {}
+    }
+    loadStripe(m);
+  })();
+})();
+</script>
+</body>
+</html>

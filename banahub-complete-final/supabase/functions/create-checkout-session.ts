@@ -50,45 +50,9 @@ serve(async (req) => {
   try {
     const { item_type, item_id, billing, email } = await req.json();
 
-    // Membership is a special case — no item_id needed
+    // Memberships are billed by the `billing` Edge Function (Stripe Billing; card + PayNow invoices)
     if (item_type === "membership") {
-      let userId: string | null = null;
-      const authHeader = req.headers.get("Authorization");
-      if (authHeader) {
-        const token = authHeader.replace("Bearer ", "");
-        const { data: userData } = await sb.auth.getUser(token);
-        userId = userData?.user?.id || null;
-      }
-      const isAnnual = billing === "annual";
-      const label    = isAnnual ? "BANAHub Annual Membership" : "BANAHub Monthly Membership";
-      const amount   = isAnnual ? 88_00 : 8_00; // cents
-
-      const session = await stripe.checkout.sessions.create({
-        mode: isAnnual ? "payment" : "subscription",
-        payment_method_types: ["card"],
-        customer_email: email || undefined,
-        line_items: [{
-          price_data: {
-            currency: "usd",
-            product_data: { name: label, description: isAnnual ? "Full-year access — save ~8% vs monthly" : "Month-to-month membership, cancel anytime" },
-            unit_amount: amount,
-            ...(isAnnual ? {} : { recurring: { interval: "month" } }),
-          },
-          quantity: 1,
-        }],
-        success_url: `${SITE_URL}/payment-success.html?session_id={CHECKOUT_SESSION_ID}&plan=${isAnnual?"annual":"monthly"}`,
-        cancel_url:  `${SITE_URL}/membership.html`,
-        metadata:    { item_type: "membership", billing: isAnnual ? "annual" : "monthly", user_id: userId || "" },
-      });
-
-      if (userId) {
-        await sb.from("transactions").insert({
-          user_id: userId, email, type: "membership_payment",
-          item_type: "membership", amount: isAnnual ? 88 : 8,
-          currency: "USD", stripe_session_id: session.id, status: "pending",
-        }).catch(() => {});
-      }
-      return new Response(JSON.stringify({ url: session.url }), { headers: { ...cors, "Content-Type": "application/json" } });
+      return new Response(JSON.stringify({ error: "Use /membership.html to subscribe" }), { status: 400, headers: cors });
     }
 
     if (!ALLOWED_ITEM_TYPES.includes(item_type) || !item_id) {
@@ -126,7 +90,8 @@ serve(async (req) => {
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
-      payment_method_types: ["card"],
+      // PayNow (Singapore QR) is available for SGD one-time payments
+      payment_method_types: (item.currency || "SGD").toUpperCase() === "SGD" ? ["card", "paynow"] : ["card"],
       customer_email: email || undefined,
       line_items: [{
         price_data: {

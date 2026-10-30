@@ -3,7 +3,7 @@
 (function () {
   // Load the v4 stylesheet on every page that uses the shared nav
   if (!document.querySelector('link[href*="bh.css"]')) {
-    var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = '/bh.css?v=4.1.0'; document.head.appendChild(l);
+    var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = '/bh.css?v=4.3.0'; document.head.appendChild(l);
   }
   var page = (location.pathname.replace(/\/+$/, '').split('/').pop() || 'index').replace(/\.html$/, '') || 'index';
   var ITEMS = [
@@ -13,6 +13,7 @@
     ['investors', 'Investors', '/investors.html'],
     ['partnerships', 'Strategic Partnerships', '/partnerships.html'],
     ['insights', 'Insights & Events', '/insights.html', ['events', 'event', 'programs', 'capital-growth-exchange']],
+    ['membership', 'Membership', '/membership.html', ['billing']],
     ['about', 'About', '/about.html'],
   ];
   function isOn(it) { return page === it[0] || (it[3] || []).indexOf(page) >= 0 || (page === 'capital-review' && it[0] === 'capital-access') || (page === 'investor-network' && it[0] === 'investors'); }
@@ -44,7 +45,7 @@
   }
 
   // Mobile sticky CTA (not on form, auth or member pages)
-  var NO_MCTA = ['growth-plan', 'capital-review', 'investor-network', 'login', 'register', 'dashboard', 'reset-password', 'reset-password-confirm', 'payment-success', 'contact'];
+  var NO_MCTA = ['growth-plan', 'capital-review', 'investor-network', 'login', 'register', 'dashboard', 'reset-password', 'reset-password-confirm', 'payment-success', 'contact', 'membership', 'billing'];
   if (navEl && NO_MCTA.indexOf(page) < 0 && !document.body.hasAttribute('data-no-mcta')) {
     var m = document.createElement('div'); m.className = 'bh-mcta';
     m.innerHTML = page === 'investors'
@@ -65,7 +66,7 @@
           '<div><h4>Companies</h4><ul><li><a href="/market-entry.html">Market Entry &amp; GTM</a></li><li><a href="/capital-access.html">Capital Access</a></li><li><a href="/growth-plan.html">Discuss Your Growth Plan</a></li><li><a href="/capital-review.html">Apply for Capital Review</a></li></ul></div>' +
           '<div><h4>Investors</h4><ul><li><a href="/investors.html">For Investors</a></li><li><a href="/investor-network.html">Join Investor Network</a></li><li><a href="/growth-plan.html?focus=portfolio">Portfolio Advisory</a></li></ul></div>' +
           '<div><h4>Partners</h4><ul><li><a href="/partnerships.html">Strategic Partnerships</a></li><li><a href="/partnerships.html#partner-form">Propose a Collaboration</a></li><li><a href="/programs.html">Programmes</a></li><li><a href="/insights.html#events">Events</a></li></ul></div>' +
-          '<div><h4>Company</h4><ul><li><a href="/about.html">About</a></li><li><a href="/insights.html">Insights</a></li><li><a href="/contact.html">Contact</a></li><li><a href="/login.html">Member sign in</a></li></ul></div>' +
+          '<div><h4>Company</h4><ul><li><a href="/about.html">About</a></li><li><a href="/insights.html">Insights</a></li><li><a href="/contact.html">Contact</a></li><li><a href="/membership.html">Membership</a></li><li><a href="/login.html">Member sign in</a></li></ul></div>' +
         '</div>' +
         '<div class="bh-foot-legal"><p>BANAHUB provides advisory services only. Bana Private Limited is not licensed by the Monetary Authority of Singapore as a financial adviser, capital markets services licensee or exempt financial institution, and does not provide financial advice, make investment recommendations, deal in securities or arrange the offer of securities. Nothing on this website is an offer or solicitation to buy or sell any security. Investor introductions are made only to parties who meet applicable eligibility requirements, and do not guarantee any investment, meeting or commercial outcome. Any success fee is payable only where contractually agreed and permitted by law. See <a href="/disclosures.html">Disclosures</a>.</p>' +
         '<div class="bh-foot-bottom"><span>© ' + new Date().getFullYear() + ' Bana Private Limited. All rights reserved.</span><span><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><a href="/disclosures.html">Disclosures</a></span></div></div>' +
