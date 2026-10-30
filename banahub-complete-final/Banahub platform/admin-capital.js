@@ -18,7 +18,7 @@
   const iso = d => { const x = new Date(d); return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}-${String(x.getDate()).padStart(2, '0')}`; };
   const fmtD = d => d ? new Date(d).toLocaleDateString('en-SG', { day: 'numeric', month: 'short' }) : '—';
   const fmtDT = d => d ? new Date(d).toLocaleString('en-SG', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—';
-  const FX = { USD: 1, SGD: 0.74, EUR: 1.08, GBP: 1.27, AED: 0.272, AUD: 0.66, HKD: 0.128, JPY: 0.0066, MYR: 0.22, IDR: 0.000063, INR: 0.012 };
+  const FX = { USD: 1, SGD: 0.74, EUR: 1.08, GBP: 1.27, AED: 0.272, AUD: 0.66, HKD: 0.128, JPY: 0.0066, MYR: 0.22, IDR: 0.000063, INR: 0.012, CHF: 1.13, DKK: 0.145, NOK: 0.093, SEK: 0.095, PLN: 0.25, BRL: 0.18, TRY: 0.029, CNY: 0.14 };
   const usd = (n, c) => n == null || n === '' ? 0 : Number(n) * (FX[String(c || 'USD').toUpperCase()] || 1);
   const short = n => { n = Number(n) || 0; const a = Math.abs(n); return a >= 1e9 ? (n / 1e9).toFixed(1).replace(/\.0$/, '') + 'B' : a >= 1e6 ? (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M' : a >= 1e3 ? Math.round(n / 1e3) + 'k' : String(Math.round(n)); };
   const money = (n, c) => n == null || n === '' ? '—' : `${c || 'USD'} ${short(n)}`;
@@ -253,18 +253,20 @@
       return { i, best, shown: ms.filter(m => m.contacted_at).length, replied: ms.filter(m => m.replied_at).length, pos: ms.filter(m => ['interested', 'meeting', 'due_diligence', 'term_sheet', 'invested'].includes(m.status)).length,
         dec: ms.filter(m => m.status === 'declined').length, meets: (meetBy[i.id] || []).length, invested: ms.filter(m => m.status === 'invested').length, inv$, live: ms.filter(m => ['due_diligence', 'term_sheet'].includes(m.status)) };
     });
-    list = list.filter(x => (f.inactive || x.i.active !== false) && (!f.type || x.i.investor_type === f.type) && (!f.shown || x.shown) &&
+    list = list.filter(x => (f.inactive || x.i.active !== false) && (!f.type || (f.type === '__review' ? x.i.type_needs_review : f.type === '__none' ? !x.i.investor_type : x.i.investor_type === f.type)) && (!f.shown || x.shown) &&
       (!s || [x.i.organization, x.i.full_name, x.i.email, arr(x.i.focus_sectors).join(' '), x.i.geography].join(' ').toLowerCase().includes(s)));
     const sorters = { score: (a, b) => ((b.best || {}).score_total || -1) - ((a.best || {}).score_total || -1), rel: (a, b) => (b.i.relationship_strength || 0) - (a.i.relationship_strength || 0),
       shown: (a, b) => b.shown - a.shown || b.replied - a.replied, last: (a, b) => String(b.i.last_interaction_at || '').localeCompare(String(a.i.last_interaction_at || '')), name: (a, b) => invName(a.i).localeCompare(invName(b.i)) };
     list.sort(sorters[f.sort] || sorters.score);
-    const types = [...new Set(Object.values(C.investors).map(i => i.investor_type).filter(Boolean))].sort();
+    const ORDER = ['VC', 'Angel', 'Family Office', 'Multi-Family Office', 'Private Equity', 'Hedge Fund', 'Fund of Funds', 'LP', 'Other'];
+    const tcount = t => Object.values(C.investors).filter(i => i.investor_type === t).length;
+    const types = ORDER.concat([...new Set(Object.values(C.investors).map(i => i.investor_type).filter(t => t && !ORDER.includes(t)))]);
     const total = list.length, rows = list.slice(0, f.limit);
     const dots = n => `<span class="cap-dots">${'●'.repeat(n || 0)}<i>${'●'.repeat(5 - (n || 0))}</i></span>`;
     const cheque = i => (i.check_min || i.check_max) ? `${money(i.check_min, i.check_currency)}–${short(i.check_max)}` : '';
     P.innerHTML = header('os-investors') + `
       <div class="filter-bar" style="flex-wrap:wrap"><input class="f-input" style="max-width:260px" placeholder="Search investor, sector, email…" value="${esc(f.q)}" oninput="capCrm('q',this.value)"/>
-        <select class="f-input f-select" style="width:180px" onchange="capCrm('type',this.value)"><option value="">All types</option>${types.map(t => `<option ${t === f.type ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select>
+        <select class="f-input f-select" style="width:180px" onchange="capCrm('type',this.value)"><option value="">All categories</option>${types.map(t => `<option value="${esc(t)}" ${t === f.type ? 'selected' : ''}>${esc(t)} (${tcount(t)})</option>`).join('')}<option value="__review" ${f.type === '__review' ? 'selected' : ''}>Category to confirm (${Object.values(C.investors).filter(i => i.type_needs_review).length})</option><option value="__none" ${f.type === '__none' ? 'selected' : ''}>Uncategorised (${Object.values(C.investors).filter(i => !i.investor_type).length})</option></select>
         <select class="f-input f-select" style="width:200px" onchange="capCrm('sort',this.value)">${[['score', 'Sort: best match score'], ['rel', 'Sort: relationship'], ['shown', 'Sort: deals shown'], ['last', 'Sort: last interaction'], ['name', 'Sort: name']].map(([v, l]) => `<option value="${v}" ${v === f.sort ? 'selected' : ''}>${l}</option>`).join('')}</select>
         <label style="font-size:12px;display:flex;gap:6px;align-items:center"><input type="checkbox" ${f.shown ? 'checked' : ''} onchange="capCrm('shown',this.checked)"/>Shown a deal</label>
         <label style="font-size:12px;display:flex;gap:6px;align-items:center"><input type="checkbox" ${f.inactive ? 'checked' : ''} onchange="capCrm('inactive',this.checked)"/>Include inactive</label>
@@ -272,7 +274,7 @@
       <div class="card" style="overflow-x:auto"><table class="data-table os-table cap-crm"><thead><tr><th>Investor</th><th>Mandate</th><th>Score</th><th>Relationship</th><th>Deals shown</th><th>Responses</th><th>Meetings</th><th>Investments</th></tr></thead><tbody>
       ${rows.map(x => { const i = x.i, b = x.best;
         return `<tr onclick="mtOpenInvestor('${i.id}')" style="cursor:pointer">
-          <td><b style="color:var(--ink)">${esc(invName(i))}</b><div class="cap-sub">${esc([i.full_name !== i.organization ? i.full_name : '', i.investor_type].filter(Boolean).join(' · '))}${i.active === false ? ' · <b style="color:#b3261e">inactive</b>' : ''}</div></td>
+          <td><b style="color:var(--ink)">${esc(invName(i))}</b><div class="cap-sub">${esc([i.full_name !== i.organization ? i.full_name : '', i.investor_type, i.investor_subtype].filter(Boolean).join(' · '))}${i.type_needs_review ? ' · <b style="color:#7a5c00">confirm category</b>' : ''}${i.active === false ? ' · <b style="color:#b3261e">inactive</b>' : ''}</div></td>
           <td class="cap-sub" style="max-width:230px">${esc(arr(i.focus_sectors).slice(0, 3).join(', ') || '—')}<div>${esc([arr(i.preferred_stages).slice(0, 2).join('/'), cheque(i)].filter(Boolean).join(' · '))}</div>${i.appetite ? `<div>${esc({ active: 'Actively deploying', selective: 'Selective', paused: 'Paused', not_deploying: 'Not deploying' }[i.appetite] || i.appetite)}</div>` : ''}</td>
           <td>${b ? `<b class="cap-score" style="--c:${b.score_total >= 90 ? '#0a5c40' : b.score_total >= 80 ? '#1a6b4a' : b.score_total >= 70 ? '#7a5c00' : '#8c1d18'}">${b.score_total}</b><div class="cap-sub">${esc(raiseName(raise(b.raise_id)))}</div>` : '<span class="cap-sub">—</span>'}</td>
           <td>${dots(i.relationship_strength)}<div class="cap-sub">${esc(i.relationship_owner ? pname(i.relationship_owner) : '')}${i.last_interaction_at ? ' · ' + fmtD(i.last_interaction_at) : ''}</div></td>
