@@ -180,7 +180,7 @@
       <div class="f-group"><label class="f-label" for="blm-owner">Relationship owner</label><select id="blm-owner" class="f-input f-select"></select></div>
       <div class="f-grid"><div class="f-group"><label class="f-label" for="blm-na">Next action</label><input id="blm-na" class="f-input"/></div><div class="f-group"><label class="f-label" for="blm-nad">Date</label><input id="blm-nad" type="date" class="f-input"/></div></div>
       <div class="f-grid"><div class="f-group"><label class="f-label" for="blm-score">Engagement score (0–100)</label><input id="blm-score" type="number" min="0" max="100" class="f-input"/></div><div class="f-group"><label class="f-label" for="blm-churn">Churn reason</label><input id="blm-churn" class="f-input" placeholder="If cancelled"/></div></div>
-      <div style="font-size:11px;color:var(--white-muted)">Plan, status and dates come from Stripe. Change a subscription in the Stripe dashboard (or ask the member to use Billing).</div></div>
+      <div style="font-size:11px;color:var(--white-muted)">Plan, status and dates come from Stripe. Use Billing actions to cancel, resume or invoice; the member can also manage billing themselves.</div></div>
       <div><div class="os-box"><div class="os-box-h">Payments</div><div id="blm-pays"></div></div></div></div>
     <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('modal-bl-member')">Close</button><button class="btn btn-primary" onclick="blSave()">Save</button></div></div></div>
   <div id="modal-bl-plans" class="modal-overlay" style="display:none;z-index:1050" onclick="if(event.target===this)closeModal('modal-bl-plans')"><div class="modal modal-lg" style="max-width:820px">
