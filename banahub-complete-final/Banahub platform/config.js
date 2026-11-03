@@ -632,7 +632,7 @@ window.fetch = async function(input, opts) {
     // ── Auth: login ─────────────────────────────────────────────────────────
     if (route.startsWith('/auth/login') && method === 'POST') {
       // Rate limit: block after 5 failed attempts / 15 min for this email
-      const { data: allowed } = await sb.rpc('check_login_rate_limit', { p_email: body.email });
+      const { data: allowed } = await sb.rpc('check_login_rate_limit', { p_email: body.email, p_ip: await _getClientIP() });
       if (allowed === false) {
         await _logLoginAttempt(sb, body.email, false);
         return _resp({ success: false, detail: 'Too many failed attempts. Try again in 15 minutes.', error: 'rate_limited' }, 429);
@@ -1099,7 +1099,7 @@ window.fetch = async function(input, opts) {
     if (route.startsWith('/companies')) {
       if (method === 'GET') {
         const urlQ = new URLSearchParams(route.includes('?') ? route.split('?')[1] : '');
-        let q = sb.from('companies').select('*').eq('status', 'approved').order('featured', { ascending: false }).order('created_at', { ascending: false });
+        let q = sb.from('companies').select('id,company_name,logo_url,industry,industries,stage,featured,status,created_at,linkedin_url,website,description').eq('status', 'approved').order('featured', { ascending: false }).order('created_at', { ascending: false });
         if (urlQ.get('industry')) q = q.contains('industry', [urlQ.get('industry')]);
         if (urlQ.get('stage')) q = q.eq('stage', urlQ.get('stage'));
         const { data } = await q;
