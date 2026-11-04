@@ -2103,6 +2103,41 @@ async function adminSignOut() {
   localStorage.removeItem('bana_access_token'); localStorage.removeItem('bana_user'); location.reload();
 }
 
+// ── Session guard ────────────────────────────────────────────
+// Signing in with another account in another tab (e.g. testing a member / LinkedIn signup) replaces the shared
+// browser session. Lock Admin OS instead of letting saves fail with RLS errors under the wrong account.
+let SESSION_LOCKED = false;
+async function checkAdminSession() {
+  if (SESSION_LOCKED || !ADMIN_USER || !ADMIN_USER.id) return true;
+  try {
+    const sb = await window.getBanaSupabaseClient();
+    const { data: { session } } = await sb.auth.getSession();
+    const u = session && session.user;
+    if (!u || u.id !== ADMIN_USER.id) { lockAdminSession(u && u.email); return false; }
+  } catch (e) { /* network hiccup — don't lock */ }
+  return true;
+}
+function lockAdminSession(email) {
+  SESSION_LOCKED = true;
+  const d = document.createElement('div');
+  d.id = 'session-lock';
+  d.setAttribute('role', 'alertdialog');
+  d.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(10,20,15,.6);display:flex;align-items:center;justify-content:center;padding:16px';
+  d.innerHTML = `<div style="background:#fff;border-radius:16px;max-width:460px;width:100%;padding:24px;font-family:Inter,system-ui,sans-serif;color:#1b1c1a;box-shadow:0 30px 80px rgba(0,0,0,.35)">
+    <div style="font-size:18px;font-weight:800;color:#003527;margin-bottom:8px">Admin session ended</div>
+    <p style="margin:0 0 10px;font-size:14px;line-height:1.55">This browser is now signed in as <b>${esc(email || 'another account')}</b>${email ? ' (not an admin)' : ''}, probably from another tab. To protect your data, Admin OS changes are blocked.</p>
+    <p style="margin:0 0 16px;font-size:13px;color:#3a433e">Tip: test member sign-ups in a private / incognito window so your admin session stays signed in.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-primary" onclick="adminSignOut()">Sign in as admin</button>${email ? '<a class="btn btn-ghost" href="/dashboard">Open member portal</a>' : ''}</div></div>`;
+  document.body.appendChild(d);
+}
+(function watchAdminSession() {
+  window.addEventListener('storage', e => { if (!e.key || /auth|sb-|bana_/i.test(e.key)) setTimeout(checkAdminSession, 50); });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) checkAdminSession(); });
+  window.addEventListener('focus', () => checkAdminSession());
+  setInterval(checkAdminSession, 20000);
+  if (window.getBanaSupabaseClient) window.getBanaSupabaseClient().then(sb => sb.auth.onAuthStateChange(() => setTimeout(checkAdminSession, 0))).catch(() => {});
+})();
+
 async function enterOS() {
   document.getElementById('auth-screen').style.display = 'none';
   document.getElementById('os-shell').style.display    = 'flex';
@@ -3347,6 +3382,7 @@ function globalSearch(q) {
 
 // ── Toast ─────────────────────────────────────────────────────
 function toast(msg, type = 'success') {
+  if (/row-level security|only admins can/i.test(String(msg))) { checkAdminSession().then(ok => { if (ok) toast('Permission denied for this action — your account lacks the required Admin OS permission.', 'error'); }); return; }
   const icons = { success: '✅', warn: '⚠️', error: '❌' };
   const el = document.createElement('div');
   el.className = `toast ${type}`;
