@@ -978,6 +978,7 @@ function renderActivity(items) {
 // ═════════════════════════════════════════════════════════════════════════
 const PROVIDERS = { google: ['Google', '#4285F4'], linkedin_oidc: ['LinkedIn', '#0A66C2'], linkedin: ['LinkedIn', '#0A66C2'], email: ['Email', '#5f6b66'] };
 const provBadge = p => { const [l, c] = PROVIDERS[p] || PROVIDERS.email; return `<span style="font-size:11px;font-weight:600;color:${c};border:1px solid ${c}40;background:${c}10;border-radius:20px;padding:1px 8px">${l}</span>`; };
+const liBadge = u => u && u.linkedin_verified ? `<span title="LinkedIn verified${u.linkedin_name ? ' as ' + esc(u.linkedin_name) : ''}${u.linkedin_email && u.email && u.linkedin_email !== String(u.email).toLowerCase() ? ' — LinkedIn email differs: ' + esc(u.linkedin_email) : ''}" style="font-size:11px;font-weight:700;color:#0A66C2;border:1px solid #0A66C240;background:#0A66C210;border-radius:20px;padding:1px 8px;margin-left:4px">in ✓</span>${u.linkedin_email && u.email && u.linkedin_email !== String(u.email).toLowerCase() ? '<span title="LinkedIn email differs from account email" style="color:#b3261e;font-weight:700;margin-left:3px">!</span>' : ''}` : '';
 const U_STATUS_PILL = { approved: 'live', pending: 'pending', vetting: 'pending', rejected: 'rejected', blocked: 'rejected', invited: 'draft' };
 let users_db = [], uTab = 'pending';
 async function loadUsers() {
@@ -1000,7 +1001,7 @@ function renderUsers() {
     ${rows.map(u => `<tr style="cursor:pointer" onclick="openUserModal('${esc(u.id)}')">
       <td><div style="display:flex;align-items:center;gap:10px">${u.avatar_url ? `<img src="${esc(u.avatar_url)}" alt="" style="width:28px;height:28px;border-radius:50%;object-fit:cover"/>` : `<div style="width:28px;height:28px;border-radius:50%;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">${esc(((u.full_name || u.email || '?')[0] || '?').toUpperCase())}</div>`}
         <div><div style="font-weight:600;color:var(--ink)">${esc(u.full_name || '—')}</div><div style="font-size:11px;font-family:var(--font-mono);color:var(--white-muted)">${esc(u.email)}</div></div></div></td>
-      <td>${provBadge(u.auth_provider)}</td>
+      <td>${provBadge(u.auth_provider)}${liBadge(u)}</td>
       <td style="font-size:12px">${esc(u.company_name || '—')}${u.title ? `<div style="color:var(--white-muted)">${esc(u.title)}</div>` : ''}</td>
       <td style="font-size:12px;text-transform:capitalize">${esc(u.role || '—')}</td>
       <td><span class="pill pill-${U_STATUS_PILL[u.status] || 'draft'}">${esc(u.status || '—')}</span></td>
@@ -1024,7 +1025,7 @@ async function openUserModal(id) {
   const d = await api(`/api/admin/members/${id}`).catch(() => ({}));
   const u = d.user || users_db.find(x => x.id === id) || {}; _uModal = d;
   $('u-modal-title').textContent = u.full_name || u.email || 'Member';
-  $('u-modal-sub').innerHTML = `${esc(u.email || '')} · ${provBadge(u.auth_provider)}`;
+  $('u-modal-sub').innerHTML = `${esc(u.email || '')} · ${provBadge(u.auth_provider)}${liBadge(u)}${u.linkedin_verified ? ` <span style="font-size:11px;color:var(--white-muted)">LinkedIn: ${esc(u.linkedin_name || '')} ${esc(u.linkedin_email || '')}</span>` : ''}`;
   $('u-avatar').src = u.avatar_url || ''; $('u-avatar').style.display = u.avatar_url ? '' : 'none';
   const link = v => v ? `<a href="${esc(v)}" target="_blank" rel="noopener noreferrer" style="color:var(--emerald)">${esc(v)}</a>` : '';
   $('u-profile').innerHTML = [['Title', esc(u.title || '')], ['Company', esc(u.company_name || '')], ['Phone', esc(u.phone || '')], ['Country', esc(u.country || '')],

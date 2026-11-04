@@ -441,6 +441,7 @@ body.is-pending [data-members-only]{display:none!important}
         <div><label class="f-lab">Membership status</label><div id="st-status" style="padding-top:8px"></div></div>
       </div>
       <div style="margin-top:14px"><label class="f-lab">Signed in with</label><div id="st-providers" style="display:flex;gap:8px;flex-wrap:wrap"></div></div>
+      <div style="margin-top:14px" id="li-verify-box"><label class="f-lab">LinkedIn verification</label><div id="li-verify" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding-top:4px"></div><p class="d" style="margin-top:6px;font-size:12px">Verifying with LinkedIn confirms your identity to the BANAHUB team and speeds up approval. We only receive your name, email and profile photo.</p></div>
     </div>
     <div class="glass-card sect" id="pw-section">
       <h3>Password</h3><p class="d" id="pw-desc">Change the password you use with your email address.</p>
@@ -724,6 +725,10 @@ async function loadProfile(quiet){
     const provs=[...new Set([...(d.identities||[]), d.provider].filter(Boolean))];
     const label={google:'Google',linkedin_oidc:'LinkedIn',email:'Email & password'};
     document.getElementById('st-providers').innerHTML = provs.map(p=>`<span class="prov">${esc(label[p]||p)}</span>`).join('') || '<span class="prov">Email & password</span>';
+    const liOk = !!_me.linkedin_verified || provs.includes('linkedin_oidc');
+    document.getElementById('li-verify').innerHTML = liOk
+      ? `<span class="prov" style="color:#0A66C2;border-color:#0A66C255">✓ LinkedIn verified${_me.linkedin_name ? ' · ' + esc(_me.linkedin_name) : ''}</span>`
+      : `<button type="button" class="btn-li" onclick="verifyLinkedIn(this)" style="display:inline-flex;align-items:center;gap:8px;border:1px solid #0A66C2;color:#0A66C2;background:#fff;border-radius:6px;padding:7px 14px;font-weight:700;font-size:13px;cursor:pointer"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="#0A66C2" d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/></svg>Verify with LinkedIn</button><span id="li-verify-err" style="font-size:12px;color:#b3261e"></span>`;
     const hasPw = provs.includes('email');
     document.getElementById('pw-section').style.display = hasPw ? '' : 'none';
     const pr=_me.preferences||{};
@@ -807,6 +812,28 @@ async function signOut() {
   localStorage.removeItem('bana_access_token');
   window.location.href='login.html';
 }
+
+async function verifyLinkedIn(btn){
+  const err=document.getElementById('li-verify-err'); if(err) err.textContent='';
+  btn.disabled=true;
+  try{
+    const sb=window.getBanaSupabaseClient();
+    const { data, error } = await sb.auth.linkIdentity({ provider:'linkedin_oidc', options:{ redirectTo: location.origin + '/dashboard?verified=linkedin' } });
+    if(error) throw error;
+    if(data && data.url) location.href = data.url;
+  }catch(e){
+    btn.disabled=false;
+    const m=String((e&&e.message)||e);
+    if(err) err.textContent = /manual linking|not enabled|provider/i.test(m) ? 'LinkedIn verification is being set up — please try again later.' : /already/i.test(m) ? 'That LinkedIn account is already linked to another BANAHUB account.' : m;
+  }
+}
+
+(function(){ try{
+  const h=new URLSearchParams(location.hash.replace(/^#/,'')), qs=new URLSearchParams(location.search);
+  const desc=h.get('error_description')||qs.get('error_description');
+  if(desc){ setTimeout(()=>{ const e=document.getElementById('li-verify-err'); const m=/already/i.test(desc)?'That LinkedIn account is already linked to another BANAHUB account.':decodeURIComponent(desc.replace(/\+/g,' ')); if(e) e.textContent=m; else alert(m); },1500); }
+  else if(qs.get('verified')==='linkedin'){ setTimeout(()=>{ if(window.toast) toast('LinkedIn verified — thank you','success'); },1500); }
+}catch(_){}})();
 </script>
 </body>
 </html>
