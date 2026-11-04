@@ -1,4 +1,4 @@
-/* BANAHUB member portal — "Submit to BANAHUB"
+/* BANAHUB member portal — "My Capital Raise" (free to enter; the investor campaign is a paid service)
  * Companies: company profile, funding history, current raise, next stage  → public.deal_rooms (submitted_by = me)
  * Investors: investor profile, mandate and funds                          → public.investors (user_id = me)
  * Server-side guards (24_member_submissions.sql) fix every internal field; BANAHUB reviews in Admin OS → Member Submissions.
@@ -39,8 +39,8 @@
     if ($('panel-submit')) return true;
     const prof = document.querySelector('.nav-item[onclick*="switchTab(\'profile\'"]'); const top = $('top-profile');
     if (!prof || !top || !$('panel-profile')) return false;
-    prof.insertAdjacentHTML('beforebegin', `<button class="nav-item" onclick="switchTab('submit',this)"><span class="mat-ic material-symbols-outlined">rocket_launch</span>Submit to BANAHUB</button>`);
-    top.insertAdjacentHTML('beforebegin', `<button class="tab-btn" id="top-submit" onclick="switchTab('submit',null,'top-submit')">Submit</button>`);
+    prof.insertAdjacentHTML('beforebegin', `<button class="nav-item" onclick="switchTab('submit',this)"><span class="mat-ic material-symbols-outlined">rocket_launch</span>My Capital Raise</button>`);
+    top.insertAdjacentHTML('beforebegin', `<button class="tab-btn" id="top-submit" onclick="switchTab('submit',null,'top-submit')">My Capital Raise</button>`);
     $('panel-profile').insertAdjacentHTML('beforebegin', '<div class="panel" id="panel-submit"><div id="ms-root"></div></div>');
     const st = document.createElement('style'); st.textContent = CSS; document.head.appendChild(st);
     const orig = window.switchTab;
@@ -62,6 +62,7 @@
         q(sb.from('investors').select('*').eq('user_id', user.id).maybeSingle()).catch(() => null),
       ]);
       S.me = me || {}; S.tax = tax || []; S.raises = raises || []; S.investor = inv;
+      if (S.price === undefined) { try { const r = await sb.functions.invoke('billing', { body: { action: 'campaign_price' } }); S.price = (r.data && r.data.price) || null; } catch (e) { S.price = null; } }
       if (!S.mode) S.mode = S.me.role === 'investor' || INVESTOR_TYPES.some(t => t[0] === S.me.member_category) || inv ? 'investor' : 'company';
       render();
     } catch (e) { root.innerHTML = `<div class="glass-card sect" style="color:#ba1a1a">${esc(e.message)}</div>`; }
@@ -70,9 +71,13 @@
   function render() {
     const root = $('ms-root'), inv = S.investor;
     root.innerHTML = `
-      <div class="ms-hero"><div><div class="ms-eyebrow">Submit to BANAHUB</div><h2>Tell us what you're building — or what you're backing</h2>
-        <p>Your submission goes to the BANAHUB team for review. We use it to understand your needs and, where relevant, prepare GTM, capital-readiness and introduction support. Submitting does not guarantee investor introductions or funding.</p></div>
+      <div class="ms-hero"><div><div class="ms-eyebrow">My Capital Raise</div><h2>${S.mode === 'investor' ? 'Tell us what you invest in' : 'Put your raise in front of the right investors'}</h2>
+        <p>${S.mode === 'investor' ? 'Share your mandate and funds so BANAHUB only brings you opportunities that fit. Free for investors.' : 'Entering your company and raise is free. Once BANAHUB has reviewed it, you can choose to have us run a paid investor campaign for you.'} BANAHUB is not a licensed financial adviser; nothing here guarantees investor interest, introductions or funding.</p></div>
         <span class="material-symbols-outlined ms-hero-ic">rocket_launch</span></div>
+      ${S.mode === 'company' ? `<div class="ms-steps"><div class="ms-st"><b>1</b><div><strong>Enter your raise</strong><span class="ms-free">Free</span></div></div><i></i><div class="ms-st"><b>2</b><div><strong>BANAHUB review</strong><span class="ms-free">Free</span></div></div><i></i>
+        <div class="ms-st"><b>3</b><div><strong>Investor campaign</strong><span class="ms-paid">${S.price ? esc(S.price.currency) + ' ' + Number(S.price.amount).toLocaleString('en-SG') : 'Paid service'}</span></div></div></div>` : ''}
+      ${/[?&]campaign=success/.test(location.search) ? '<div class="ms-ok">✓ Payment received — your campaign is confirmed once payment clears (PayNow can take a few minutes). The BANAHUB team will be in touch to start.</div>' : ''}
+      ${/[?&]campaign=cancelled/.test(location.search) ? '<div class="ms-ok" style="background:#fff4d6;color:#7a5000">Payment cancelled — you can start the campaign any time.</div>' : ''}
       <div class="ms-choice">
         <button type="button" class="ms-card${S.mode === 'company' ? ' on' : ''}" onclick="msMode('company')"><span class="material-symbols-outlined">apartment</span><b>I'm a company</b><span>Company profile, capital raise, stage and next round</span></button>
         <button type="button" class="ms-card${S.mode === 'investor' ? ' on' : ''}" onclick="msMode('investor')"><span class="material-symbols-outlined">account_balance</span><b>I'm an investor</b><span>Investor profile, mandate and funds</span></button>
@@ -82,12 +87,33 @@
     if (S.mode === 'company' && $('ms-form')) primaryOpts();
   }
 
+  // ── paid investor campaign ─────────────────────────────────────────────
+  const INCLUDED = ['Investor matching against your sector, stage, ticket and geography', 'Curated investor shortlist approved with you', 'Outreach run and followed up by the BANAHUB team', 'Campaign tracking and a results report'];
+  function campaignBox(r) {
+    const c = r.campaign_status, price = S.price ? `${esc(S.price.currency)} ${Number(S.price.amount).toLocaleString('en-SG')}` : null;
+    const inc = `<ul class="ms-inc">${INCLUDED.map(x => `<li>${x}</li>`).join('')}</ul>`;
+    if (['paid', 'active', 'completed'].includes(c)) return `<div class="ms-camp ms-camp-on"><span class="material-symbols-outlined">campaign</span><div><b>Investor campaign — ${c === 'paid' ? 'paid, starting soon' : c === 'active' ? 'running' : 'completed'}</b><div class="ms-sub">Paid ${r.campaign_paid_at ? new Date(r.campaign_paid_at).toLocaleDateString('en-SG', { day: 'numeric', month: 'short', year: 'numeric' }) : ''}${r.campaign_amount ? ' · ' + esc(r.campaign_currency || '') + ' ' + Number(r.campaign_amount).toLocaleString('en-SG') : ''}. The BANAHUB team will keep you updated.</div></div></div>`;
+    if (r.review_status !== 'accepted') return `<div class="ms-camp ms-camp-lock"><span class="material-symbols-outlined">lock</span><div><b>Investor campaign${price ? ' · ' + price : ''}</b><div class="ms-sub">Paid service — available once BANAHUB has reviewed and accepted your raise.</div>${inc}</div></div>`;
+    if (!price) return `<div class="ms-camp"><span class="material-symbols-outlined">campaign</span><div><b>Investor campaign</b><div class="ms-sub">Your raise is accepted. Campaign pricing is being finalised — the BANAHUB team will contact you.</div>${inc}</div></div>`;
+    return `<div class="ms-camp ms-camp-go"><span class="material-symbols-outlined">campaign</span><div style="flex:1"><b>Run an investor campaign — ${price}</b><div class="ms-sub">One-time payment by card or PayNow. Your raise is accepted and ready to go.</div>${inc}
+      <div class="ms-camp-act"><button class="btn-p" onclick="msCampaign('${r.id}',this)">${c === 'awaiting_payment' ? 'Continue to payment' : 'Start campaign — pay ' + price}</button><span class="ms-sub">No guarantee of investor interest, introductions or funding.</span></div><div class="ms-msg err" id="mcp-${r.id}"></div></div></div>`;
+  }
+  async function startCampaign(id, btn) {
+    const err = $('mcp-' + id); if (err) err.textContent = ''; btn.disabled = true; const t = btn.textContent; btn.textContent = 'Opening secure payment…';
+    try {
+      const sb = await sbc(); const { data, error } = await sb.functions.invoke('billing', { body: { action: 'campaign_checkout', raise_id: id } });
+      if (error) { let m = error.message; try { const j = await error.context.json(); m = j.error || m; } catch (e) {} throw new Error(m); }
+      if (!data || !data.url) throw new Error((data && data.error) || 'Could not start payment');
+      location.href = data.url;
+    } catch (e) { if (err) err.textContent = e.message; btn.disabled = false; btn.textContent = t; }
+  }
+
   // ── company ─────────────────────────────────────────────────────────────
   function companyView() {
-    const list = S.raises.length ? `<div class="glass-card sect"><h3>My submissions</h3><p class="d">Status is updated by the BANAHUB team.</p>
-      ${S.raises.map(r => `<div class="ms-row"><div><b>${esc(r.company_name || r.name)}</b> · ${esc(r.stage || '')} · ${money(r.target_raise, r.currency)}<div class="ms-sub">Submitted ${r.submitted_at ? new Date(r.submitted_at).toLocaleDateString('en-SG', { day: 'numeric', month: 'short', year: 'numeric' }) : ''}${r.review_note ? ` · <b style="color:#ba1a1a">BANAHUB: ${esc(r.review_note)}</b>` : ''}</div></div>
-        <div style="display:flex;gap:8px;align-items:center">${pill(r.review_status)}${['submitted', 'needs_info'].includes(r.review_status) ? `<button class="btn-o" onclick="msEdit('${r.id}')">Edit</button>` : ''}</div></div>`).join('')}
-      <button class="btn-o" style="margin-top:12px" onclick="msEdit('')">+ New submission</button></div>` : '';
+    const list = S.raises.length ? `<div class="glass-card sect"><h3>My capital raises</h3><p class="d">Review status is updated by the BANAHUB team.</p>
+      ${S.raises.map(r => `<div class="ms-raise"><div class="ms-row" style="border:0"><div><b>${esc(r.company_name || r.name)}</b> · ${esc(r.stage || '')} · ${money(r.target_raise, r.currency)}<div class="ms-sub">Entered ${r.submitted_at ? new Date(r.submitted_at).toLocaleDateString('en-SG', { day: 'numeric', month: 'short', year: 'numeric' }) : ''}${r.review_note ? ` · <b style="color:#ba1a1a">BANAHUB: ${esc(r.review_note)}</b>` : ''}</div></div>
+        <div style="display:flex;gap:8px;align-items:center">${pill(r.review_status)}${['submitted', 'needs_info'].includes(r.review_status) ? `<button class="btn-o" onclick="msEdit('${r.id}')">Edit</button>` : ''}</div></div>${campaignBox(r)}</div>`).join('')}
+      <button class="btn-o" style="margin-top:12px" onclick="msEdit('')">+ Enter another raise</button></div>` : '';
     if (S.raises.length && S.editing === null) return list;
     return list + companyForm(S.raises.find(r => r.id === S.editing) || {});
   }
@@ -132,7 +158,7 @@
           ${field('mc-next-date', 'Expected timing', inp('mc-next-date', r.next_stage_date ? String(r.next_stage_date).slice(0, 7) : '', 'type="month"'))}</div></div>
       <datalist id="ms-geo">${GEOS.map(g => `<option>${esc(g)}</option>`).join('')}</datalist>
       <div class="ms-submit"><label class="ms-consent"><input type="checkbox" id="mc-consent" required/> I confirm the information is accurate and I'm authorised to share it with BANAHUB.</label>
-        <div style="display:flex;gap:10px;align-items:center">${S.raises.length ? '<button type="button" class="btn-o" onclick="msEdit(null)">Cancel</button>' : ''}<button class="btn-p" id="mc-go" type="submit">${r.id ? 'Save changes' : 'Submit to BANAHUB'}</button></div></div>
+        <div style="display:flex;gap:10px;align-items:center">${S.raises.length ? '<button type="button" class="btn-o" onclick="msEdit(null)">Cancel</button>' : ''}<button class="btn-p" id="mc-go" type="submit">${r.id ? 'Save changes' : 'Save my raise — free'}</button></div></div>
       <div id="mc-msg" class="ms-msg"></div><input type="hidden" id="mc-id" value="${esc(r.id || '')}"/></form>`;
   }
   function roundRow(x) {
@@ -170,7 +196,7 @@
       if (id) await q(sb.from('deal_rooms').update(p).eq('id', id)); else await q(sb.from('deal_rooms').insert(p));
       await sb.from('users').update({ member_category: p.company_type, company_name: S.me.company_name || p.company_name }).eq('id', S.uid);
       S.editing = null; await load();
-      const m = document.querySelector('#ms-root .ms-hero'); if (m) m.insertAdjacentHTML('afterend', '<div class="ms-ok">✓ Submitted — the BANAHUB team will review it and update the status here.</div>');
+      const m = document.querySelector('#ms-root .ms-hero'); if (m) m.insertAdjacentHTML('afterend', '<div class="ms-ok">✓ Saved — free. BANAHUB will review your raise; once accepted you can start an investor campaign.</div>');
     } catch (e) { bad(e.message); } finally { if ($('mc-go')) $('mc-go').disabled = false; }
   }
 
@@ -203,7 +229,7 @@
       <div class="glass-card sect"><div class="ms-step">3</div><h3>Funds</h3><p class="d">Funds or vehicles you're investing from (optional).</p>
         <div id="mi-funds">${arr(i.funds).map(fundRow).join('')}</div><button type="button" class="btn-o" onclick="msAddFund()">+ Add a fund</button></div>
       <div class="ms-submit"><label class="ms-consent"><input type="checkbox" id="mi-consent" required/> I confirm the information is accurate. BANAHUB does not provide investment advice; any introduction is at my discretion.</label>
-        <button class="btn-p" id="mi-go" type="submit">${i.id ? 'Save changes' : 'Submit to BANAHUB'}</button></div>
+        <button class="btn-p" id="mi-go" type="submit">${i.id ? 'Save changes' : 'Save my investor profile'}</button></div>
       <div id="mi-msg" class="ms-msg"></div></form>`;
   }
   function fundRow(f) {
@@ -237,7 +263,7 @@
     } catch (e) { bad(e.message); } finally { if ($('mi-go')) $('mi-go').disabled = false; }
   }
 
-  Object.assign(window, { msMode: m => { S.mode = m; render(); }, msEdit: id => { S.editing = id; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); }, msSaveCompany: saveCompany, msSaveInvestor: saveInvestor,
+  Object.assign(window, { msMode: m => { S.mode = m; render(); }, msEdit: id => { S.editing = id; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); }, msSaveCompany: saveCompany, msCampaign: startCampaign, msSaveInvestor: saveInvestor,
     msAddRound: () => $('mc-rounds').insertAdjacentHTML('beforeend', roundRow()), msAddFund: () => $('mi-funds').insertAdjacentHTML('beforeend', fundRow()), __MS: S });
 
   const CSS = `#panel-submit{max-width:1040px}
@@ -259,6 +285,13 @@
   .ms-x{border:1px solid rgba(186,26,26,.3);color:#ba1a1a;background:#fff;border-radius:8px;padding:6px 10px;font:700 12px 'Manrope',sans-serif;cursor:pointer;margin-top:6px}
   .ms-submit{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:18px 22px;border-radius:14px;background:#fff;border:1px solid rgba(0,53,39,.12);position:sticky;bottom:12px;box-shadow:0 8px 24px rgba(0,53,39,.10)}
   .ms-consent{display:flex;gap:8px;align-items:flex-start;font-size:13px;color:#1b1c1a;max-width:620px}
+  .ms-steps{display:flex;align-items:center;gap:10px;margin:-4px 0 18px;flex-wrap:wrap}.ms-steps i{flex:1;min-width:20px;height:2px;background:rgba(0,53,39,.18)}
+  .ms-st{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid rgba(0,53,39,.14);border-radius:12px;padding:10px 14px}.ms-st b{width:26px;height:26px;border-radius:50%;background:#003527;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px}
+  .ms-st strong{display:block;font-size:13px;color:#1b1c1a}.ms-free{font-size:11.5px;font-weight:800;color:#0a5c40}.ms-paid{font-size:11.5px;font-weight:800;color:#7a5000}
+  .ms-raise{border:1px solid rgba(0,53,39,.10);border-radius:14px;padding:4px 16px 14px;margin-bottom:12px;background:rgba(255,255,255,.7)}
+  .ms-camp{display:flex;gap:12px;align-items:flex-start;border-radius:12px;padding:14px;background:#f4f8f6;border:1px dashed rgba(0,53,39,.25);color:#1b1c1a}.ms-camp>.material-symbols-outlined{font-size:24px;color:#003527}
+  .ms-camp-lock{background:#f7f6f2;border-style:dashed}.ms-camp-lock>.material-symbols-outlined{color:#5c645f}.ms-camp-go{background:linear-gradient(135deg,#eef7f2,#fff);border:1.5px solid #003527}.ms-camp-on{background:#e3f1e8;border:1px solid #0a5c40}
+  .ms-inc{margin:8px 0 0 18px;font-size:12.5px;color:#1b1c1a;list-style:disc}.ms-inc li{margin:2px 0}.ms-camp-act{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:12px}
   .ms-msg{margin-top:10px;font-size:13px;font-weight:600}.ms-msg.err{color:#ba1a1a}.ms-ok{padding:12px 16px;border-radius:12px;background:#eaf4ef;color:#003527;font-weight:700;margin-bottom:16px}
   .ms-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(0,53,39,.08);color:#1b1c1a;font-size:14px}.ms-sub{font-size:12px;color:#3a433e;margin-top:3px}
   .ms-status{display:flex;justify-content:space-between;align-items:center}.ms-pill{display:inline-block;padding:4px 11px;border-radius:999px;font-size:12px;font-weight:700}.ms-loading{padding:40px;text-align:center;color:#3a433e}`;

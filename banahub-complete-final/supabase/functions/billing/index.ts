@@ -152,6 +152,39 @@ Deno.serve(async (req) => {
       return json({ url: inv.hosted_invoice_url }, 200, headers);
     }
 
+    // Paid investor campaign for an accepted capital raise (price from pricing_catalog 'capital_campaign')
+    if (body.action === "campaign_checkout") {
+      const raiseId = String(body.raise_id || "");
+      if (!/^[0-9a-f-]{36}$/i.test(raiseId)) throw new HttpError(400, "Invalid raise");
+      const { data: r } = await db.from("deal_rooms").select("id, submitted_by, company_name, name, review_status, campaign_status").eq("id", raiseId).maybeSingle();
+      if (!r || r.submitted_by !== user.id) throw new HttpError(404, "Capital raise not found");
+      if (r.review_status !== "accepted") throw new HttpError(400, "The campaign becomes available once BANAHUB has reviewed and accepted your raise.");
+      if (["paid", "active", "completed"].includes(r.campaign_status || "")) throw new HttpError(409, "This campaign is already paid.");
+      const { data: item } = await db.from("pricing_catalog").select("id, name, description, price_amount, currency, active").eq("_seed_key", "capital_campaign").maybeSingle();
+      const amount = Number(item?.price_amount || 0);
+      if (!item || !item.active || !(amount > 0)) throw new HttpError(400, "Campaign pricing is being finalised — please contact BANAHUB.");
+      const currency = String(item.currency || "SGD").toLowerCase();
+      const customer = await ensureCustomer({ id: user.id, email: user.email }, u, m?.stripe_customer_id ?? null);
+      const meta = { user_id: user.id, raise_id: r.id, product_family: "capital_campaign", item_type: "capital_campaign" };
+      const session = await stripe.checkout.sessions.create({
+        mode: "payment", customer, client_reference_id: user.id,
+        payment_method_types: currency === "sgd" ? ["card", "paynow"] : ["card"],
+        line_items: [{ quantity: 1, price_data: { currency, unit_amount: Math.round(amount * 100), product_data: { name: `${item.name} — ${r.company_name || r.name}`, description: (item.description || "").slice(0, 300) } } }],
+        metadata: meta, payment_intent_data: { metadata: meta, description: `Capital raise campaign — ${r.company_name || r.name}` },
+        success_url: `${SITE_URL}/dashboard?tab=submit&campaign=success`,
+        cancel_url: `${SITE_URL}/dashboard?tab=submit&campaign=cancelled`,
+      }, { idempotencyKey: `campaign-${r.id}-${amount}-${new Date().toISOString().slice(0, 13)}` });
+      await db.from("transactions").insert({ user_id: user.id, email: user.email, type: "campaign_payment", item_type: "capital_campaign", item_id: r.id,
+        amount, currency: currency.toUpperCase(), stripe_session_id: session.id, status: "pending", revenue_source: "advisory", description: `Capital raise campaign — ${r.company_name || r.name}` });
+      await db.from("deal_rooms").update({ campaign_status: "awaiting_payment", campaign_amount: amount, campaign_currency: currency.toUpperCase(), campaign_session: session.id }).eq("id", r.id);
+      return json({ url: session.url }, 200, headers);
+    }
+
+    if (body.action === "campaign_price") {
+      const { data: item } = await db.from("pricing_catalog").select("name, description, price_amount, currency, active").eq("_seed_key", "capital_campaign").maybeSingle();
+      return json({ price: item && item.active && Number(item.price_amount) > 0 ? { amount: Number(item.price_amount), currency: item.currency, name: item.name, description: item.description } : null }, 200, headers);
+    }
+
     if (body.action === "portal") {
       if (!m?.stripe_customer_id) throw new HttpError(400, "No billing account yet");
       const s = await stripe.billingPortal.sessions.create({ customer: m.stripe_customer_id, return_url: `${SITE_URL}/billing.html` });

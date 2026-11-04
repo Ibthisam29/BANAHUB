@@ -19,6 +19,8 @@
   const fmtD = d => d ? new Date(d).toLocaleDateString('en-SG', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
   const RS = { submitted: ['New', '#7a5000', '#fff4d6'], in_review: ['In review', '#1d3d6b', '#e6eef9'], needs_info: ['Needs info', '#8c1d18', '#fdecea'], accepted: ['Accepted', '#0a5c40', '#e3f1e8'], declined: ['Declined', '#3a3a3a', '#ecebe7'] };
   const pill = s => { const r = RS[s] || RS.submitted; return `<span class="sx-pill" style="color:${r[1]};background:${r[2]}">${r[0]}</span>`; };
+  const CAMP = { awaiting_payment: ['Campaign: awaiting payment', '#7a5000', '#fff4d6'], paid: ['Campaign: PAID', '#0a5c40', '#e3f1e8'], active: ['Campaign: running', '#1d3d6b', '#e6eef9'], completed: ['Campaign: completed', '#3a3a3a', '#ecebe7'], cancelled: ['Campaign: cancelled', '#8c1d18', '#fdecea'] };
+  const campPill = r => r.campaign_status && CAMP[r.campaign_status] ? `<span class="sx-pill" style="color:${CAMP[r.campaign_status][1]};background:${CAMP[r.campaign_status][2]};margin-right:6px">${CAMP[r.campaign_status][0]}${r.campaign_amount ? ' · ' + esc(r.campaign_currency || '') + ' ' + Number(r.campaign_amount).toLocaleString('en-SG') : ''}</span>` : '';
   const TRACTION = { pre_revenue: 'Pre-revenue', early_revenue: 'Early revenue', product_market_fit: 'Product–market fit', scaling: 'Scaling revenue', profitable: 'Profitable' };
   const X = { raises: [], inv: [], users: {}, tab: 'companies', st: 'open', q: '' };
 
@@ -61,6 +63,7 @@
       <div class="os-kpis">${[
         ['New company raises', cnt(X.raises, r => r.review_status === 'submitted')], ['Raises in review', cnt(X.raises, r => ['in_review', 'needs_info'].includes(r.review_status))],
         ['New investor profiles', cnt(X.inv, i => (i.review_status || 'submitted') === 'submitted')], ['Accepted', cnt(X.raises, r => r.review_status === 'accepted') + cnt(X.inv, i => i.review_status === 'accepted')],
+        ['Paid campaigns', cnt(X.raises, r => ['paid', 'active', 'completed'].includes(r.campaign_status))],
         ['Capital sought (open)', 'US$' + short(X.raises.filter(r => isOpen(r.review_status)).reduce((a, r) => a + usd(r.target_raise, r.currency), 0))],
       ].map(([l, v]) => `<div class="os-kpi"><div class="os-kpi-l">${l}</div><div class="os-kpi-v">${v}</div></div>`).join('')}</div>
       <div class="sx-tabs"><button class="${X.tab === 'companies' ? 'on' : ''}" onclick="sxTab('companies')"><span class="material-symbols-outlined">apartment</span>Companies raising <b>${X.raises.length}</b></button>
@@ -78,7 +81,7 @@
         <div><b>${arr(r.prior_rounds).length || r.rounds_raised || 0}</b><i>${arr(r.prior_rounds).length || r.rounds_raised ? 'prior rounds' + (r.total_raised_to_date ? ' · ' + money(r.total_raised_to_date, r.currency) : '') : 'First raise'}</i></div>
         <div><b>${esc(arr(r.preferred_instruments)[0] || r.instrument || '—')}</b><i>Preferred</i></div>
         <div><b>${esc(r.next_stage || '—')}</b><i>Next${r.next_stage_amount ? ' · ' + money(r.next_stage_amount, r.currency) : ''}${r.next_stage_date ? ' · ' + new Date(r.next_stage_date).toLocaleDateString('en-SG', { month: 'short', year: 'numeric' }) : ''}</i></div></div>
-      <div class="sx-foot">Submitted ${fmtD(r.submitted_at)}${r.review_note ? ` · Note: ${esc(r.review_note)}` : ''}</div></div>`;
+      <div class="sx-foot">${campPill(r)}Submitted ${fmtD(r.submitted_at)}${r.review_note ? ` · Note: ${esc(r.review_note)}` : ''}</div></div>`;
   }
   function invCard(i) {
     const funds = arr(i.funds);
@@ -103,12 +106,24 @@
       <div class="sx-sec">Traction</div>${kv([['Stage', esc(TRACTION[x.traction_stage] || x.traction_stage)], ['Annual revenue', x.annual_revenue != null ? money(x.annual_revenue, x.currency) : ''], ['Growth', x.revenue_growth_pct != null ? x.revenue_growth_pct + '% YoY' : '']])}
       <div class="sx-sec">Funding history</div>${arr(x.prior_rounds).length ? kv(arr(x.prior_rounds).map(p => [esc(p.round), `${money(p.amount, p.currency || x.currency)}${p.date ? ' · ' + new Date(p.date).toLocaleDateString('en-SG', { month: 'short', year: 'numeric' }) : ''}${p.lead ? ' · lead ' + esc(p.lead) : ''}`])) : '<div class="sx-muted">First raise</div>'}
       <div class="sx-sec">Current raise</div>${kv([['Round', esc(x.stage)], ['Raising', money(x.target_raise, x.currency)], ['Committed', x.raised_amount != null ? money(x.raised_amount, x.currency) : ''], ['Min ticket', x.min_ticket ? money(x.min_ticket, x.currency) : ''], ['Pre-money', x.pre_money_valuation ? money(x.pre_money_valuation, x.currency) : ''], ['Close', x.close_date ? fmtD(x.close_date) : ''], ['Instruments', arr(x.preferred_instruments)], ['Needs lead', x.lead_needed ? 'Yes' : ''], ['Use of funds', esc(x.use_of_funds)], ['Deck', link(x.deck_url)]])}
+      <div class="sx-sec">Investor campaign (paid service)</div><div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">${campPill(x) || '<span class="sx-muted">Not purchased</span>'}
+        ${['', 'awaiting_payment', 'cancelled'].includes(x.campaign_status || '') ? `<button class="btn btn-ghost btn-sm" onclick="sxCamp('paid')">Mark paid (offline / invoice)</button>` : ''}
+        ${x.campaign_status === 'paid' ? `<button class="btn btn-ghost btn-sm" onclick="sxCamp('active')">Mark campaign running</button>` : ''}
+        ${x.campaign_status === 'active' ? `<button class="btn btn-ghost btn-sm" onclick="sxCamp('completed')">Mark completed</button>` : ''}</div>
       <div class="sx-sec">Next stage</div>${kv([['Next round', esc(x.next_stage)], ['Amount', x.next_stage_amount ? money(x.next_stage_amount, x.currency) : ''], ['Timing', x.next_stage_date ? new Date(x.next_stage_date).toLocaleDateString('en-SG', { month: 'short', year: 'numeric' }) : '']])}`
       : `<div class="sx-sec">Investor</div>${kv([['Type', esc([x.investor_type, x.investor_subtype].filter(Boolean).join(' · '))], ['Website', link(x.website)], ['AUM', x.aum ? money(x.aum, x.aum_currency) : ''], ['Appetite', esc(x.appetite)], ['Lead / follow', esc(x.lead_follow)], ['Co-invest', esc(x.co_invest)]])}
       <div class="sx-sec">Mandate</div>${kv([['Ticket', x.check_min != null || x.check_max != null ? `${money(x.check_min, x.check_currency)} – ${money(x.check_max, x.check_currency)}` : ''], ['Stages', arr(x.preferred_stages)], ['Instruments', arr(x.instruments)], ['Geographies', arr(x.invest_geographies)], ['Industries', arr(x.focus_industries)], ['Sectors', arr(x.focus_sectors)], ['Min revenue', x.min_revenue != null ? money(x.min_revenue, x.check_currency) : ''], ['Thesis', esc(x.current_mandate)]])}
       <div class="sx-sec">Funds</div>${arr(x.funds).length ? kv(arr(x.funds).map(f => [esc(f.name || 'Fund'), `${f.size ? money(f.size, f.currency) : ''}${f.vintage ? ' · ' + esc(f.vintage) : ''}${f.status ? ' · ' + esc(String(f.status).replace(/_/g, ' ')) : ''}${f.strategy ? ' · ' + esc(f.strategy) : ''}`])) : '<div class="sx-muted">No funds listed</div>'}`;
     $('sx-links').innerHTML = `${uid ? `<button class="btn btn-ghost btn-sm" onclick="closeModal('modal-sx');nav('users');setTimeout(()=>openUserModal('${uid}'),400)">Member profile</button>` : ''}${kind === 'r' ? `<button class="btn btn-ghost btn-sm" onclick="closeModal('modal-sx');window.matchForRaise&&matchForRaise('${id}')">Investor matches</button>` : ''}`;
     $('modal-sx').style.display = 'flex';
+  }
+  async function camp(status) {
+    const id = $('sx-id').value;
+    if (status === 'paid' && !confirm('Mark this campaign as PAID? Only do this if payment was received outside Stripe (bank transfer / Stripe invoice).')) return;
+    const p = { campaign_status: status };
+    if (status === 'paid') Object.assign(p, { campaign_paid_at: new Date().toISOString(), pipeline_stage: 'ready', next_action: 'Launch paid investor campaign', next_action_date: new Date(Date.now() + 2 * 864e5).toISOString().slice(0, 10) });
+    if (status === 'active') p.pipeline_stage = 'campaign';
+    try { await q(sb().from('deal_rooms').update(p).eq('id', id)); notify('Campaign updated'); closeModal('modal-sx'); render(); } catch (e) { notify(e.message, 'warn'); }
   }
   async function review(status) {
     const kind = $('sx-kind').value, id = $('sx-id').value, note = $('sx-note').value.trim();
@@ -123,7 +138,7 @@
 
   const prev = window.loadPanel;
   window.loadPanel = function (p) { if (p === 'os-submissions') { inject(); return render(); } return prev && prev(p); };
-  Object.assign(window, { sxTab: t => { X.tab = t; draw(); }, sxF: (k, v) => { X[k] = v; draw(); }, sxOpen: open, sxReview: review, __SX: X });
+  Object.assign(window, { sxTab: t => { X.tab = t; draw(); }, sxF: (k, v) => { X[k] = v; draw(); }, sxOpen: open, sxReview: review, sxCamp: camp, __SX: X });
 
   const MODAL = `<div id="modal-sx" class="modal-overlay" style="display:none;z-index:1050" onclick="if(event.target===this)closeModal('modal-sx')"><div class="modal modal-lg" style="max-width:860px">
     <div class="modal-header"><div><div class="modal-title" id="sx-h">Submission</div><div class="modal-sub" id="sx-sub"></div></div><button class="modal-close" onclick="closeModal('modal-sx')">✕</button></div>

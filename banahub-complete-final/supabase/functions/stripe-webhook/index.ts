@@ -37,8 +37,20 @@ async function onCheckoutCompleted(s: Stripe.Checkout.Session) {
       status: "completed", stripe_payment_intent_id: cid(s.payment_intent as string | Stripe.PaymentIntent | null),
       stripe_customer_id: cid(s.customer as string | Stripe.Customer | null), paid_at: new Date().toISOString(),
       payment_method: s.payment_method_types?.length === 1 ? s.payment_method_types[0] : null,
-      revenue_source: s.metadata?.item_type === "program" ? "programme" : s.metadata?.item_type === "sponsorship_package" ? "sponsorship" : s.metadata?.item_type || null,
+      revenue_source: s.metadata?.item_type === "capital_campaign" ? "advisory" : s.metadata?.item_type === "program" ? "programme" : s.metadata?.item_type === "sponsorship_package" ? "sponsorship" : s.metadata?.item_type || null,
     }).eq("stripe_session_id", s.id).neq("status", "completed");
+    if (s.metadata?.product_family === "capital_campaign" && s.metadata?.raise_id) {
+      const { data: r } = await db.from("deal_rooms").select("id, company_name, name, pipeline_stage, campaign_status").eq("id", s.metadata.raise_id).maybeSingle();
+      if (r && !["paid", "active", "completed"].includes(r.campaign_status || "")) {
+        await db.from("deal_rooms").update({
+          campaign_status: "paid", campaign_paid_at: new Date().toISOString(), campaign_session: s.id,
+          campaign_amount: (s.amount_total || 0) / 100, campaign_currency: (s.currency || "sgd").toUpperCase(),
+          ...(["new", "screening"].includes(r.pipeline_stage || "new") ? { pipeline_stage: "ready" } : {}),
+          next_action: "Launch paid investor campaign", next_action_date: new Date(Date.now() + 2 * 864e5).toISOString().slice(0, 10),
+        }).eq("id", r.id);
+        await task(`Paid campaign: launch investor outreach for ${r.company_name || r.name}`, 2, "high", "Member paid for the capital raise campaign. Run matching, get shortlist approved, start the campaign.");
+      }
+    }
   }
 }
 
@@ -74,7 +86,9 @@ Deno.serve(async (req) => {
       case "checkout.session.completed":
       case "checkout.session.async_payment_succeeded": await onCheckoutCompleted(o as Stripe.Checkout.Session); break;
       case "checkout.session.expired":
-        await db.from("transactions").update({ status: "failed" }).eq("stripe_session_id", (o as Stripe.Checkout.Session).id).eq("status", "pending"); break;
+        await db.from("transactions").update({ status: "failed" }).eq("stripe_session_id", (o as Stripe.Checkout.Session).id).eq("status", "pending");
+        await db.from("deal_rooms").update({ campaign_status: null }).eq("campaign_session", (o as Stripe.Checkout.Session).id).eq("campaign_status", "awaiting_payment");
+        break;
       case "customer.subscription.created":
       case "customer.subscription.updated": await syncSubscription(o as Stripe.Subscription); break;
       case "customer.subscription.deleted": {
