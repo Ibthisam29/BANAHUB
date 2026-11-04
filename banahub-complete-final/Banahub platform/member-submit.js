@@ -12,10 +12,10 @@
   async function q(p) { const r = await p; if (r.error) throw new Error(r.error.message); return r.data; }
   const money = (n, c) => n == null || n === '' ? '—' : `${c || 'USD'} ${Number(n).toLocaleString('en-SG', { maximumFractionDigits: 0 })}`;
 
-  const COMPANY_TYPES = ['Startup', 'Scale-up', 'SMB / SME', 'Corporate', 'Enterprise / MNC', 'Government / agency', 'Non-profit', 'Other company'];
+  const COMPANY_TYPES = ['Startup', 'Scale-up', 'SMB / SME', 'Corporate', 'Enterprise / MNC', 'Mining / resources company', 'Government / agency', 'Non-profit', 'Other company'];
   const INVESTOR_TYPES = [['Angel investor', 'Angel', null], ['Venture capital (VC)', 'VC', null], ['Corporate venture capital', 'VC', 'Corporate VC'], ['Private equity (PE)', 'Private Equity', null],
     ['Limited partner (LP)', 'LP', null], ['Single family office', 'Family Office', 'Single family office'], ['Multi-family office', 'Multi-Family Office', null], ['Fund manager', 'Other', 'Fund manager'],
-    ['Hedge fund', 'Hedge Fund', null], ['Fund of funds', 'Fund of Funds', null], ['Institutional investor', 'Other', 'Institutional'], ['Other investor', 'Other', null]];
+    ['Hedge fund', 'Hedge Fund', null], ['Resources / mining fund', 'Other', 'Resources / mining fund'], ['Fund of funds', 'Fund of Funds', null], ['Institutional investor', 'Other', 'Institutional'], ['Other investor', 'Other', null]];
   const STAGES = ['Pre-seed', 'Seed', 'Pre-Series A', 'Series A', 'Series B', 'Series C+', 'Growth', 'Pre-IPO', 'Debt'];
   const ROUNDS = ['Friends & family', 'Angel', 'Pre-seed', 'Seed', 'Pre-Series A', 'Series A', 'Series B', 'Series C+', 'Bridge', 'Grant', 'Venture debt', 'Other'];
   const INSTR = ['Equity', 'Preferred equity', 'Convertible note', 'SAFE', 'Venture debt', 'Revenue-based financing', 'Private credit', 'Secondary sale', 'Open to discuss'];

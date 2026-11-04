@@ -13,7 +13,7 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;}
 html{scroll-behavior:smooth;}
-body{font-family:'Manrope',system-ui,sans-serif;overflow:hidden;}
+body{font-family:'Manrope',system-ui,sans-serif;overflow-x:hidden;}
 .font-display{font-family:'Newsreader',Georgia,serif;}
 .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;vertical-align:middle;line-height:1;}
 
@@ -161,13 +161,20 @@ body.is-pending [data-members-only]{display:none!important}
 .btn-outline:hover{background:rgba(0,53,39,0.06);}
 
 /* ── Responsive ── */
-@media(max-width:768px){
+@media(max-width:900px){
   :root{--sidebar-w:0px;}
-  .sidebar{transform:translateX(-224px);transition:transform .2s;}
-  .sidebar.open{transform:translateX(0);width:224px;}
-  .mob-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.2);z-index:29;}
+  .sidebar{transform:translateX(-248px);transition:transform .2s;width:248px;overflow-y:auto;box-shadow:0 0 40px rgba(0,0,0,.15)}
+  .sidebar.open{transform:translateX(0);}
+  .mob-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.28);z-index:29;}
   .mob-overlay.open{display:block;}
+  #mob-toggle{display:flex!important;flex-shrink:0}
+  .topbar{padding:0 10px}
+  .topbar > div:nth-child(2){overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;min-width:0}
+  .topbar > div:nth-child(2)::-webkit-scrollbar{display:none}
+  .panel{padding:18px 14px 60px}
+  .ms-steps i{display:none}.ms-steps{flex-direction:column;align-items:stretch}
 }
+@media(max-width:600px){.sect{padding:16px}.ms-hero{padding:20px}.ms-hero h2{font-size:22px}}
 </style>
 </head>
 <body class="antialiased">
@@ -546,9 +553,9 @@ let _dashUser = null;
     loadOverviewStats();
 
     // Responsive toggle
-    if(window.innerWidth<768) document.getElementById('mob-toggle').style.display='flex';
+    if(window.innerWidth<=900) document.getElementById('mob-toggle').style.display='flex';
     window.addEventListener('resize',()=>{
-      document.getElementById('mob-toggle').style.display = window.innerWidth<768?'flex':'none';
+      document.getElementById('mob-toggle').style.display = window.innerWidth<=900?'flex':'none';
     });
 
   } catch(e) { window.location.href='login.html'; }
@@ -835,6 +842,6 @@ async function verifyLinkedIn(btn){
   else if(qs.get('verified')==='linkedin'){ setTimeout(()=>{ if(window.toast) toast('LinkedIn verified — thank you','success'); },1500); }
 }catch(_){}})();
 </script>
-<script src="member-submit.js?v=1.1.0"></script>
+<script src="member-submit.js?v=1.2.0"></script>
 </body>
 </html>

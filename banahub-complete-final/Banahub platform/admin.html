@@ -470,6 +470,40 @@ body::before {
 .mx-catpill{display:inline-block;font-size:11.5px;font-weight:700;border-radius:999px;padding:3px 10px;white-space:nowrap}
 .mx-sub{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600;color:#1d3d6b;background:#e6eef9;border-radius:6px;padding:2px 8px;margin:2px 4px 2px 0}
 .mx-sub .material-symbols-outlined{font-size:14px}
+
+/* ── Responsive (tablet & phone) ── */
+.main { height: calc(100dvh - var(--topbar-h)); -webkit-overflow-scrolling: touch; }
+.adm-backdrop { display: none; }
+@media (max-width: 900px) {
+  #mob-toggle { display: flex !important; flex-shrink: 0; }
+  .sidebar { box-shadow: 0 0 40px rgba(0,0,0,.18); overflow-y: auto; height: 100dvh; }
+  .sidebar.open ~ .adm-backdrop, .adm-backdrop.open { display: block; position: fixed; inset: 0; background: rgba(0,0,0,.28); z-index: 49; }
+  .topbar { padding: 0 12px; gap: 10px; }
+  .topbar > div:nth-child(2) { min-width: 0; flex: 1; }
+  .topbar-title { font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .topbar-sub { display: none; }
+  .topbar-search { width: 160px; }
+  .main { padding: 16px 14px 60px; }
+  .page-header { flex-wrap: wrap; gap: 10px; }
+  .settings-tabs, #u-tabs { overflow-x: auto; flex-wrap: nowrap; white-space: nowrap; scrollbar-width: none; }
+  .filter-bar { flex-wrap: wrap; }
+  .filter-bar > .f-input, .filter-bar > select, .filter-bar > input { max-width: 100% !important; flex: 1 1 160px; width: auto !important; }
+  .main .card { overflow-x: auto; }
+  .modal-overlay { padding: 8px; align-items: flex-end; }
+  .modal { max-height: 94dvh; border-radius: 16px 16px 10px 10px; }
+  .modal-footer { flex-wrap: wrap; position: sticky; bottom: 0; background: var(--bg-2); }
+  .modal-footer .btn { flex: 1 1 auto; }
+  .f-grid { grid-template-columns: 1fr !important; }
+  .mx-scroll, .sx-list { max-height: none; }
+}
+@media (max-width: 600px) {
+  .topbar-search { display: none; }
+  .topbar-right { gap: 6px; }
+  .os-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .mx-groups { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .page-title { font-size: 24px !important; }
+}
+.modal-footer { position: sticky; bottom: 0; background: var(--bg-2); z-index: 2; }
 </style>
 <link rel="stylesheet" href="brand-glass.css">
 <style>
@@ -647,6 +681,7 @@ body::before {
   </aside>
 
   <!-- ── TOPBAR ─────────────────────────────────────────── -->
+  <div class="adm-backdrop" id="adm-backdrop" onclick="document.getElementById('sidebar').classList.remove('open');this.classList.remove('open')"></div>
   <div class="topbar">
     <button onclick="toggleSidebar()" class="tb-btn" style="display:none" id="mob-toggle">
       <span class="material-symbols-outlined" style="font-size:20px">menu</span>
@@ -1944,7 +1979,7 @@ Sitemap: https://www.banahub.com/sitemap.xml</textarea></div>
 ════════════════════════════════════════════════════════════ -->
 <script src="config.js"></script>
 <script src="api.js"></script>
-<script src="admin-v3.js?v=3.9.0"></script>
+<script src="admin-v3.js?v=3.9.1"></script>
 <script>
 
 // ── State ────────────────────────────────────────────────────
@@ -2151,7 +2186,7 @@ function nav(panel) {
   });
 
   // Close mobile sidebar
-  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar').classList.remove('open'); { const b = document.getElementById('adm-backdrop'); if (b) b.classList.remove('open'); }
 
   loadPanel(panel);
 }
@@ -3331,7 +3366,7 @@ function setupMobileNav() {
   if (window.innerWidth <= 900) { btn.style.display = 'flex'; }
   window.addEventListener('resize', () => { btn.style.display = window.innerWidth <= 900 ? 'flex' : 'none'; });
 }
-function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+function toggleSidebar() { const o = document.getElementById('sidebar').classList.toggle('open'); const b = document.getElementById('adm-backdrop'); if (b) b.classList.toggle('open', o); }
 
 // ── Util ──────────────────────────────────────────────────────
 function esc(s) { return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
