@@ -148,6 +148,7 @@
           ${field('mc-val', 'Pre-money valuation', inp('mc-val', r.pre_money_valuation, 'type="number" min="0" step="any"'))}
           ${field('mc-close', 'Target close', inp('mc-close', r.close_date, 'type="date"'))}
           ${field('mc-deck', 'Pitch deck link', inp('mc-deck', r.deck_url, 'type="url" placeholder="https://…" maxlength="500"'), 'Shared only with the BANAHUB team')}</div>
+        ${deckBox('mc', 'raise', r, 'Pitch deck')}
         <div class="f-lab" style="margin-top:14px">Preferred investment *</div>${chips('instr', INSTR, instr)}
         <div class="ms-grid" style="margin-top:10px">${field('mc-primary', 'Most preferred', `<select id="mc-primary" class="f-in"></select>`)}
           ${field('mc-lead', 'Do you need a lead investor?', sel('mc-lead', [['no', 'No / already have one'], ['yes', 'Yes']], r.lead_needed ? 'yes' : 'no'))}</div>
@@ -182,6 +183,7 @@
     const target = num('mc-target'); if (!(target > 0)) return bad('Enter the amount you are raising.');
     const raised = num('mc-raised'); if (raised != null && raised > target * 3) return bad('Committed amount looks too high — please check.');
     const deck = val('mc-deck'); if (deck && !/^https:\/\//i.test(deck)) return bad('Pitch deck link must start with https://');
+    let deckF; try { deckF = deckFile('mc'); } catch (e) { return bad(e.message); }
     const rounds = [...document.querySelectorAll('#mc-rounds .ms-round')].map(el => { const g = k => el.querySelector(`[data-k=${k}]`).value.trim(); return { round: g('round'), amount: g('amount') === '' ? null : Number(g('amount')), currency: val('mc-cur'), date: g('date') ? g('date') + '-01' : null, lead: g('lead').slice(0, 120) || null }; });
     const preferred = prim && instr.includes(prim) ? [prim, ...instr.filter(x => x !== prim)] : instr;
     const nd = val('mc-next-date');
@@ -193,7 +195,9 @@
     const btn = $('mc-go'); btn.disabled = true;
     try {
       const sb = await sbc(), id = val('mc-id');
-      if (id) await q(sb.from('deal_rooms').update(p).eq('id', id)); else await q(sb.from('deal_rooms').insert(p));
+      let rid = id;
+      if (id) await q(sb.from('deal_rooms').update(p).eq('id', id)); else rid = (await q(sb.from('deal_rooms').insert(p).select('id').single())).id;
+      if (deckF) await uploadDeck('raise', rid, deckF, (S.raises.find(x => x.id === id) || {}).deck_path);
       await sb.from('users').update({ member_category: p.company_type, company_name: S.me.company_name || p.company_name }).eq('id', S.uid);
       S.editing = null; await load();
       const m = document.querySelector('#ms-root .ms-hero'); if (m) m.insertAdjacentHTML('afterend', '<div class="ms-ok">✓ Saved — free. BANAHUB will review your raise; once accepted you can start an investor campaign.</div>');
@@ -214,6 +218,7 @@
           ${field('mi-hq', 'HQ country', inp('mi-hq', i.hq_country, 'list="ms-geo" maxlength="80"'))}
           ${field('mi-femail', 'Firm email', inp('mi-femail', i.firm_email, 'type="email" maxlength="200" placeholder="deals@fund.com"'))}
           ${field('mi-fphone', 'Firm phone', inp('mi-fphone', i.firm_phone, 'type="tel" maxlength="40" placeholder="+65 …"'))}
+          <div class="ms-f" style="grid-column:1/-1">${deckBox('mi', 'investor', i, 'Fund / pitch deck')}</div>
           ${field('mi-aum', 'Assets under management', inp('mi-aum', i.aum, 'type="number" min="0" step="any"'), 'Optional — shared only with BANAHUB')}
           ${field('mi-aumc', 'Currency', sel('mi-aumc', CUR, i.aum_currency || i.check_currency || 'USD'))}
           ${field('mi-appetite', 'Current appetite', sel('mi-appetite', [['', 'Select'], ['active', 'Actively deploying'], ['selective', 'Selective'], ['paused', 'Paused'], ['not_deploying', 'Not deploying']], i.appetite || ''))}</div></div>
@@ -270,6 +275,50 @@
       <div class="ms-f" style="justify-content:flex-end"><label class="ms-consent" style="align-items:center"><input type="radio" name="mi-primary" data-k="primary" ${x.primary ? 'checked' : ''}/> Main contact for BANAHUB</label></div></div>
       <button type="button" class="ms-x" onclick="this.parentNode.remove()" aria-label="Remove team member">✕ Remove</button></div>`;
   }
+  // ── pitch deck upload (private bucket `decks`, <uid>/…) ─────────────────
+  const DECK_EXT = { pdf: 'application/pdf', pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation', ppt: 'application/vnd.ms-powerpoint', key: 'application/vnd.apple.keynote' };
+  const kb = n => n >= 1048576 ? (n / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB';
+  function deckBox(pre, kind, rec, label) {
+    rec = rec || {};
+    const cur = rec.deck_path ? `<div class="ms-deck-cur"><span class="material-symbols-outlined">description</span><div><b>${esc(rec.deck_name || 'Pitch deck')}</b><div class="ms-sub">${rec.deck_size ? kb(rec.deck_size) + ' · ' : ''}uploaded ${rec.deck_uploaded_at ? new Date(rec.deck_uploaded_at).toLocaleDateString('en-SG', { day: 'numeric', month: 'short', year: 'numeric' }) : ''}</div></div>
+      <button type="button" class="btn-o" onclick="msDeckView('${esc(rec.deck_path)}')">View</button><button type="button" class="btn-o" onclick="msDeckRemove('${kind}','${rec.id}','${esc(rec.deck_path)}')">Remove</button></div>` : '';
+    return `<div class="ms-deck"><label class="f-lab" for="${pre}-file">${label} — upload</label>${cur}
+      <label class="ms-drop" for="${pre}-file"><span class="material-symbols-outlined">upload_file</span><span id="${pre}-file-lbl">${rec.deck_path ? 'Replace with a new file' : 'Choose a file'} — PDF, PowerPoint or Keynote, max 25 MB</span></label>
+      <input type="file" id="${pre}-file" accept=".pdf,.ppt,.pptx,.key,application/pdf,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.ms-powerpoint" hidden onchange="msDeckPick('${pre}')"/>
+      <div class="ms-sub">Private — visible only to you and the BANAHUB team. Uploads when you save.</div></div>`;
+  }
+  function deckFile(pre) {
+    const f = $(pre + '-file') && $(pre + '-file').files[0]; if (!f) return null;
+    const ext = (f.name.split('.').pop() || '').toLowerCase();
+    if (!DECK_EXT[ext]) throw new Error('Deck must be a PDF, PowerPoint (.ppt/.pptx) or Keynote (.key) file.');
+    if (f.size > 25 * 1048576) throw new Error('Deck is larger than 25 MB — please compress it or upload a PDF.');
+    return f;
+  }
+  async function uploadDeck(kind, id, f, oldPath) {
+    const sb = await sbc(), ext = f.name.split('.').pop().toLowerCase();
+    const path = `${S.uid}/${kind}-${id}-${Date.now()}.${ext}`;
+    const up = await sb.storage.from('decks').upload(path, f, { contentType: DECK_EXT[ext], upsert: false, cacheControl: '3600' });
+    if (up.error) throw new Error('Deck upload failed: ' + up.error.message);
+    const r = await sb.rpc('set_my_deck', { p_kind: kind, p_id: id, p_path: path, p_name: f.name.slice(0, 200), p_size: f.size });
+    if (r.error) { await sb.storage.from('decks').remove([path]); throw new Error(r.error.message); }
+    if (oldPath && oldPath !== path) await sb.storage.from('decks').remove([oldPath]);
+  }
+  async function deckView(path) {
+    const w = window.open('', '_blank');
+    try { const sb = await sbc(); const r = await sb.storage.from('decks').createSignedUrl(path, 300); if (r.error) throw new Error(r.error.message); if (w) w.location = r.data.signedUrl; else location.href = r.data.signedUrl; }
+    catch (e) { if (w) w.close(); alert('Could not open the deck: ' + e.message); }
+  }
+  async function deckRemove(kind, id, path) {
+    if (!confirm('Remove this deck?')) return;
+    try { const sb = await sbc(); const r = await sb.rpc('set_my_deck', { p_kind: kind, p_id: id, p_path: null, p_name: null, p_size: null }); if (r.error) throw new Error(r.error.message); await sb.storage.from('decks').remove([path]); await load(); }
+    catch (e) { alert(e.message); }
+  }
+  function deckPick(pre) {
+    const f = $(pre + '-file').files[0], l = $(pre + '-file-lbl'); if (!f || !l) return;
+    try { deckFile(pre); l.textContent = `✓ ${f.name} (${kb(f.size)}) — will upload when you save`; l.parentNode.classList.add('ok'); }
+    catch (e) { l.textContent = e.message; l.parentNode.classList.remove('ok'); $(pre + '-file').value = ''; }
+  }
+
   async function saveInvestor() {
     const msg = $('mi-msg'); msg.textContent = ''; msg.className = 'ms-msg';
     const bad = m => { msg.textContent = m; msg.classList.add('err'); msg.scrollIntoView({ behavior: 'smooth', block: 'center' }); };
@@ -281,6 +330,7 @@
     const port = [...document.querySelectorAll('#mi-port .ms-prow')].map(el => { const g = k => el.querySelector(`[data-k=${k}]`).value.trim(); return { name: g('name').slice(0, 160), sector: g('sector').slice(0, 120) || null, stage: g('stage') || null, year: g('year') === '' ? null : Number(g('year')), website: g('website').slice(0, 200) || null }; }).filter(x => x.name);
     const team = [...document.querySelectorAll('#mi-team .ms-team')].map(el => { const g = k => el.querySelector(`[data-k=${k}]`).value.trim(); return { name: g('name').slice(0, 120), role: g('role').slice(0, 120) || null, email: g('email').toLowerCase().slice(0, 200) || null, phone: g('phone').slice(0, 40) || null, linkedin: g('linkedin').slice(0, 300) || null, primary: el.querySelector('[data-k=primary]').checked }; }).filter(x => x.name);
     const emailOk = e => !e || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+    let deckF; try { deckF = deckFile('mi'); } catch (e) { return bad(e.message); }
     if (!emailOk(val('mi-femail'))) return bad('Check the firm email.');
     const badTeam = team.find(t => !emailOk(t.email)); if (badTeam) return bad(`Check the email for ${badTeam.name}.`);
     if (team.some(t => t.phone && !/^[+()\d\s.-]{6,40}$/.test(t.phone)) || (val('mi-fphone') && !/^[+()\d\s.-]{6,40}$/.test(val('mi-fphone')))) return bad('Phone numbers may contain digits, spaces, +, - and brackets only.');
@@ -294,17 +344,24 @@
     const btn = $('mi-go'); btn.disabled = true;
     try {
       const sb = await sbc();
-      if (S.investor && S.investor.id) await q(sb.from('investors').update(p).eq('id', S.investor.id)); else await q(sb.from('investors').insert(p));
+      let iid = S.investor && S.investor.id;
+      if (iid) await q(sb.from('investors').update(p).eq('id', iid)); else iid = (await q(sb.from('investors').insert(p).select('id').single())).id;
+      if (deckF) await uploadDeck('investor', iid, deckF, S.investor && S.investor.deck_path);
       await sb.from('users').update({ member_category: cat[0], company_name: S.me.company_name || p.organization }).eq('id', S.uid);
       await load();
       const m = document.querySelector('#ms-root .ms-hero'); if (m) m.insertAdjacentHTML('afterend', '<div class="ms-ok">✓ Saved — the BANAHUB team will review your profile.</div>');
     } catch (e) { bad(e.message); } finally { if ($('mi-go')) $('mi-go').disabled = false; }
   }
 
-  Object.assign(window, { msMode: m => { S.mode = m; render(); }, msEdit: id => { S.editing = id; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); }, msSaveCompany: saveCompany, msCampaign: startCampaign, msSaveInvestor: saveInvestor,
+  Object.assign(window, { msMode: m => { S.mode = m; render(); }, msEdit: id => { S.editing = id; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); }, msSaveCompany: saveCompany, msCampaign: startCampaign, msSaveInvestor: saveInvestor, msDeckView: deckView, msDeckRemove: deckRemove, msDeckPick: deckPick,
     msAddRound: () => $('mc-rounds').insertAdjacentHTML('beforeend', roundRow()), msAddFund: () => $('mi-funds').insertAdjacentHTML('beforeend', fundRow()), msAddPort: () => $('mi-port').insertAdjacentHTML('beforeend', portRow()), msAddTeam: () => $('mi-team').insertAdjacentHTML('beforeend', teamRow()), __MS: S });
 
   const CSS = `#panel-submit{max-width:1040px}
+  .ms-deck{margin-top:14px;display:flex;flex-direction:column;gap:8px}
+  .ms-drop{display:flex;align-items:center;gap:10px;border:1.5px dashed rgba(0,53,39,.28);border-radius:12px;padding:14px;cursor:pointer;color:#1b1c1a;background:#fafbf8;font-size:13.5px}
+  .ms-drop:hover{border-color:#003527;background:#f2f5f0}.ms-drop.ok{border-style:solid;border-color:#0a5c40;background:#e9f4ed;color:#0a5c40}
+  .ms-deck-cur{display:flex;align-items:center;gap:10px;flex-wrap:wrap;border:1px solid rgba(0,53,39,.14);border-radius:12px;padding:10px 12px;background:#fff}
+  .ms-deck-cur>div{flex:1;min-width:160px;word-break:break-word}.ms-deck-cur .material-symbols-outlined{color:#003527}
   .ms-hero{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;padding:26px 28px;border-radius:18px;margin-bottom:18px;color:#fff;background:linear-gradient(135deg,#003527 0%,#0b5a43 60%,#1f7a5c 100%);box-shadow:0 12px 32px rgba(0,53,39,.18)}
   .ms-hero h2{font-family:'Newsreader',Georgia,serif;font-size:26px;font-weight:600;line-height:1.2;margin:6px 0 8px}.ms-hero p{font-size:13.5px;line-height:1.6;color:rgba(255,255,255,.92);max-width:640px}
   .ms-eyebrow{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#b9e6cf}.ms-hero-ic{font-size:56px!important;color:rgba(255,255,255,.25)}
