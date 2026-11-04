@@ -272,7 +272,7 @@ window.fetch = async function(input, opts) {
     }
     if (memOne && (method === 'PATCH' || method === 'PUT')) {
       const patch = {};
-      ['role', 'status', 'blocked', 'blocked_reason', 'full_name', 'company_name', 'title', 'phone', 'country', 'linkedin_url', 'website', 'bio'].forEach(k => { if (k in body) patch[k] = body[k]; });
+      ['role', 'status', 'blocked', 'blocked_reason', 'full_name', 'company_name', 'title', 'phone', 'country', 'linkedin_url', 'website', 'bio', 'member_category'].forEach(k => { if (k in body) patch[k] = body[k]; });
       if ('blocked' in patch) patch.blocked_at = patch.blocked ? new Date().toISOString() : null;
       const { data, error } = await sb.from('users').update(patch).eq('id', memOne[1]).select().single();
       if (error) return _resp({ error: error.message }, 400);

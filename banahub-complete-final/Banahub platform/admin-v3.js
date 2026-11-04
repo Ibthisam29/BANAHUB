@@ -980,35 +980,63 @@ const PROVIDERS = { google: ['Google', '#4285F4'], linkedin_oidc: ['LinkedIn', '
 const provBadge = p => { const [l, c] = PROVIDERS[p] || PROVIDERS.email; return `<span style="font-size:11px;font-weight:600;color:${c};border:1px solid ${c}40;background:${c}10;border-radius:20px;padding:1px 8px">${l}</span>`; };
 const liBadge = u => u && u.linkedin_verified ? `<span title="LinkedIn verified${u.linkedin_name ? ' as ' + esc(u.linkedin_name) : ''}${u.linkedin_email && u.email && u.linkedin_email !== String(u.email).toLowerCase() ? ' — LinkedIn email differs: ' + esc(u.linkedin_email) : ''}" style="font-size:11px;font-weight:700;color:#0A66C2;border:1px solid #0A66C240;background:#0A66C210;border-radius:20px;padding:1px 8px;margin-left:4px">in ✓</span>${u.linkedin_email && u.email && u.linkedin_email !== String(u.email).toLowerCase() ? '<span title="LinkedIn email differs from account email" style="color:#b3261e;font-weight:700;margin-left:3px">!</span>' : ''}` : '';
 const U_STATUS_PILL = { approved: 'live', pending: 'pending', vetting: 'pending', rejected: 'rejected', blocked: 'rejected', invited: 'draft' };
-let users_db = [], uTab = 'pending';
+let users_db = [], uTab = 'pending', uGroup = 'all', uCat = '', u_subs = { raises: {}, inv: {} };
+const MX_INV = ['Angel investor', 'Venture capital (VC)', 'Corporate venture capital', 'Private equity (PE)', 'Limited partner (LP)', 'Single family office', 'Multi-family office', 'Fund manager', 'Hedge fund', 'Fund of funds', 'Institutional investor', 'Other investor'];
+const MX_CO = ['Startup', 'Scale-up', 'SMB / SME', 'Corporate', 'Enterprise / MNC', 'Government / agency', 'Non-profit', 'Other company'];
+const MX_OTHER = ['Advisor / consultant', 'Service provider', 'Partner / sponsor', 'Other'];
+const mxGroup = u => MX_INV.includes(u.member_category) || u.role === 'investor' ? 'investors' : MX_CO.includes(u.member_category) || ['founder', 'business'].includes(u.role) ? 'companies'
+  : u.role === 'admin' ? 'team' : ['advisor', 'partner', 'provider'].includes(u.role) || MX_OTHER.includes(u.member_category) ? 'others' : 'unassigned';
+const mxCat = u => u.member_category || ({ investor: 'Investor — type not set', founder: 'Company — type not set', business: 'Company — type not set', advisor: 'Advisor / consultant', partner: 'Partner / sponsor', provider: 'Service provider', admin: 'BANAHUB team' }[u.role]) || 'Not categorised';
+const MX_COL = { investors: ['#1d3d6b', '#e6eef9'], companies: ['#0a5c40', '#e3f1e8'], others: ['#5a3e7a', '#efe8f6'], team: ['#1b1c1a', '#ecebe7'], unassigned: ['#7a5000', '#fff4d6'] };
 async function loadUsers() {
   $('users-table').innerHTML = emptyRow('Loading…');
   const d = await api('/api/admin/users').catch(() => ({}));
   users_db = (d && d.users) || [];
+  try {
+    const sb = await window.getBanaSupabaseClient();
+    const [r, i] = await Promise.all([sb.from('deal_rooms').select('submitted_by,review_status').not('submitted_by', 'is', null), sb.from('investors').select('user_id,review_status').not('user_id', 'is', null)]);
+    u_subs = { raises: {}, inv: {} };
+    (r.data || []).forEach(x => { (u_subs.raises[x.submitted_by] = u_subs.raises[x.submitted_by] || []).push(x.review_status); });
+    (i.data || []).forEach(x => { u_subs.inv[x.user_id] = x.review_status || 'submitted'; });
+  } catch (e) {}
   renderUsers();
 }
 function renderUsers() {
+  const inTab = u => uTab === 'all' || (uTab === 'pending' ? ['pending', 'vetting'].includes(u.status) : u.status === uTab);
   const cnt = st => users_db.filter(u => st === 'pending' ? ['pending', 'vetting'].includes(u.status) : u.status === st).length;
   $('u-tabs').innerHTML = [['pending', `Pending approval (${cnt('pending')})`], ['approved', `Approved (${cnt('approved')})`], ['rejected', `Rejected (${cnt('rejected')})`], ['blocked', `Blocked (${cnt('blocked')})`], ['all', `All (${users_db.length})`]]
     .map(([k, l]) => `<button class="s-tab${uTab === k ? ' active' : ''}" onclick="uTab='${k}';renderUsers()">${l}</button>`).join('');
   setBadge('nb-users', cnt('pending'));
+  const base = users_db.filter(inTab);
+  const GROUPS = [['all', 'Everyone', 'groups'], ['investors', 'Investors', 'account_balance'], ['companies', 'Companies', 'apartment'], ['others', 'Advisors & partners', 'handshake'], ['unassigned', 'Not categorised', 'help'], ['team', 'BANAHUB team', 'shield_person']];
+  $('u-groups').innerHTML = GROUPS.map(([k, l, ic]) => { const n = k === 'all' ? base.length : base.filter(u => mxGroup(u) === k).length; if (k !== 'all' && !n && uGroup !== k) return '';
+    return `<button class="mx-group${uGroup === k ? ' on' : ''}" onclick="uGroup='${k}';uCat='';renderUsers()"><span class="material-symbols-outlined">${ic}</span><b>${n}</b><span>${l}</span></button>`; }).join('');
+  const inGroup = base.filter(u => uGroup === 'all' || mxGroup(u) === uGroup);
+  const cc = {}; inGroup.forEach(u => { const c = mxCat(u); cc[c] = (cc[c] || 0) + 1; });
+  const order = [...MX_INV, ...MX_CO, ...MX_OTHER];
+  const cats = Object.keys(cc).sort((a, b) => (order.includes(a) ? order.indexOf(a) : 90) - (order.includes(b) ? order.indexOf(b) : 90) || a.localeCompare(b));
+  $('u-cats').innerHTML = cats.length > 1 || uCat ? `<button class="mx-cat${!uCat ? ' on' : ''}" onclick="uCat='';renderUsers()">All types</button>` + cats.map(c => `<button class="mx-cat${uCat === c ? ' on' : ''}" onclick="uCat=${esc(JSON.stringify(c))};renderUsers()">${esc(c)} <b>${cc[c]}</b></button>`).join('') : '';
   const q = ($('u-search').value || '').toLowerCase(), r = $('u-role-f').value, pv = $('u-prov-f').value;
-  const rows = users_db.filter(u => (uTab === 'all' || (uTab === 'pending' ? ['pending', 'vetting'].includes(u.status) : u.status === uTab)) &&
-    (!r || u.role === r) && (!pv || (u.auth_provider || 'email') === pv) &&
-    (!q || [u.full_name, u.email, u.company_name, u.title, u.country].join(' ').toLowerCase().includes(q)));
+  const rows = inGroup.filter(u => (!uCat || mxCat(u) === uCat) && (!r || u.role === r) && (!pv || (u.auth_provider || 'email') === pv) &&
+    (!q || [u.full_name, u.email, u.company_name, u.title, u.country, u.member_category].join(' ').toLowerCase().includes(q)));
   $('u-count').textContent = `${rows.length} shown`;
-  $('users-table').innerHTML = rows.length ? `<table class="data-table"><thead><tr><th>Member</th><th>Signed up with</th><th>Company</th><th>Type</th><th>Status</th><th>Joined</th><th></th></tr></thead><tbody>
-    ${rows.map(u => `<tr style="cursor:pointer" onclick="openUserModal('${esc(u.id)}')">
-      <td><div style="display:flex;align-items:center;gap:10px">${u.avatar_url ? `<img src="${esc(u.avatar_url)}" alt="" style="width:28px;height:28px;border-radius:50%;object-fit:cover"/>` : `<div style="width:28px;height:28px;border-radius:50%;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">${esc(((u.full_name || u.email || '?')[0] || '?').toUpperCase())}</div>`}
-        <div><div style="font-weight:600;color:var(--ink)">${esc(u.full_name || '—')}</div><div style="font-size:11px;font-family:var(--font-mono);color:var(--white-muted)">${esc(u.email)}</div></div></div></td>
-      <td>${provBadge(u.auth_provider)}${liBadge(u)}</td>
-      <td style="font-size:12px">${esc(u.company_name || '—')}${u.title ? `<div style="color:var(--white-muted)">${esc(u.title)}</div>` : ''}</td>
-      <td style="font-size:12px;text-transform:capitalize">${esc(u.role || '—')}</td>
+  const subCell = u => { const rs = u_subs.raises[u.id] || [], iv = u_subs.inv[u.id]; const out = [];
+    if (rs.length) out.push(`<span class="mx-sub" title="Company raise submissions"><span class="material-symbols-outlined">rocket_launch</span>${rs.length} raise${rs.length > 1 ? 's' : ''}${rs.some(x => x === 'submitted') ? ' · new' : ''}</span>`);
+    if (iv) out.push(`<span class="mx-sub" title="Investor profile submitted"><span class="material-symbols-outlined">account_balance</span>investor profile${iv === 'submitted' ? ' · new' : ''}</span>`);
+    return out.join('') || '<span style="color:var(--white-muted)">—</span>'; };
+  $('users-table').innerHTML = rows.length ? `<table class="data-table mx-table"><thead><tr><th>Member</th><th>Category</th><th>Company</th><th>Submissions</th><th>Status</th><th>Joined</th><th></th></tr></thead><tbody>
+    ${rows.map(u => { const g = mxGroup(u), col = MX_COL[g] || MX_COL.unassigned;
+      return `<tr onclick="openUserModal('${esc(u.id)}')">
+      <td><div style="display:flex;align-items:center;gap:12px">${u.avatar_url ? `<img src="${esc(u.avatar_url)}" alt="" class="mx-av"/>` : `<div class="mx-av mx-av-i" style="background:${col[1]};color:${col[0]}">${esc(((u.full_name || u.email || '?')[0] || '?').toUpperCase())}</div>`}
+        <div style="min-width:0"><div class="mx-name">${esc(u.full_name || '—')}${liBadge(u)}</div><div class="mx-mail">${esc(u.email)} · ${provBadge(u.auth_provider)}</div></div></div></td>
+      <td><span class="mx-catpill" style="color:${col[0]};background:${col[1]}">${esc(mxCat(u))}</span></td>
+      <td><div class="mx-co">${esc(u.company_name || '—')}</div><div class="mx-mail">${esc([u.title, u.country].filter(Boolean).join(' · '))}</div></td>
+      <td style="font-size:12px">${subCell(u)}</td>
       <td><span class="pill pill-${U_STATUS_PILL[u.status] || 'draft'}">${esc(u.status || '—')}</span></td>
-      <td style="font-size:12px;color:var(--white-muted)">${fmtD(u.created_at)}</td>
+      <td style="font-size:12px;color:var(--ink)">${fmtD(u.created_at)}</td>
       <td style="white-space:nowrap" onclick="event.stopPropagation()">${u.status !== 'approved' && u.role !== 'admin' ? `<button class="btn btn-approve btn-sm" onclick="quickApprove('${esc(u.id)}')">Approve</button>` : ''}
-        <button class="btn btn-ghost btn-sm" onclick="openUserModal('${esc(u.id)}')">Review</button></td></tr>`).join('')}</tbody></table>`
-    : emptyRow(uTab === 'pending' ? 'No sign-ups waiting for approval.' : 'No members in this view.');
+        <button class="btn btn-ghost btn-sm" onclick="openUserModal('${esc(u.id)}')">Review</button></td></tr>`; }).join('')}</tbody></table>`
+    : emptyRow(uTab === 'pending' ? 'No sign-ups waiting for approval in this view.' : 'No members in this view.');
 }
 async function quickApprove(id) {
   const r = await api(`/api/admin/members/${id}`, 'PATCH', { status: 'approved' });
@@ -1040,11 +1068,14 @@ async function openUserModal(id) {
       <span class="pill pill-${['approved', 'verified'].includes(k.status) ? 'live' : k.status === 'pending' ? 'pending' : 'rejected'}">${esc(k.status)}</span>
       <button class="btn btn-ghost btn-sm" onclick="viewKyc('${esc(k.id)}')">View</button></div>`).join('') : '<span style="color:var(--white-muted)">None uploaded</span>';
   $('u-status-edit').value = u.status || 'pending'; $('u-role-edit').value = u.role || 'applicant'; $('u-note').value = u.blocked_reason || '';
+  $('u-cat-edit').innerHTML = '<option value="">Not set</option>' + [['Investors', MX_INV], ['Companies', MX_CO], ['Others', MX_OTHER]].map(([g, l]) => `<optgroup label="${g}">${l.map(c => `<option ${c === u.member_category ? 'selected' : ''}>${esc(c)}</option>`).join('')}</optgroup>`).join('');
+  const rs = (u_subs.raises[u.id] || []).length, iv = u_subs.inv[u.id];
+  $('u-subs').innerHTML = rs || iv ? `<div class="f-label">Submissions</div>${rs ? `<div>${rs} company raise submission${rs > 1 ? 's' : ''}</div>` : ''}${iv ? '<div>Investor profile &amp; funds</div>' : ''}<button class="btn btn-ghost btn-sm" style="margin-top:6px" onclick="closeModal('modal-user');nav('os-submissions')">Open in Member Submissions</button>` : '';
   $('u-timeline').innerHTML = [`Joined ${new Date(u.created_at || Date.now()).toLocaleString()}`, u.approved_at && `Approved ${new Date(u.approved_at).toLocaleString()}`, u.updated_at && `Profile updated ${new Date(u.updated_at).toLocaleString()}`].filter(Boolean).join('<br/>');
 }
 async function saveUserEdit(force) {
   const id = $('u-id').value, status = force || $('u-status-edit').value;
-  const patch = { status, role: $('u-role-edit').value, blocked: status === 'blocked', blocked_reason: ['blocked', 'rejected'].includes(status) ? ($('u-note').value.trim() || null) : null };
+  const patch = { status, role: $('u-role-edit').value, member_category: $('u-cat-edit').value || null, blocked: status === 'blocked', blocked_reason: ['blocked', 'rejected'].includes(status) ? ($('u-note').value.trim() || null) : null };
   if (patch.role === 'admin' && !confirm('Grant FULL ADMIN access to this account?')) return;
   const r = await api(`/api/admin/members/${id}`, 'PATCH', patch);
   if (!r || r.error) { toast('Save failed: ' + ((r && r.error) || ''), 'warn'); return; }

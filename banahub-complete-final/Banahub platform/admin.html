@@ -32,8 +32,8 @@
   --gold:         #735c00;
   --gold-pale:    #ffffff;
   --white:        #1b1c1a;
-  --white-dim:    rgba(27,28,26,0.65);
-  --white-muted:  rgba(27,28,26,0.42);
+  --white-dim:    rgba(27,28,26,0.86);
+  --white-muted:  rgba(27,28,26,0.70);
   --white-ghost:  rgba(27,28,26,0.10);
   --ink:          #1b1c1a;
   --error:        #f04444;
@@ -366,9 +366,9 @@ body::before {
 .pill-live::before { background: var(--emerald); }
 .pill-draft   { background: var(--surface-2); color: var(--white-dim); }
 .pill-draft::before { background: var(--white-muted); }
-.pill-pending { background: rgba(197,160,40,.1); color: var(--gold-pale); }
+.pill-pending { background: rgba(197,160,40,.16); color: #7a5000; }
 .pill-pending::before { background: var(--gold); }
-.pill-rejected { background: rgba(240,68,68,.1); color: #fca5a5; }
+.pill-rejected { background: rgba(240,68,68,.12); color: #a01b1b; }
 .pill-rejected::before { background: var(--error); }
 
 /* ── Page header ── */
@@ -451,6 +451,25 @@ body::before {
 .fc-pill{display:inline-flex;align-items:center;gap:4px;background:rgba(10,92,64,.08);border:1px solid rgba(10,92,64,.2);color:var(--emerald-deep);border-radius:999px;padding:3px 6px 3px 10px;font:600 12px var(--font-ui);cursor:pointer}
 .fc-pill small{font-weight:500;color:var(--white-dim)}.fc-pill .material-symbols-outlined{font-size:14px}
 #inv-refine-btn.active{border-color:var(--emerald);color:var(--emerald)}
+
+/* Members (categorised) */
+.mx-groups{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:10px}
+.mx-group{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:var(--surface,#fff);cursor:pointer;text-align:left;color:var(--ink);transition:all .15s}
+.mx-group .material-symbols-outlined{font-size:20px;color:var(--emerald,#003527)}.mx-group b{font-size:22px;line-height:1.1}.mx-group span:last-child{font-size:12px;font-weight:600}
+.mx-group:hover{border-color:var(--ink)}.mx-group.on{background:var(--ink);color:#fff;border-color:var(--ink)}.mx-group.on .material-symbols-outlined{color:#fff}
+.mx-cats{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.mx-cat{border:1px solid var(--border);background:var(--surface,#fff);color:var(--ink);border-radius:999px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer}
+.mx-cat b{margin-left:4px;opacity:.75}.mx-cat.on{background:#003527;color:#fff;border-color:#003527}
+.mx-scroll{max-height:calc(100vh - 330px);min-height:320px;overflow:auto}
+.mx-scroll .data-table thead th{position:sticky;top:0;background:var(--surface,#fff);z-index:2;color:var(--ink)}
+.mx-table tbody tr{cursor:pointer;transition:background .12s}.mx-table tbody tr:hover{background:rgba(0,53,39,.04)}
+.mx-table td{color:var(--ink)!important;vertical-align:middle}
+.mx-av{width:38px;height:38px;border-radius:50%;object-fit:cover;flex-shrink:0}.mx-av-i{display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px}
+.mx-name{font-weight:700;color:var(--ink);font-size:14px}.mx-mail{font-size:11.5px;color:var(--white-dim);margin-top:2px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.mx-co{font-size:13px;font-weight:600;color:var(--ink)}
+.mx-catpill{display:inline-block;font-size:11.5px;font-weight:700;border-radius:999px;padding:3px 10px;white-space:nowrap}
+.mx-sub{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600;color:#1d3d6b;background:#e6eef9;border-radius:6px;padding:2px 8px;margin:2px 4px 2px 0}
+.mx-sub .material-symbols-outlined{font-size:14px}
 </style>
 <link rel="stylesheet" href="brand-glass.css">
 <style>
@@ -881,7 +900,8 @@ body::before {
         <select class="f-input f-select" style="width:150px" id="u-prov-f" onchange="renderUsers()"><option value="">Any sign-in</option><option value="email">Email</option><option value="google">Google</option><option value="linkedin_oidc">LinkedIn</option></select>
         <span id="u-count" style="font-size:12px;color:var(--white-muted);margin-left:auto"></span>
       </div>
-      <div class="card" style="overflow:auto"><div id="users-table"><div style="padding:32px;text-align:center;color:var(--white-muted)">Loading…</div></div></div>
+      <div id="u-groups" class="mx-groups"></div><div id="u-cats" class="mx-cats"></div>
+      <div class="card mx-scroll"><div id="users-table"><div style="padding:32px;text-align:center;color:var(--white-muted)">Loading…</div></div></div>
     </div>
 
     <!-- ════ APPLICATIONS ════════════════════════════════════ -->
@@ -1862,6 +1882,8 @@ Sitemap: https://www.banahub.com/sitemap.xml</textarea></div>
           <select id="u-status-edit" class="f-input f-select"><option value="pending">Pending review</option><option value="vetting">Vetting</option><option value="approved">Approved</option><option value="rejected">Rejected</option><option value="blocked">Blocked</option></select></div>
         <div class="f-group"><label class="f-label">Member type</label>
           <select id="u-role-edit" class="f-input f-select"><option value="applicant">Applicant</option><option value="member">Member</option><option value="founder">Founder</option><option value="business">Business</option><option value="investor">Investor</option><option value="advisor">Advisor</option><option value="partner">Partner</option><option value="provider">Provider</option><option value="admin">Admin</option></select></div>
+        <div class="f-group"><label class="f-label" for="u-cat-edit">Category</label><select id="u-cat-edit" class="f-input f-select"></select></div>
+        <div id="u-subs" style="font-size:12px"></div>
         <div class="f-group"><label class="f-label">Reason / note (blocked or rejected)</label><textarea id="u-note" class="f-input" rows="3" style="resize:vertical"></textarea></div>
         <button class="btn btn-ghost" onclick="memberToCrm()"><span class="material-symbols-outlined" style="font-size:15px">contacts</span>Add to CRM</button>
         <div id="u-timeline" style="font-size:11px;color:var(--white-muted);line-height:1.7"></div>
@@ -1922,7 +1944,7 @@ Sitemap: https://www.banahub.com/sitemap.xml</textarea></div>
 ════════════════════════════════════════════════════════════ -->
 <script src="config.js"></script>
 <script src="api.js"></script>
-<script src="admin-v3.js?v=3.8.0"></script>
+<script src="admin-v3.js?v=3.9.0"></script>
 <script>
 
 // ── State ────────────────────────────────────────────────────
@@ -3339,6 +3361,7 @@ document.addEventListener('keydown', e => {
 <script src="admin-payments.js?v=1.0.0"></script>
 <script src="admin-capital.js?v=1.1.0"></script>
 <script src="admin-fundraisers.js?v=1.0.0"></script>
+<script src="admin-submissions.js?v=1.0.0"></script>
 <script src="admin-match.js?v=1.2.0"></script>
 </body>
 </html>

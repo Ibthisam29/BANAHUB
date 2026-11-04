@@ -76,13 +76,13 @@ body::after{
   display:flex;align-items:center;gap:10px;
   padding:9px 12px;border-radius:10px;
   font-family:'Manrope',sans-serif;font-size:13px;font-weight:500;
-  color:rgba(27,28,26,0.55);cursor:pointer;
+  color:rgba(27,28,26,0.82);cursor:pointer;
   transition:all .15s;border:none;background:transparent;width:100%;text-align:left;
 }
 .nav-item:hover{background:rgba(0,53,39,0.06);color:#1b1c1a;}
 .nav-item.active{background:rgba(0,53,39,0.10);color:#003527;font-weight:600;}
 .nav-item.active .mat-ic{color:#003527;}
-.nav-item .mat-ic{font-size:17px;color:rgba(27,28,26,0.45);transition:color .15s;}
+.nav-item .mat-ic{font-size:17px;color:rgba(27,28,26,0.72);transition:color .15s;}
 .nav-item:hover .mat-ic,.nav-item.active .mat-ic{color:#003527;}
 
 /* ── Main content ── */
@@ -99,17 +99,17 @@ body::after{
 }
 .tab-btn{
   padding:8px 16px;font-family:'Manrope',sans-serif;font-size:13px;font-weight:500;
-  color:rgba(27,28,26,0.50);border:none;background:none;cursor:pointer;
+  color:rgba(27,28,26,0.82);border:none;background:none;cursor:pointer;
   border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;
 }
 .tab-btn.active{color:#003527;font-weight:700;border-bottom-color:#003527;}
 .tab-btn:hover:not(.active){color:#1b1c1a;}
 
 /* ── Profile / settings ── */
-.f-lab{display:block;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(27,28,26,0.45);margin-bottom:6px}
+.f-lab{display:block;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(27,28,26,0.72);margin-bottom:6px}
 .f-in{width:100%;border:1px solid rgba(0,53,39,0.15);border-radius:10px;padding:10px 12px;font:500 14px 'Manrope',sans-serif;color:#1b1c1a;background:rgba(255,255,255,0.75);outline:none;transition:border .15s}
 .f-in:focus{border-color:#003527;box-shadow:0 0 0 3px rgba(0,53,39,0.08)}
-.f-in[disabled]{background:rgba(27,28,26,0.04);color:rgba(27,28,26,0.5)}
+.f-in[disabled]{background:rgba(27,28,26,0.04);color:rgba(27,28,26,0.82)}
 .f-grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 @media(max-width:700px){.f-grid2{grid-template-columns:1fr}}
 .btn-p{background:#003527;color:#fff;border:none;border-radius:10px;padding:10px 18px;font:700 13px 'Manrope',sans-serif;cursor:pointer}
@@ -118,7 +118,7 @@ body::after{
 .btn-d{background:none;color:#ba1a1a;border:1px solid rgba(186,26,26,0.3);border-radius:10px;padding:9px 16px;font:700 13px 'Manrope',sans-serif;cursor:pointer}
 .sect{padding:22px;margin-bottom:18px}
 .sect h3{font-family:'Newsreader',Georgia,serif;font-size:19px;font-weight:600;color:#1b1c1a;margin-bottom:4px}
-.sect p.d{font-size:12px;color:rgba(27,28,26,0.5);margin-bottom:16px}
+.sect p.d{font-size:12px;color:rgba(27,28,26,0.82);margin-bottom:16px}
 .tgl{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid rgba(0,53,39,0.07);font-size:13px}
 .prov{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;border-radius:20px;padding:3px 10px;border:1px solid rgba(0,53,39,0.15)}
 body.is-pending [data-members-only]{display:none!important}
@@ -128,20 +128,20 @@ body.is-pending [data-members-only]{display:none!important}
 
 /* ── Glass stat card ── */
 .stat-card{padding:20px 22px;}
-.stat-card .label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(27,28,26,0.45);margin-bottom:8px;}
+.stat-card .label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(27,28,26,0.72);margin-bottom:8px;}
 .stat-card .value{font-family:'Newsreader',Georgia,serif;font-size:28px;font-weight:600;color:#1b1c1a;line-height:1;}
-.stat-card .sub{font-size:12px;color:rgba(27,28,26,0.45);margin-top:4px;}
+.stat-card .sub{font-size:12px;color:rgba(27,28,26,0.72);margin-top:4px;}
 
 /* ── Pills ── */
 .pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;}
 .pill-green{background:rgba(0,53,39,0.08);color:#003527;}
 .pill-amber{background:rgba(180,120,0,0.08);color:#7a5000;}
 .pill-red{background:rgba(186,26,26,0.08);color:#ba1a1a;}
-.pill-grey{background:rgba(27,28,26,0.06);color:rgba(27,28,26,0.55);}
+.pill-grey{background:rgba(27,28,26,0.06);color:rgba(27,28,26,0.82);}
 
 /* ── Table ── */
 .data-table{width:100%;border-collapse:collapse;font-size:13px;}
-.data-table th{padding:9px 12px;text-align:left;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:rgba(27,28,26,0.4);border-bottom:1px solid rgba(0,53,39,0.08);}
+.data-table th{padding:9px 12px;text-align:left;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:rgba(27,28,26,0.72);border-bottom:1px solid rgba(0,53,39,0.08);}
 .data-table td{padding:11px 12px;border-bottom:1px solid rgba(0,53,39,0.06);color:#1b1c1a;}
 .data-table tr:last-child td{border-bottom:none;}
 .data-table tr:hover td{background:rgba(0,53,39,0.02);}
@@ -185,7 +185,7 @@ body.is-pending [data-members-only]{display:none!important}
     <p style="font-family:'Newsreader',Georgia,serif;font-size:15px;font-weight:500;color:#1b1c1a;margin-top:6px;line-height:1.2">Member Portal</p>
   </div>
 
-  <div style="padding:12px 10px 0;font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:rgba(27,28,26,0.38);padding:16px 14px 6px">Overview</div>
+  <div style="padding:12px 10px 0;font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:rgba(27,28,26,0.72);padding:16px 14px 6px">Overview</div>
   <nav style="padding:0 10px;display:flex;flex-direction:column;gap:2px;flex:1">
     <button class="nav-item active" onclick="switchTab('overview',this)">
       <span class="mat-ic material-symbols-outlined">grid_view</span>Dashboard
@@ -200,7 +200,7 @@ body.is-pending [data-members-only]{display:none!important}
       <span class="mat-ic material-symbols-outlined">account_balance</span>Capital Flows
     </button>
     <div style="height:1px;background:rgba(0,53,39,0.07);margin:8px 4px"></div>
-    <div style="font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:rgba(27,28,26,0.38);padding:12px 4px 4px">Account</div>
+    <div style="font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:rgba(27,28,26,0.72);padding:12px 4px 4px">Account</div>
     <button class="nav-item" onclick="switchTab('profile',this)">
       <span class="mat-ic material-symbols-outlined">person</span>My Profile
     </button>
@@ -226,10 +226,10 @@ body.is-pending [data-members-only]{display:none!important}
       </div>
       <div style="min-width:0">
         <p id="sb-name" style="font-size:12px;font-weight:700;color:#1b1c1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Member</p>
-        <p id="sb-role" style="font-size:11px;color:rgba(27,28,26,0.45)">Loading…</p>
+        <p id="sb-role" style="font-size:11px;color:rgba(27,28,26,0.72)">Loading…</p>
       </div>
     </div>
-    <button onclick="signOut()" style="width:100%;display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;background:none;border:none;cursor:pointer;font-family:'Manrope',sans-serif;font-size:12px;color:rgba(27,28,26,0.50);transition:all .15s" onmouseover="this.style.background='rgba(0,53,39,0.05)';this.style.color='#1b1c1a'" onmouseout="this.style.background='none';this.style.color='rgba(27,28,26,0.50)'">
+    <button onclick="signOut()" style="width:100%;display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;background:none;border:none;cursor:pointer;font-family:'Manrope',sans-serif;font-size:12px;color:rgba(27,28,26,0.82);transition:all .15s" onmouseover="this.style.background='rgba(0,53,39,0.05)';this.style.color='#1b1c1a'" onmouseout="this.style.background='none';this.style.color='rgba(27,28,26,0.82)'">
       <span class="material-symbols-outlined" style="font-size:15px">logout</span>Sign Out
     </button>
   </div>
@@ -249,7 +249,7 @@ body.is-pending [data-members-only]{display:none!important}
     <button class="tab-btn" id="top-settings" onclick="switchTab('settings',null,'top-settings')">Settings</button>
   </div>
   <div style="display:flex;align-items:center;gap:10px">
-    <button onclick="switchTab(document.body.classList.contains('is-pending')?'profile':'compliance',null,document.body.classList.contains('is-pending')?'top-profile':'top-compliance')" style="position:relative;background:none;border:none;cursor:pointer;padding:6px;border-radius:8px;color:rgba(27,28,26,0.45);transition:all .15s" onmouseover="this.style.background='rgba(0,53,39,0.06)'" onmouseout="this.style.background='none'">
+    <button onclick="switchTab(document.body.classList.contains('is-pending')?'profile':'compliance',null,document.body.classList.contains('is-pending')?'top-profile':'top-compliance')" style="position:relative;background:none;border:none;cursor:pointer;padding:6px;border-radius:8px;color:rgba(27,28,26,0.72);transition:all .15s" onmouseover="this.style.background='rgba(0,53,39,0.06)'" onmouseout="this.style.background='none'">
       <span class="material-symbols-outlined" style="font-size:18px">notifications</span>
       <span id="notif-dot" style="display:none;position:absolute;top:4px;right:4px;width:7px;height:7px;background:#003527;border-radius:50%;border:2px solid white"></span>
     </button>
@@ -265,9 +265,9 @@ body.is-pending [data-members-only]{display:none!important}
   <!-- ════ OVERVIEW PANEL ════════════════════════════════════ -->
   <div class="panel active" id="panel-overview">
     <div style="margin-bottom:28px">
-      <p style="font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:rgba(27,28,26,0.40);margin-bottom:4px">Welcome back</p>
+      <p style="font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:rgba(27,28,26,0.72);margin-bottom:4px">Welcome back</p>
       <h1 id="dash-welcome" style="font-family:'Newsreader',Georgia,serif;font-size:34px;font-weight:600;color:#1b1c1a;line-height:1.15">Institutional Member</h1>
-      <p style="font-size:13px;color:rgba(27,28,26,0.50);margin-top:4px">Singapore HQ · BANAHUB Platform</p>
+      <p style="font-size:13px;color:rgba(27,28,26,0.82);margin-top:4px">Singapore HQ · BANAHUB Platform</p>
     </div>
 
     <!-- Status notice (shown if pending) -->
@@ -311,19 +311,19 @@ body.is-pending [data-members-only]{display:none!important}
       <div class="glass-card" data-members-only style="padding:20px;cursor:pointer" onclick="switchTab('memberships',null,'top-memberships')" role="button" tabindex="0">
         <span class="material-symbols-outlined" style="color:#003527;font-size:22px;margin-bottom:10px;display:block">verified</span>
         <p style="font-family:'Newsreader',Georgia,serif;font-size:18px;font-weight:600;color:#1b1c1a;margin-bottom:4px">Memberships</p>
-        <p style="font-size:12px;color:rgba(27,28,26,0.50)">Your plan, active cohorts, and upcoming programs</p>
+        <p style="font-size:12px;color:rgba(27,28,26,0.82)">Your plan, active cohorts, and upcoming programs</p>
         <div style="margin-top:12px;display:flex;align-items:center;gap:4px;font-size:12px;color:#003527;font-weight:600">View <span class="material-symbols-outlined" style="font-size:14px">arrow_forward</span></div>
       </div>
       <div class="glass-card" data-members-only style="padding:20px;cursor:pointer" onclick="switchTab('compliance',null,'top-compliance')" role="button" tabindex="0">
         <span class="material-symbols-outlined" style="color:#003527;font-size:22px;margin-bottom:10px;display:block">shield_check</span>
         <p style="font-family:'Newsreader',Georgia,serif;font-size:18px;font-weight:600;color:#1b1c1a;margin-bottom:4px">Compliance</p>
-        <p style="font-size:12px;color:rgba(27,28,26,0.50)">KYC documents and access request status</p>
+        <p style="font-size:12px;color:rgba(27,28,26,0.82)">KYC documents and access request status</p>
         <div style="margin-top:12px;display:flex;align-items:center;gap:4px;font-size:12px;color:#003527;font-weight:600">View <span class="material-symbols-outlined" style="font-size:14px">arrow_forward</span></div>
       </div>
       <div class="glass-card" data-members-only style="padding:20px;cursor:pointer" onclick="switchTab('capital',null,'top-capital')" role="button" tabindex="0">
         <span class="material-symbols-outlined" style="color:#003527;font-size:22px;margin-bottom:10px;display:block">account_balance</span>
         <p style="font-family:'Newsreader',Georgia,serif;font-size:18px;font-weight:600;color:#1b1c1a;margin-bottom:4px">Capital Flows</p>
-        <p style="font-size:12px;color:rgba(27,28,26,0.50)">Open deal mandates and upcoming events</p>
+        <p style="font-size:12px;color:rgba(27,28,26,0.82)">Open deal mandates and upcoming events</p>
         <div style="margin-top:12px;display:flex;align-items:center;gap:4px;font-size:12px;color:#003527;font-weight:600">View <span class="material-symbols-outlined" style="font-size:14px">arrow_forward</span></div>
       </div>
     </div>
@@ -333,16 +333,16 @@ body.is-pending [data-members-only]{display:none!important}
   <div class="panel" id="panel-memberships">
     <div style="margin-bottom:24px">
       <h2 style="font-family:'Newsreader',Georgia,serif;font-size:26px;font-weight:600;color:#1b1c1a">Memberships</h2>
-      <p style="font-size:13px;color:rgba(27,28,26,0.50);margin-top:2px">Your subscription plan and enrolled programs</p>
+      <p style="font-size:13px;color:rgba(27,28,26,0.82);margin-top:2px">Your subscription plan and enrolled programs</p>
     </div>
 
     <!-- Current plan -->
     <div class="glass-card" style="padding:22px;margin-bottom:20px" id="mem-plan-card">
       <div style="display:flex;align-items:start;justify-content:space-between;flex-wrap:wrap;gap:12px">
         <div>
-          <p style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(27,28,26,0.40);margin-bottom:6px">Current Plan</p>
+          <p style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(27,28,26,0.72);margin-bottom:6px">Current Plan</p>
           <p id="mem-plan-name" style="font-family:'Newsreader',Georgia,serif;font-size:22px;font-weight:600;color:#1b1c1a"><div class="skel" style="width:140px;height:26px"></div></p>
-          <p id="mem-plan-status" style="font-size:13px;color:rgba(27,28,26,0.50);margin-top:4px"></p>
+          <p id="mem-plan-status" style="font-size:13px;color:rgba(27,28,26,0.82);margin-top:4px"></p>
         </div>
         <div style="text-align:right">
           <a href="programs.html" class="btn-primary" style="text-decoration:none;display:inline-block">Explore Programs</a>
@@ -351,7 +351,7 @@ body.is-pending [data-members-only]{display:none!important}
     </div>
 
     <!-- Programs -->
-    <p style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(27,28,26,0.40);margin-bottom:12px">Available Programs &amp; Cohorts</p>
+    <p style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(27,28,26,0.72);margin-bottom:12px">Available Programs &amp; Cohorts</p>
     <div id="mem-programs" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px">
       <div class="glass-card" style="padding:18px"><div class="skel" style="height:16px;margin-bottom:8px"></div><div class="skel" style="height:12px;width:60%"></div></div>
       <div class="glass-card" style="padding:18px"><div class="skel" style="height:16px;margin-bottom:8px"></div><div class="skel" style="height:12px;width:60%"></div></div>
@@ -362,22 +362,22 @@ body.is-pending [data-members-only]{display:none!important}
   <div class="panel" id="panel-compliance">
     <div style="margin-bottom:24px">
       <h2 style="font-family:'Newsreader',Georgia,serif;font-size:26px;font-weight:600;color:#1b1c1a">Compliance</h2>
-      <p style="font-size:13px;color:rgba(27,28,26,0.50);margin-top:2px">KYC documents and access requests</p>
+      <p style="font-size:13px;color:rgba(27,28,26,0.82);margin-top:2px">KYC documents and access requests</p>
     </div>
 
     <!-- KYC -->
-    <p style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(27,28,26,0.40);margin-bottom:12px">KYC Documents</p>
+    <p style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(27,28,26,0.72);margin-bottom:12px">KYC Documents</p>
     <div class="glass-card" style="margin-bottom:20px">
       <div id="kyc-table" style="overflow-x:auto">
-        <div style="padding:48px;text-align:center;color:rgba(27,28,26,0.40)"><div class="skel" style="width:200px;height:14px;margin:0 auto"></div></div>
+        <div style="padding:48px;text-align:center;color:rgba(27,28,26,0.72)"><div class="skel" style="width:200px;height:14px;margin:0 auto"></div></div>
       </div>
     </div>
 
     <!-- Access requests -->
-    <p style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(27,28,26,0.40);margin-bottom:12px">Access Requests</p>
+    <p style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(27,28,26,0.72);margin-bottom:12px">Access Requests</p>
     <div class="glass-card">
       <div id="access-table" style="overflow-x:auto">
-        <div style="padding:48px;text-align:center;color:rgba(27,28,26,0.40)"><div class="skel" style="width:200px;height:14px;margin:0 auto"></div></div>
+        <div style="padding:48px;text-align:center;color:rgba(27,28,26,0.72)"><div class="skel" style="width:200px;height:14px;margin:0 auto"></div></div>
       </div>
     </div>
   </div>
@@ -386,20 +386,20 @@ body.is-pending [data-members-only]{display:none!important}
   <div class="panel" id="panel-capital">
     <div style="margin-bottom:24px">
       <h2 style="font-family:'Newsreader',Georgia,serif;font-size:26px;font-weight:600;color:#1b1c1a">Capital Flows</h2>
-      <p style="font-size:13px;color:rgba(27,28,26,0.50);margin-top:2px">Open deal mandates and upcoming events with capital access</p>
+      <p style="font-size:13px;color:rgba(27,28,26,0.82);margin-top:2px">Open deal mandates and upcoming events with capital access</p>
     </div>
 
     <!-- Deal mandates -->
-    <p style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(27,28,26,0.40);margin-bottom:12px">Open Deal Mandates</p>
+    <p style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(27,28,26,0.72);margin-bottom:12px">Open Deal Mandates</p>
     <div id="cap-deals" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-bottom:24px">
       <div class="glass-card" style="padding:18px"><div class="skel" style="height:16px;margin-bottom:8px"></div><div class="skel" style="height:12px;width:60%"></div></div>
     </div>
 
     <!-- Events -->
-    <p style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(27,28,26,0.40);margin-bottom:12px">Upcoming Events</p>
+    <p style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(27,28,26,0.72);margin-bottom:12px">Upcoming Events</p>
     <div class="glass-card">
       <div id="cap-events" style="overflow-x:auto">
-        <div style="padding:32px;text-align:center;color:rgba(27,28,26,0.40)"><div class="skel" style="width:160px;height:14px;margin:0 auto"></div></div>
+        <div style="padding:32px;text-align:center;color:rgba(27,28,26,0.72)"><div class="skel" style="width:160px;height:14px;margin:0 auto"></div></div>
       </div>
     </div>
   </div>
@@ -407,13 +407,13 @@ body.is-pending [data-members-only]{display:none!important}
   <!-- ════ PROFILE PANEL ═══════════════════════════════════════ -->
   <div class="panel" id="panel-profile">
     <div style="margin-bottom:22px"><h2 style="font-family:'Newsreader',Georgia,serif;font-size:26px;font-weight:600;color:#1b1c1a">My Profile</h2>
-      <p style="font-size:13px;color:rgba(27,28,26,0.5)">This is what the BANAHUB team reviews when approving your membership and making introductions.</p></div>
+      <p style="font-size:13px;color:rgba(27,28,26,0.82)">This is what the BANAHUB team reviews when approving your membership and making introductions.</p></div>
     <form id="profile-form" onsubmit="saveProfile(event)">
       <div class="glass-card sect">
         <div style="display:flex;align-items:center;gap:18px;margin-bottom:20px">
           <div id="pf-avatar" style="width:72px;height:72px;border-radius:50%;background:rgba(0,53,39,0.08);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0"><span class="material-symbols-outlined" style="font-size:32px;color:#003527">person</span></div>
           <div><label class="btn-o" style="display:inline-block">Upload photo<input type="file" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="uploadAvatar(this.files[0])"/></label>
-            <p style="font-size:11px;color:rgba(27,28,26,0.45);margin-top:6px">PNG, JPG or WEBP · max 2 MB</p></div>
+            <p style="font-size:11px;color:rgba(27,28,26,0.72);margin-top:6px">PNG, JPG or WEBP · max 2 MB</p></div>
         </div>
         <div class="f-grid2">
           <div><label class="f-lab" for="pf-name">Full name *</label><input id="pf-name" class="f-in" required maxlength="200" autocomplete="name"/></div>
@@ -462,7 +462,7 @@ body.is-pending [data-members-only]{display:none!important}
     <div class="glass-card sect">
       <h3>Sessions &amp; data</h3><p class="d">Sign out of every device, or ask us to delete your account and data.</p>
       <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn-o" onclick="signOutEverywhere()">Sign out of all devices</button><button class="btn-d" onclick="requestDeletion()">Request account deletion</button></div>
-      <p id="del-msg" style="font-size:12px;margin-top:10px;color:rgba(27,28,26,0.6)"></p>
+      <p id="del-msg" style="font-size:12px;margin-top:10px;color:rgba(27,28,26,0.82)"></p>
     </div>
   </div>
 
@@ -529,7 +529,7 @@ let _dashUser = null;
     document.getElementById('sb-role').textContent = (user.role||'member').charAt(0).toUpperCase()+(user.role||'member').slice(1);
 
     if(user.blocked){
-      document.body.innerHTML='<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#faf9f5;font-family:Manrope,sans-serif"><div style="max-width:380px;text-align:center;padding:40px"><p style="font-size:40px;margin-bottom:16px">🔒</p><h2 style="font-family:Newsreader,Georgia,serif;font-size:24px;color:#1b1c1a;margin-bottom:8px">Account Suspended</h2><p style="font-size:14px;color:rgba(27,28,26,0.55)">This account has been suspended. Contact <a href="mailto:hello@banahub.com" style="color:#003527">hello@banahub.com</a> for assistance.</p></div></div>';
+      document.body.innerHTML='<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#faf9f5;font-family:Manrope,sans-serif"><div style="max-width:380px;text-align:center;padding:40px"><p style="font-size:40px;margin-bottom:16px">🔒</p><h2 style="font-family:Newsreader,Georgia,serif;font-size:24px;color:#1b1c1a;margin-bottom:8px">Account Suspended</h2><p style="font-size:14px;color:rgba(27,28,26,0.82)">This account has been suspended. Contact <a href="mailto:hello@banahub.com" style="color:#003527">hello@banahub.com</a> for assistance.</p></div></div>';
       return;
     }
 
@@ -594,16 +594,16 @@ async function loadMemberships() {
       <div class="glass-card" style="padding:18px">
         <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px">
           <span class="pill pill-${p.status==='active'?'green':p.status==='upcoming'?'amber':'grey'}">${esc(p.status||'draft')}</span>
-          <span style="font-size:11px;color:rgba(27,28,26,0.40)">${esc(p.type||'Program')}</span>
+          <span style="font-size:11px;color:rgba(27,28,26,0.72)">${esc(p.type||'Program')}</span>
         </div>
         <p style="font-family:'Newsreader',Georgia,serif;font-size:16px;font-weight:600;color:#1b1c1a;margin-bottom:4px">${esc(p.title)}</p>
-        <p style="font-size:12px;color:rgba(27,28,26,0.50);margin-bottom:10px">${esc(p.description?p.description.slice(0,90)+'…':'')}</p>
-        <p style="font-size:11px;color:rgba(27,28,26,0.40)">${fmtDate(p.start_date)}${p.end_date?' – '+fmtDate(p.end_date):''}</p>
+        <p style="font-size:12px;color:rgba(27,28,26,0.82);margin-bottom:10px">${esc(p.description?p.description.slice(0,90)+'…':'')}</p>
+        <p style="font-size:11px;color:rgba(27,28,26,0.72)">${fmtDate(p.start_date)}${p.end_date?' – '+fmtDate(p.end_date):''}</p>
         ${p.price_amount>0?`<a href="programs.html" class="btn-outline" style="display:inline-block;margin-top:12px;font-size:12px;text-decoration:none">Apply →</a>`:''}
       </div>`).join('')
-    : '<div style="padding:32px;text-align:center;color:rgba(27,28,26,0.40);font-size:13px">No programs published yet.</div>';
+    : '<div style="padding:32px;text-align:center;color:rgba(27,28,26,0.72);font-size:13px">No programs published yet.</div>';
   } catch(e) {
-    document.getElementById('mem-programs').innerHTML='<div style="padding:32px;text-align:center;color:rgba(27,28,26,0.40);font-size:13px">Could not load programs.</div>';
+    document.getElementById('mem-programs').innerHTML='<div style="padding:32px;text-align:center;color:rgba(27,28,26,0.72);font-size:13px">Could not load programs.</div>';
   }
 }
 
@@ -622,11 +622,11 @@ async function loadCompliance() {
           <tr>
             <td>${esc(k.document_type||'Document')}</td>
             <td><span class="pill pill-${k.status==='verified'?'green':k.status==='pending'?'amber':'red'}">${esc(k.status)}</span></td>
-            <td style="color:rgba(27,28,26,0.50)">${fmtDate(k.created_at)}</td>
+            <td style="color:rgba(27,28,26,0.82)">${fmtDate(k.created_at)}</td>
           </tr>`).join('')}
         </tbody>
       </table>`
-    : '<div style="padding:32px;text-align:center;font-size:13px;color:rgba(27,28,26,0.40)">No KYC documents submitted yet. Contact <a href="mailto:hello@banahub.com" style="color:#003527">hello@banahub.com</a> to begin your verification.</div>';
+    : '<div style="padding:32px;text-align:center;font-size:13px;color:rgba(27,28,26,0.72)">No KYC documents submitted yet. Contact <a href="mailto:hello@banahub.com" style="color:#003527">hello@banahub.com</a> to begin your verification.</div>';
 
     // Access requests
     const accRows = d.access_requests||[];
@@ -638,14 +638,14 @@ async function loadCompliance() {
           <tr>
             <td>${esc(r.target_label||r.target_type||'Access Request')}</td>
             <td><span class="pill pill-${r.status==='approved'?'green':r.status==='pending'?'amber':'red'}">${esc(r.status)}</span></td>
-            <td style="color:rgba(27,28,26,0.50)">${fmtDate(r.created_at)}</td>
-            <td style="color:rgba(27,28,26,0.50);font-size:12px">${esc(r.review_notes||'—')}</td>
+            <td style="color:rgba(27,28,26,0.82)">${fmtDate(r.created_at)}</td>
+            <td style="color:rgba(27,28,26,0.82);font-size:12px">${esc(r.review_notes||'—')}</td>
           </tr>`).join('')}
         </tbody>
       </table>`
-    : '<div style="padding:32px;text-align:center;font-size:13px;color:rgba(27,28,26,0.40)">No access requests on record.</div>';
+    : '<div style="padding:32px;text-align:center;font-size:13px;color:rgba(27,28,26,0.72)">No access requests on record.</div>';
   } catch(e) {
-    document.getElementById('kyc-table').innerHTML='<div style="padding:32px;text-align:center;font-size:13px;color:rgba(27,28,26,0.40)">Could not load compliance data.</div>';
+    document.getElementById('kyc-table').innerHTML='<div style="padding:32px;text-align:center;font-size:13px;color:rgba(27,28,26,0.72)">Could not load compliance data.</div>';
     document.getElementById('access-table').innerHTML='';
   }
 }
@@ -662,20 +662,20 @@ async function loadCapital() {
       <div class="glass-card" style="padding:18px">
         <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px">
           <span class="pill pill-green">Open</span>
-          <span style="font-size:11px;color:rgba(27,28,26,0.40);text-transform:capitalize">${esc(deal.investment_type||'Equity')}</span>
+          <span style="font-size:11px;color:rgba(27,28,26,0.72);text-transform:capitalize">${esc(deal.investment_type||'Equity')}</span>
         </div>
         <p style="font-family:'Newsreader',Georgia,serif;font-size:16px;font-weight:600;color:#1b1c1a;margin-bottom:2px">${esc(deal.name||deal.company_name||'Untitled Deal')}</p>
-        ${deal.company_name&&deal.name?`<p style="font-size:12px;color:rgba(27,28,26,0.60);margin-bottom:4px">${esc(deal.company_name)}</p>`:''}
-        <p style="font-size:12px;color:rgba(27,28,26,0.50);margin-bottom:8px">${esc((deal.sectors&&deal.sectors.length?deal.sectors.join(', '):deal.industry)||'—')} · ${esc((deal.stage||'').replace('-',' '))}${deal.geography?' · '+esc(deal.geography):''}</p>
-        ${deal.description?`<p style="font-size:12px;color:rgba(27,28,26,0.70);margin-bottom:8px;line-height:1.5">${esc(deal.description.slice(0,180))}${deal.description.length>180?'…':''}</p>`:''}
-        <p style="font-size:16px;font-weight:700;color:#003527">${fmtCurrency(deal.target_raise,deal.currency)} <span style="font-size:11px;font-weight:500;color:rgba(27,28,26,0.45)">target</span></p>
-        ${deal.target_raise&&deal.raised_amount?`<div style="height:6px;background:rgba(0,53,39,0.08);border-radius:3px;margin-top:6px;overflow:hidden"><div style="height:100%;width:${Math.min(100,Math.round(deal.raised_amount/deal.target_raise*100))}%;background:#003527"></div></div><p style="font-size:11px;color:rgba(27,28,26,0.50);margin-top:4px">${Math.min(100,Math.round(deal.raised_amount/deal.target_raise*100))}% committed</p>`:''}
-        <p style="font-size:11px;color:rgba(27,28,26,0.50);margin-top:6px">${deal.min_ticket?'Min ticket '+fmtCurrency(deal.min_ticket,deal.currency):''}${deal.min_ticket&&deal.close_date?' · ':''}${deal.close_date?'Closes '+fmtDate(deal.close_date):''}</p>
+        ${deal.company_name&&deal.name?`<p style="font-size:12px;color:rgba(27,28,26,0.82);margin-bottom:4px">${esc(deal.company_name)}</p>`:''}
+        <p style="font-size:12px;color:rgba(27,28,26,0.82);margin-bottom:8px">${esc((deal.sectors&&deal.sectors.length?deal.sectors.join(', '):deal.industry)||'—')} · ${esc((deal.stage||'').replace('-',' '))}${deal.geography?' · '+esc(deal.geography):''}</p>
+        ${deal.description?`<p style="font-size:12px;color:rgba(27,28,26,0.82);margin-bottom:8px;line-height:1.5">${esc(deal.description.slice(0,180))}${deal.description.length>180?'…':''}</p>`:''}
+        <p style="font-size:16px;font-weight:700;color:#003527">${fmtCurrency(deal.target_raise,deal.currency)} <span style="font-size:11px;font-weight:500;color:rgba(27,28,26,0.72)">target</span></p>
+        ${deal.target_raise&&deal.raised_amount?`<div style="height:6px;background:rgba(0,53,39,0.08);border-radius:3px;margin-top:6px;overflow:hidden"><div style="height:100%;width:${Math.min(100,Math.round(deal.raised_amount/deal.target_raise*100))}%;background:#003527"></div></div><p style="font-size:11px;color:rgba(27,28,26,0.82);margin-top:4px">${Math.min(100,Math.round(deal.raised_amount/deal.target_raise*100))}% committed</p>`:''}
+        <p style="font-size:11px;color:rgba(27,28,26,0.82);margin-top:6px">${deal.min_ticket?'Min ticket '+fmtCurrency(deal.min_ticket,deal.currency):''}${deal.min_ticket&&deal.close_date?' · ':''}${deal.close_date?'Closes '+fmtDate(deal.close_date):''}</p>
         <div style="margin-top:12px">
           <a href="mailto:hello@banahub.com?subject=${encodeURIComponent('Interest: '+deal.name)}" class="btn-outline" style="display:inline-block;font-size:12px;text-decoration:none">Express Interest →</a>
         </div>
       </div>`).join('')
-    : '<div style="padding:32px;text-align:center;font-size:13px;color:rgba(27,28,26,0.40);grid-column:1/-1">No open deal mandates at this time. Check back soon or contact <a href="mailto:hello@banahub.com" style="color:#003527">hello@banahub.com</a>.</div>';
+    : '<div style="padding:32px;text-align:center;font-size:13px;color:rgba(27,28,26,0.72);grid-column:1/-1">No open deal mandates at this time. Check back soon or contact <a href="mailto:hello@banahub.com" style="color:#003527">hello@banahub.com</a>.</div>';
 
     // Events
     const events = d.events||[];
@@ -686,16 +686,16 @@ async function loadCapital() {
         <tbody>${events.map(e=>`
           <tr>
             <td style="font-weight:600"><a href="${esc(e.page_url||('event.html?id='+e.id))}" style="color:#003527;text-decoration:none">${esc(e.title)}</a></td>
-            <td style="color:rgba(27,28,26,0.50)">${fmtDate(e.event_date)}</td>
-            <td style="color:rgba(27,28,26,0.50)">${esc(e.location||'TBD')}</td>
+            <td style="color:rgba(27,28,26,0.82)">${fmtDate(e.event_date)}</td>
+            <td style="color:rgba(27,28,26,0.82)">${esc(e.location||'TBD')}</td>
             <td>${e.price_amount>0?`${esc(e.currency||'SGD')} ${Number(e.price_amount).toLocaleString()}`:'<span class="pill pill-green">Free</span>'}</td>
-            <td>${e.luma_url?`<a href="${esc(e.luma_url)}" target="_blank" class="btn-primary" style="text-decoration:none;font-size:12px;padding:6px 14px">RSVP on Luma</a>`:e.registration_url?`<a href="${esc(e.registration_url)}" target="_blank" class="btn-outline" style="text-decoration:none;font-size:12px;padding:6px 14px">Register</a>`:'<span style="font-size:12px;color:rgba(27,28,26,0.40)">Invitation only</span>'}</td>
+            <td>${e.luma_url?`<a href="${esc(e.luma_url)}" target="_blank" class="btn-primary" style="text-decoration:none;font-size:12px;padding:6px 14px">RSVP on Luma</a>`:e.registration_url?`<a href="${esc(e.registration_url)}" target="_blank" class="btn-outline" style="text-decoration:none;font-size:12px;padding:6px 14px">Register</a>`:'<span style="font-size:12px;color:rgba(27,28,26,0.72)">Invitation only</span>'}</td>
           </tr>`).join('')}
         </tbody>
       </table>`
-    : '<div style="padding:32px;text-align:center;font-size:13px;color:rgba(27,28,26,0.40)">No upcoming events scheduled. <a href="events.html" style="color:#003527">View all events →</a></div>';
+    : '<div style="padding:32px;text-align:center;font-size:13px;color:rgba(27,28,26,0.72)">No upcoming events scheduled. <a href="events.html" style="color:#003527">View all events →</a></div>';
   } catch(e) {
-    document.getElementById('cap-deals').innerHTML='<div style="padding:32px;text-align:center;font-size:13px;color:rgba(27,28,26,0.40)">Could not load capital data.</div>';
+    document.getElementById('cap-deals').innerHTML='<div style="padding:32px;text-align:center;font-size:13px;color:rgba(27,28,26,0.72)">Could not load capital data.</div>';
   }
 }
 
@@ -749,7 +749,7 @@ async function loadProfile(quiet){
 async function saveProfile(e){
   e.preventDefault();
   const btn=document.getElementById('pf-save'), msg=document.getElementById('save-msg');
-  btn.disabled=true; msg.textContent='Saving…'; msg.style.color='rgba(27,28,26,0.5)';
+  btn.disabled=true; msg.textContent='Saving…'; msg.style.color='rgba(27,28,26,0.82)';
   const payload={ full_name:pfVal('pf-name'), title:pfVal('pf-title'), company_name:pfVal('pf-company'), phone:pfVal('pf-phone'), country:pfVal('pf-country'),
     linkedin_url:pfVal('pf-linkedin'), website:pfVal('pf-website'), bio:pfVal('pf-bio') };
   const role=document.getElementById('pf-role'); if(!role.disabled && role.value) payload.role=role.value;
@@ -835,5 +835,6 @@ async function verifyLinkedIn(btn){
   else if(qs.get('verified')==='linkedin'){ setTimeout(()=>{ if(window.toast) toast('LinkedIn verified — thank you','success'); },1500); }
 }catch(_){}})();
 </script>
+<script src="member-submit.js?v=1.0.0"></script>
 </body>
 </html>
