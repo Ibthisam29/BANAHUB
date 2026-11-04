@@ -211,6 +211,9 @@
         <div class="ms-grid">${field('mi-cat', 'Investor type *', `<select id="mi-cat" class="f-in"><option value="">Select</option>${INVESTOR_TYPES.map(t => `<option ${t[0] === cat ? 'selected' : ''}>${esc(t[0])}</option>`).join('')}</select>`)}
           ${field('mi-org', 'Organisation / fund manager *', inp('mi-org', i.organization || S.me.company_name, 'required maxlength="160"'))}
           ${field('mi-web', 'Website', inp('mi-web', i.website || S.me.website, 'maxlength="200" placeholder="fund.com"'))}
+          ${field('mi-hq', 'HQ country', inp('mi-hq', i.hq_country, 'list="ms-geo" maxlength="80"'))}
+          ${field('mi-femail', 'Firm email', inp('mi-femail', i.firm_email, 'type="email" maxlength="200" placeholder="deals@fund.com"'))}
+          ${field('mi-fphone', 'Firm phone', inp('mi-fphone', i.firm_phone, 'type="tel" maxlength="40" placeholder="+65 …"'))}
           ${field('mi-aum', 'Assets under management', inp('mi-aum', i.aum, 'type="number" min="0" step="any"'), 'Optional — shared only with BANAHUB')}
           ${field('mi-aumc', 'Currency', sel('mi-aumc', CUR, i.aum_currency || i.check_currency || 'USD'))}
           ${field('mi-appetite', 'Current appetite', sel('mi-appetite', [['', 'Select'], ['active', 'Actively deploying'], ['selective', 'Selective'], ['paused', 'Paused'], ['not_deploying', 'Not deploying']], i.appetite || ''))}</div></div>
@@ -228,7 +231,13 @@
         ${field('mi-thesis', 'Investment thesis / current mandate', `<textarea id="mi-thesis" class="f-in" rows="3" maxlength="1500" placeholder="What you invest in and why; what you are looking for right now">${esc(i.current_mandate || '')}</textarea>`)}</div>
       <div class="glass-card sect"><div class="ms-step">3</div><h3>Funds</h3><p class="d">Funds or vehicles you're investing from (optional).</p>
         <div id="mi-funds">${arr(i.funds).map(fundRow).join('')}</div><button type="button" class="btn-o" onclick="msAddFund()">+ Add a fund</button></div>
-      <div class="ms-submit"><label class="ms-consent"><input type="checkbox" id="mi-consent" required/> I confirm the information is accurate. BANAHUB does not provide investment advice; any introduction is at my discretion.</label>
+      <div class="glass-card sect"><div class="ms-step">4</div><h3>Portfolio companies</h3><p class="d">Companies you've invested in (optional). Helps us avoid conflicts and find relevant co-investors.</p>
+        <div class="ms-ptable"><div class="ms-prow ms-phead"><span>Company</span><span>Sector</span><span>Stage invested</span><span>Year</span><span>Website</span><span></span></div>
+        <div id="mi-port">${arr(i.portfolio_companies).map(portRow).join('')}</div></div><button type="button" class="btn-o" onclick="msAddPort()">+ Add a portfolio company</button></div>
+      <div class="glass-card sect"><div class="ms-step">5</div><h3>Key people &amp; team</h3><p class="d">Partners, fund managers and investment team. Contact details are shared only with the BANAHUB team — never published.</p>
+        <div id="mi-team">${(arr(i.team).length ? arr(i.team) : [{ name: S.me.full_name, email: S.me.email, primary: true }]).map(teamRow).join('')}</div><button type="button" class="btn-o" onclick="msAddTeam()">+ Add a team member</button></div>
+      <datalist id="ms-geo">${GEOS.map(g => `<option>${esc(g)}</option>`).join('')}</datalist>
+      <div class="ms-submit"><label class="ms-consent"><input type="checkbox" id="mi-consent" required/> I confirm the information is accurate and that the people listed agreed to their contact details being shared with BANAHUB. BANAHUB does not provide investment advice; any introduction is at my discretion.</label>
         <button class="btn-p" id="mi-go" type="submit">${i.id ? 'Save changes' : 'Save my investor profile'}</button></div>
       <div id="mi-msg" class="ms-msg"></div></form>`;
   }
@@ -237,8 +246,29 @@
     return `<div class="ms-fund"><div class="ms-grid">${['name|Fund name|text', 'size|Fund size|number', 'vintage|Vintage year|number'].map(s => { const [k, l, t] = s.split('|'); return `<div class="ms-f"><label class="f-lab">${l}</label><input class="f-in" data-k="${k}" type="${t}" value="${esc(f[k] == null ? '' : f[k])}" ${t === 'number' ? 'min="0" step="any"' : 'maxlength="120"'}/></div>`; }).join('')}
       <div class="ms-f"><label class="f-lab">Currency</label><select class="f-in" data-k="currency">${opt(CUR, f.currency || 'USD')}</select></div>
       <div class="ms-f"><label class="f-lab">Status</label><select class="f-in" data-k="status">${opt([['raising', 'Raising'], ['deploying', 'Deploying'], ['fully_deployed', 'Fully deployed'], ['harvesting', 'Harvesting']], f.status || 'deploying')}</select></div>
-      <div class="ms-f"><label class="f-lab">Strategy</label><input class="f-in" data-k="strategy" value="${esc(f.strategy || '')}" maxlength="200" placeholder="e.g. Seed–Series A B2B SaaS, SEA"/></div></div>
+      <div class="ms-f"><label class="f-lab">Strategy</label><input class="f-in" data-k="strategy" value="${esc(f.strategy || '')}" maxlength="200" placeholder="e.g. Seed–Series A B2B SaaS, SEA"/></div>
+      <div class="ms-f"><label class="f-lab">Fund manager</label><input class="f-in" data-k="manager" value="${esc(f.manager || '')}" maxlength="160" placeholder="Firm or person managing the fund"/></div>
+      <div class="ms-f"><label class="f-lab">Ticket range for this fund</label><input class="f-in" data-k="tickets" value="${esc(f.tickets || '')}" maxlength="80" placeholder="e.g. USD 250k–2M"/></div>
+      <div class="ms-f"><label class="f-lab">Investments made</label><input class="f-in" data-k="investments" type="number" min="0" value="${esc(f.investments == null ? '' : f.investments)}"/></div></div>
       <button type="button" class="ms-x" onclick="this.parentNode.remove()" aria-label="Remove fund">✕ Remove fund</button></div>`;
+  }
+  function portRow(x) {
+    x = x || {};
+    return `<div class="ms-prow"><input class="f-in" data-k="name" placeholder="Company" maxlength="160" value="${esc(x.name || '')}" aria-label="Company"/><input class="f-in" data-k="sector" placeholder="e.g. Fintech" maxlength="120" value="${esc(x.sector || '')}" aria-label="Sector"/>
+      <select class="f-in" data-k="stage" aria-label="Stage invested">${opt(['', ...STAGES], x.stage || '')}</select><input class="f-in" data-k="year" type="number" min="1950" max="2100" placeholder="Year" value="${esc(x.year == null ? '' : x.year)}" aria-label="Year"/>
+      <input class="f-in" data-k="website" placeholder="company.com" maxlength="200" value="${esc(x.website || '')}" aria-label="Website"/><button type="button" class="ms-x" onclick="this.parentNode.remove()" aria-label="Remove company">✕</button></div>`;
+  }
+  function teamRow(x) {
+    x = x || {};
+    const ROLES = ['Managing Partner', 'General Partner', 'Partner', 'Fund Manager', 'Portfolio Manager', 'Principal', 'Investment Director', 'Investment Manager', 'Associate', 'Analyst', 'CIO', 'CEO / Founder', 'Head of Family Office', 'Investor Relations', 'Operations'];
+    return `<div class="ms-team"><div class="ms-grid">
+      <div class="ms-f"><label class="f-lab">Name</label><input class="f-in" data-k="name" maxlength="120" value="${esc(x.name || '')}"/></div>
+      <div class="ms-f"><label class="f-lab">Role / title</label><input class="f-in" data-k="role" list="ms-roles" maxlength="120" value="${esc(x.role || '')}" placeholder="e.g. Fund Manager"/><datalist id="ms-roles">${ROLES.map(r => `<option>${r}</option>`).join('')}</datalist></div>
+      <div class="ms-f"><label class="f-lab">Email</label><input class="f-in" data-k="email" type="email" maxlength="200" value="${esc(x.email || '')}"/></div>
+      <div class="ms-f"><label class="f-lab">Phone / mobile</label><input class="f-in" data-k="phone" type="tel" maxlength="40" value="${esc(x.phone || '')}" placeholder="+65 …"/></div>
+      <div class="ms-f"><label class="f-lab">LinkedIn</label><input class="f-in" data-k="linkedin" maxlength="300" value="${esc(x.linkedin || '')}" placeholder="linkedin.com/in/…"/></div>
+      <div class="ms-f" style="justify-content:flex-end"><label class="ms-consent" style="align-items:center"><input type="radio" name="mi-primary" data-k="primary" ${x.primary ? 'checked' : ''}/> Main contact for BANAHUB</label></div></div>
+      <button type="button" class="ms-x" onclick="this.parentNode.remove()" aria-label="Remove team member">✕ Remove</button></div>`;
   }
   async function saveInvestor() {
     const msg = $('mi-msg'); msg.textContent = ''; msg.className = 'ms-msg';
@@ -247,11 +277,19 @@
     if (!cat) return bad('Choose your investor type.');
     if (!val('mi-org')) return bad('Enter your organisation.');
     const mn = num('mi-min'), mx = num('mi-max'); if (mn != null && mx != null && mn > mx) return bad('Minimum ticket is larger than maximum.');
-    const funds = [...document.querySelectorAll('#mi-funds .ms-fund')].map(el => { const g = k => el.querySelector(`[data-k=${k}]`).value.trim(); return { name: g('name'), size: g('size') === '' ? null : Number(g('size')), currency: g('currency'), vintage: g('vintage') === '' ? null : Number(g('vintage')), status: g('status'), strategy: g('strategy') || null }; }).filter(f => f.name || f.size);
+    const funds = [...document.querySelectorAll('#mi-funds .ms-fund')].map(el => { const g = k => el.querySelector(`[data-k=${k}]`).value.trim(); return { name: g('name'), size: g('size') === '' ? null : Number(g('size')), currency: g('currency'), vintage: g('vintage') === '' ? null : Number(g('vintage')), status: g('status'), strategy: g('strategy') || null, manager: g('manager') || null, tickets: g('tickets') || null, investments: g('investments') === '' ? null : Number(g('investments')) }; }).filter(f => f.name || f.size);
+    const port = [...document.querySelectorAll('#mi-port .ms-prow')].map(el => { const g = k => el.querySelector(`[data-k=${k}]`).value.trim(); return { name: g('name').slice(0, 160), sector: g('sector').slice(0, 120) || null, stage: g('stage') || null, year: g('year') === '' ? null : Number(g('year')), website: g('website').slice(0, 200) || null }; }).filter(x => x.name);
+    const team = [...document.querySelectorAll('#mi-team .ms-team')].map(el => { const g = k => el.querySelector(`[data-k=${k}]`).value.trim(); return { name: g('name').slice(0, 120), role: g('role').slice(0, 120) || null, email: g('email').toLowerCase().slice(0, 200) || null, phone: g('phone').slice(0, 40) || null, linkedin: g('linkedin').slice(0, 300) || null, primary: el.querySelector('[data-k=primary]').checked }; }).filter(x => x.name);
+    const emailOk = e => !e || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+    if (!emailOk(val('mi-femail'))) return bad('Check the firm email.');
+    const badTeam = team.find(t => !emailOk(t.email)); if (badTeam) return bad(`Check the email for ${badTeam.name}.`);
+    if (team.some(t => t.phone && !/^[+()\d\s.-]{6,40}$/.test(t.phone)) || (val('mi-fphone') && !/^[+()\d\s.-]{6,40}$/.test(val('mi-fphone')))) return bad('Phone numbers may contain digits, spaces, +, - and brackets only.');
+    if (team.length && !team.some(t => t.primary)) team[0].primary = true;
     const p = { user_id: S.uid, full_name: S.me.full_name || null, email: S.me.email, organization: val('mi-org'), website: val('mi-web') || null, investor_type: cat[1], investor_subtype: cat[2],
       aum: num('mi-aum'), aum_currency: val('mi-aumc'), appetite: val('mi-appetite') || null, check_min: mn, check_max: mx, check_currency: val('mi-cur'), lead_follow: val('mi-lead') || null, min_revenue: num('mi-rev'),
       co_invest: val('mi-co') || null, preferred_stages: chipVals('istages'), instruments: chipVals('iinstr'), invest_geographies: chipVals('igeo'), geography: chipVals('igeo').join(', ') || null,
-      focus_sectors: chipVals('isectors'), current_mandate: val('mi-thesis') || null, funds,
+      focus_sectors: chipVals('isectors'), current_mandate: val('mi-thesis') || null, funds, portfolio_companies: port, portfolio: port.map(x => x.name), team,
+      hq_country: val('mi-hq') || null, firm_email: val('mi-femail').toLowerCase() || null, firm_phone: val('mi-fphone') || null,
       check_size: mn != null || mx != null ? `${val('mi-cur')} ${mn != null ? Number(mn).toLocaleString() : '?'}–${mx != null ? Number(mx).toLocaleString() : '?'}` : null };
     const btn = $('mi-go'); btn.disabled = true;
     try {
@@ -264,7 +302,7 @@
   }
 
   Object.assign(window, { msMode: m => { S.mode = m; render(); }, msEdit: id => { S.editing = id; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); }, msSaveCompany: saveCompany, msCampaign: startCampaign, msSaveInvestor: saveInvestor,
-    msAddRound: () => $('mc-rounds').insertAdjacentHTML('beforeend', roundRow()), msAddFund: () => $('mi-funds').insertAdjacentHTML('beforeend', fundRow()), __MS: S });
+    msAddRound: () => $('mc-rounds').insertAdjacentHTML('beforeend', roundRow()), msAddFund: () => $('mi-funds').insertAdjacentHTML('beforeend', fundRow()), msAddPort: () => $('mi-port').insertAdjacentHTML('beforeend', portRow()), msAddTeam: () => $('mi-team').insertAdjacentHTML('beforeend', teamRow()), __MS: S });
 
   const CSS = `#panel-submit{max-width:1040px}
   .ms-hero{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;padding:26px 28px;border-radius:18px;margin-bottom:18px;color:#fff;background:linear-gradient(135deg,#003527 0%,#0b5a43 60%,#1f7a5c 100%);box-shadow:0 12px 32px rgba(0,53,39,.18)}
@@ -281,6 +319,9 @@
   .ms-chip:hover{border-color:#003527}.ms-chip.on{background:#003527;color:#fff;border-color:#003527}
   .ms-secs{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-bottom:12px}.ms-ind{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#003527;margin-bottom:6px}
   .ms-round{display:grid;grid-template-columns:160px 140px 150px minmax(0,1fr) 36px;gap:8px;margin-bottom:8px}@media(max-width:700px){.ms-round{grid-template-columns:1fr 1fr}}
+  .ms-ptable{overflow-x:auto;margin-bottom:8px}.ms-prow{display:grid;grid-template-columns:minmax(150px,1.4fr) minmax(120px,1fr) 140px 90px minmax(130px,1fr) 36px;gap:8px;margin-bottom:8px;min-width:720px}
+  .ms-phead span{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#1b1c1a}
+  .ms-team{border:1px solid rgba(0,53,39,.12);border-radius:12px;padding:12px 14px;margin-bottom:10px;background:rgba(255,255,255,.6)}
   .ms-fund{border:1px solid rgba(0,53,39,.12);border-radius:12px;padding:12px 14px;margin-bottom:10px;background:rgba(255,255,255,.6)}
   .ms-x{border:1px solid rgba(186,26,26,.3);color:#ba1a1a;background:#fff;border-radius:8px;padding:6px 10px;font:700 12px 'Manrope',sans-serif;cursor:pointer;margin-top:6px}
   .ms-submit{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:18px 22px;border-radius:14px;background:#fff;border:1px solid rgba(0,53,39,.12);position:sticky;bottom:12px;box-shadow:0 8px 24px rgba(0,53,39,.10)}
