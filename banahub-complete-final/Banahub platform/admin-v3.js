@@ -584,7 +584,7 @@ async function loadCapital() {
     ['Total target (open)', Object.keys(tgt).map(k => money(tgt[k], k)).join(' · ') || '—'], ['Drafts', cap.raises.filter(r => r.status === 'draft').length],
   ].map(([l, v]) => `<div class="card" style="padding:16px"><div style="color:var(--white-muted);font-size:12px">${l}</div><div style="font-size:22px;font-weight:700;color:var(--ink);margin-top:6px">${esc(v)}</div></div>`).join('');
   renderCapital();
-  $('match-raise').innerHTML = '<option value="">Select a raise…</option>' + cap.raises.map(r => `<option value="${r.id}">${esc(raiseName(r))}</option>`).join('');
+  if ($('match-raise')) $('match-raise').innerHTML = '<option value="">Select a raise…</option>' + cap.raises.map(r => `<option value="${r.id}">${esc(raiseName(r))}</option>`).join('');
 }
 const raiseName = r => r.name || r.company_name || (r.companies && r.companies.company_name) || 'Untitled raise';
 function renderCapital() {

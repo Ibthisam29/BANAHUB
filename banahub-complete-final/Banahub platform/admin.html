@@ -886,7 +886,7 @@ body::before {
             <option value="doc">Documents</option>
           </select>
           <button class="btn btn-primary" onclick="document.getElementById('file-input').click()"><span class="material-symbols-outlined" style="font-size:15px">upload</span>Upload Files</button>
-          <input id="file-input" type="file" multiple accept="image/*,.pdf,.docx,.xlsx" style="display:none" onchange="handleFileUpload(this.files)"/>
+          <input id="file-input" type="file" multiple accept="image/*,.pdf,video/mp4,video/webm" style="display:none" onchange="handleFileUpload(this.files)"/>
         </div>
       </div>
 
@@ -1977,9 +1977,9 @@ Sitemap: https://www.banahub.com/sitemap.xml</textarea></div>
 <!-- ════════════════════════════════════════════════════════════
      JAVASCRIPT ENGINE
 ════════════════════════════════════════════════════════════ -->
-<script src="config.js"></script>
+<script src="config.js?v=5.2.0"></script>
 <script src="api.js"></script>
-<script src="admin-v3.js?v=3.9.1"></script>
+<script src="admin-v3.js?v=3.9.2"></script>
 <script>
 
 // ── State ────────────────────────────────────────────────────
@@ -2275,12 +2275,22 @@ async function api(path, method = 'GET', body) {
     }
     opts.body = JSON.stringify(body);
   }
+  if (['POST','PATCH','PUT','DELETE'].includes(method.toUpperCase()) && !(await checkAdminSession())) throw new Error('Admin session ended — sign in again as admin');
   const r = await fetch(fullPath, opts);
   if (r.status === 401) { location.reload(); return {}; }
   const ct = r.headers.get('content-type') || '';
-  if (!ct.includes('application/json')) return {};
-  return r.json();
+  const j = ct.includes('application/json') ? await r.json().catch(() => ({})) : {};
+  // Writes must never fail silently: surface the server / database error to the caller (and the global handler)
+  if (['POST','PATCH','PUT','DELETE'].includes(method.toUpperCase()) && (!r.ok || (j && j.error && j.success !== true))) {
+    const err = new Error((j && (j.error || j.detail)) || `Request failed (${r.status})`); err.status = r.status; err.body = j; throw err;
+  }
+  return j;
 }
+// Any unhandled save / approve failure shows a toast instead of failing silently
+window.addEventListener('unhandledrejection', e => {
+  const m = e.reason && (e.reason.message || String(e.reason)); if (!m || /Load failed|AbortError/i.test(m)) return;
+  if (typeof toast === 'function') toast('Action failed: ' + m, 'error');
+});
 
 
 // ── Backend-backed CMS persistence ───────────────────────────
@@ -2380,13 +2390,17 @@ async function loadApplications() {
 }
 
 async function approveApplication(id) {
-  await api(`/api/applications/admin/${id}/status`, 'PATCH', { status: 'approved' });
-  toast('Application approved', 'success'); loadApplications(); pollBadges();
+  try { await api(`/api/applications/admin/${id}/status`, 'PATCH', { status: 'approved' }); }
+  catch (e) { toast('Approve failed: ' + e.message, 'error'); return; }
+  logActivity('admin.application_approve', 'admin', id);
+  toast('Application approved — member account approved', 'success'); loadApplications(); pollBadges();
 }
 async function rejectApplication(id) {
   if (!confirm('Reject this application?')) return;
-  await api(`/api/applications/admin/${id}/status`, 'PATCH', { status: 'rejected' });
-  toast('Application rejected', 'warn'); loadApplications();
+  try { await api(`/api/applications/admin/${id}/status`, 'PATCH', { status: 'rejected' }); }
+  catch (e) { toast('Reject failed: ' + e.message, 'error'); return; }
+  logActivity('admin.application_reject', 'admin', id);
+  toast('Application rejected', 'warn'); loadApplications(); pollBadges();
 }
 
 // ── KYC Documents ─────────────────────────────────────────────
@@ -2445,7 +2459,7 @@ async function approveAccess() {
     await api(`/api/admin/access-requests/${currentAccessReviewId}`, 'PATCH', payload);
     await logActivity('access.approve', 'access', `Approved access request ${currentAccessReviewId}`);
     toast('Access approved', 'success'); closeModal('modal-access-review'); loadAccess();
-  } catch(e) { toast('Could not approve request', 'warn'); }
+  } catch(e) { toast('Could not approve request: ' + (e.message || e), 'warn'); }
 }
 async function rejectAccess() {
   if (!currentAccessReviewId) return;
@@ -2453,20 +2467,20 @@ async function rejectAccess() {
     await api(`/api/admin/access-requests/${currentAccessReviewId}`, 'PATCH', { status: 'rejected', review_notes: document.getElementById('ar-notes').value });
     await logActivity('access.reject', 'access', `Rejected access request ${currentAccessReviewId}`);
     toast('Access rejected', 'warn'); closeModal('modal-access-review'); loadAccess();
-  } catch(e) { toast('Could not reject request', 'warn'); }
+  } catch(e) { toast('Could not reject request: ' + (e.message || e), 'warn'); }
 }
 async function quickApproveAccess(id) {
   try { await api(`/api/admin/access-requests/${id}`, 'PATCH', { status: 'approved' }); await logActivity('access.approve','access',`Approved ${id}`); toast('Approved','success'); loadAccess(); }
-  catch(e) { toast('Could not approve','warn'); }
+  catch(e) { toast('Could not approve: ' + (e.message || e), 'warn'); }
 }
 async function quickRejectAccess(id) {
   try { await api(`/api/admin/access-requests/${id}`, 'PATCH', { status: 'rejected' }); await logActivity('access.reject','access',`Rejected ${id}`); toast('Rejected','warn'); loadAccess(); }
-  catch(e) { toast('Could not reject','warn'); }
+  catch(e) { toast('Could not reject: ' + (e.message || e), 'warn'); }
 }
 async function quickRevokeAccess(id) {
   if (!confirm('Revoke this access?')) return;
   try { await api(`/api/admin/access-requests/${id}`, 'PATCH', { status: 'rejected' }); await logActivity('access.revoke','access',`Revoked ${id}`); toast('Access revoked','warn'); loadAccess(); }
-  catch(e) { toast('Could not revoke access','warn'); }
+  catch(e) { toast('Could not revoke access: ' + (e.message || e), 'warn'); }
 }
 
 // ── Pricing Catalog ────────────────────────────────────────────
@@ -2946,16 +2960,16 @@ async function saveProgram() {
     toast(id?'Program updated':'Program created','success');
     logActivity(id?'admin.program_update':'admin.program_create','admin',payload.title);
     closeModal('modal-program'); loadPrograms();
-  } catch(e) { toast('Could not save program','warn'); }
+  } catch(e) { toast('Could not save program: ' + (e.message || e), 'warn'); }
 }
 async function togglePublishProg(id, publish) {
   try { await api(`/api/admin/content/programs/${id}`, 'PATCH', { published: publish }); toast(publish?'Published!':'Unpublished','success'); loadPrograms(); }
-  catch(e) { toast('Could not update program','warn'); }
+  catch(e) { toast('Could not update program: ' + (e.message || e), 'warn'); }
 }
 async function deleteProg(id) {
   if(!confirm('Delete?')) return;
   try { await api(`/api/admin/content/programs/${id}`, 'DELETE'); toast('Deleted','warn'); loadPrograms(); }
-  catch(e) { toast('Could not delete program','warn'); }
+  catch(e) { toast('Could not delete program: ' + (e.message || e), 'warn'); }
 }
 
 // ── Partners ─────────────────────────────────────────────────
@@ -3001,12 +3015,12 @@ async function savePartner() {
   try {
     await api('/api/admin/partners', 'POST', payload);
     toast('Partner added', 'success'); closeModal('modal-partner'); loadPartners();
-  } catch(e) { toast('Could not add partner', 'warn'); }
+  } catch(e) { toast('Could not add partner: ' + (e.message || e), 'warn'); }
 }
 async function deletePartner(id) {
   if (!confirm('Remove this partner?')) return;
   try { await api(`/api/admin/partners/${id}`, 'DELETE'); toast('Partner removed', 'warn'); loadPartners(); }
-  catch(e) { toast('Could not remove partner', 'warn'); }
+  catch(e) { toast('Could not remove partner: ' + (e.message || e), 'warn'); }
 }
 
 // ── Businesses / Investors / Providers (placeholders) ────────
@@ -3153,39 +3167,53 @@ async function syncEventRsvps(id) {
 // ── Media Library ────────────────────────────────────────────
 function renderMedia() {
   const el = document.getElementById('media-grid');
-  if (!mediaFiles.length) { el.innerHTML = ''; return; }
-  el.innerHTML = mediaFiles.map((f,i) => `
-    <div class="media-item" onclick="toggleMediaSelect(${i})" id="media-${i}">
-      ${f.type.startsWith('image')?`<img src="${f.data}" alt="${esc(f.name)}" loading="lazy"/>`:`<div class="media-doc"><div class="media-doc-icon material-symbols-outlined">description</div><div class="media-doc-name">${esc(f.name)}</div></div>`}
+  const f0 = (document.getElementById('media-type-filter') || {}).value || '';
+  const list = mediaFiles.filter(f => !f0 || String(f.file_type || '').includes(f0) || (f0 === 'doc' && !/^image|^video/.test(f.file_type || '')));
+  if (!list.length) { el.innerHTML = '<div style="padding:32px;text-align:center;color:var(--white-muted)">No media yet — drop files above to upload.</div>'; return; }
+  el.innerHTML = list.map(f => {
+    const i = mediaFiles.indexOf(f), t = String(f.file_type || '');
+    return `<div class="media-item" onclick="toggleMediaSelect(${i})" id="media-${i}">
+      ${t.startsWith('image') ? `<img src="${esc(f.file_url)}" alt="${esc(f.file_name)}" loading="lazy"/>` : `<div class="media-doc"><div class="media-doc-icon material-symbols-outlined">${t.startsWith('video') ? 'movie' : 'description'}</div><div class="media-doc-name">${esc(f.file_name)}</div></div>`}
       <div class="media-item-overlay">
-        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();copyMediaUrl(${i})"><span class="material-symbols-outlined" style="font-size:14px">content_copy</span></button>
-        <button class="btn btn-danger btn-sm"  onclick="event.stopPropagation();deleteMedia(${i})"><span class="material-symbols-outlined" style="font-size:14px">delete</span></button>
+        <button class="btn btn-ghost btn-sm" title="Copy link" onclick="event.stopPropagation();copyMediaUrl(${i})"><span class="material-symbols-outlined" style="font-size:14px">content_copy</span></button>
+        <button class="btn btn-danger btn-sm" title="Delete" onclick="event.stopPropagation();deleteMedia(${i})"><span class="material-symbols-outlined" style="font-size:14px">delete</span></button>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
-function handleFileUpload(files) {
+async function handleFileUpload(files) {
   const prog = document.getElementById('upload-progress');
-  prog.style.display = 'block';
-  prog.innerHTML = '<div style="font-size:13px;color:var(--white-muted)">Uploading…</div>';
-  Array.from(files).forEach(file => {
-    if (file.size > 10 * 1024 * 1024) { toast(`${file.name} exceeds 10MB limit`, 'warn'); return; }
-    const allowed = ['image/jpeg','image/png','image/webp','image/svg+xml','application/pdf','application/vnd.openxmlformats-officedocument.wordprocessingml.document','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
-    if (!allowed.includes(file.type)) { toast(`${file.name}: file type not allowed`, 'warn'); return; }
-    const reader = new FileReader();
-    reader.onload = e => {
-      mediaFiles.unshift({ name: file.name, type: file.type, size: file.size, data: e.target.result, uploaded: Date.now() });
-      persistCmsContent('media');
-      renderMedia();
-      toast(`${file.name} uploaded`, 'success');
-    };
-    reader.readAsDataURL(file);
-  });
-  setTimeout(() => { prog.style.display='none'; }, 2000);
+  prog.style.display = 'block'; prog.innerHTML = '';
+  const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml', 'application/pdf', 'video/mp4', 'video/webm'];
+  const sb = await window.getBanaSupabaseClient();
+  let ok = 0;
+  for (const file of Array.from(files || [])) {
+    const row = document.createElement('div'); row.style.cssText = 'font-size:13px;color:var(--ink);padding:2px 0'; row.textContent = `Uploading ${file.name}…`; prog.appendChild(row);
+    try {
+      if (file.size > 50 * 1024 * 1024) throw new Error('over 50 MB');
+      if (!allowed.includes(file.type)) throw new Error('type not allowed (images, PDF, MP4/WebM)');
+      const path = `cms/${Date.now()}-${file.name.replace(/[^a-z0-9._-]/gi, '_')}`;
+      const up = await sb.storage.from('media').upload(path, file, { upsert: false, contentType: file.type });
+      if (up.error) throw new Error(up.error.message);
+      const url = sb.storage.from('media').getPublicUrl(path).data.publicUrl;
+      const r = await api('/api/admin/content/media', 'POST', { file_url: url, file_name: file.name, file_type: file.type, storage_path: path });
+      if (!r || r.error || !r.media) { await sb.storage.from('media').remove([path]); throw new Error((r && r.error) || 'could not save'); }
+      mediaFiles.unshift(r.media); ok++; row.textContent = `✓ ${file.name}`;
+    } catch (e) { row.textContent = `✕ ${file.name} — ${e.message || e}`; row.style.color = 'var(--danger,#b3261e)'; }
+  }
+  renderMedia();
+  if (ok) toast(`${ok} file${ok > 1 ? 's' : ''} uploaded`, 'success');
+  setTimeout(() => { prog.style.display = 'none'; }, 4000);
 }
 
-function copyMediaUrl(i) { navigator.clipboard?.writeText(mediaFiles[i].name||''); toast('Name copied', 'success'); }
-function deleteMedia(i)  { if(!confirm('Delete?'))return; mediaFiles.splice(i,1); persistCmsContent('media'); renderMedia(); toast('Deleted','warn'); }
+function copyMediaUrl(i) { const u = (mediaFiles[i] || {}).file_url || ''; navigator.clipboard?.writeText(u); toast('Link copied', 'success'); }
+async function deleteMedia(i) {
+  const f = mediaFiles[i]; if (!f || !confirm(`Delete ${f.file_name || 'this file'}? Pages using it will show a broken image.`)) return;
+  const r = await api(`/api/admin/content/media/${f.id}`, 'DELETE');
+  if (!r || r.error) { toast('Delete failed: ' + ((r && r.error) || ''), 'warn'); return; }
+  mediaFiles.splice(i, 1); renderMedia(); toast('Deleted', 'warn');
+}
 function toggleMediaSelect(i) { document.getElementById(`media-${i}`)?.classList.toggle('selected'); }
 function filterMedia() { renderMedia(); }
 
@@ -3257,7 +3285,7 @@ async function saveSettings() {
     },
   };
   try { await api('/api/admin/content/settings', 'PATCH', payload); toast('Settings saved', 'success'); logActivity('admin.settings_update','admin','Site settings updated'); }
-  catch(e) { toast('Could not save settings', 'warn'); }
+  catch(e) { toast('Could not save settings: ' + (e.message || e), 'warn'); }
 }
 
 // ── SEO ─────────────────────────────────────────────────────
@@ -3283,7 +3311,7 @@ async function saveSEO() {
     robots: document.getElementById('seo-robots').value,
   }};
   try { await api('/api/admin/content/settings', 'PATCH', payload); toast('SEO settings saved', 'success'); logActivity('admin.seo_update','admin','SEO settings updated'); }
-  catch(e) { toast('Could not save SEO settings', 'warn'); }
+  catch(e) { toast('Could not save SEO settings: ' + (e.message || e), 'warn'); }
 }
 
 // ── Profile (populated from the already-authenticated ADMIN_USER) ──
@@ -3436,6 +3464,6 @@ document.addEventListener('keydown', e => {
 <script src="file-viewer.js?v=1.0.0"></script>
 <script src="admin-agents.js?v=1.0.0"></script>
 <script src="admin-match.js?v=1.2.0"></script>
-<script src="admin-ben.js?v=1.0.1"></script>
+<script src="admin-ben.js?v=1.0.2"></script>
 </body>
 </html>

@@ -35,6 +35,10 @@
         '<div class="bh-actions"><a href="/growth-plan.html" class="bh-btn bh-btn-primary">Discuss Your Growth Plan</a><a href="/capital-review.html" class="bh-btn bh-btn-secondary">Apply for Capital Review</a><a href="/investor-network.html" class="bh-btn bh-btn-secondary">Join Investor Network</a><a href="/login.html" class="bh-btn bh-btn-secondary">Member sign in</a></div>' +
       '</div></header>';
     var btn = document.getElementById('bh-burger'), drawer = document.getElementById('bh-drawer');
+    // The header uses backdrop-filter, which traps position:fixed children inside it (drawer would be clipped
+    // to the 72px header and covered by the hero). Mount the drawer on <body> so it overlays the whole page.
+    document.body.appendChild(drawer);
+    drawer.addEventListener('click', function (e) { if (e.target.closest('a') && drawer.classList.contains('open')) btn.click(); });
     btn.addEventListener('click', function () {
       var open = drawer.classList.toggle('open');
       btn.setAttribute('aria-expanded', open); btn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');

@@ -334,7 +334,8 @@ window.fetch = async function(input, opts) {
         return _resp({ success: true, item: data });
       }
       if (pMatch && method === 'DELETE') {
-        await sb.from('pricing_catalog').update({ active: false }).eq('id', pMatch[1]);
+        const { error } = await sb.from('pricing_catalog').update({ active: false }).eq('id', pMatch[1]);
+        if (error) return _resp({ error: error.message }, 400);
         return _resp({ success: true });
       }
     }
@@ -720,7 +721,11 @@ window.fetch = async function(input, opts) {
     // ── Admin: update user ──────────────────────────────────────────────────
     const auMatch = route.match(/^\/admin\/users\/([^/?]+)/);
     if (auMatch && method === 'PATCH') {
-      const { data } = await sb.from('users').update(body).eq('id', auMatch[1]).select().single();
+      const patch = {};
+      ['role', 'status', 'blocked', 'blocked_reason', 'full_name', 'company_name', 'title', 'phone', 'country', 'linkedin_url', 'website', 'bio', 'member_category'].forEach(k => { if (k in body) patch[k] = body[k]; });
+      if ('blocked' in patch) patch.blocked_at = patch.blocked ? new Date().toISOString() : null;
+      const { data, error } = await sb.from('users').update(patch).eq('id', auMatch[1]).select().single();
+      if (error) return _resp({ error: error.message }, 400);
       return _resp({ success: true, user: data });
     }
 
@@ -755,10 +760,26 @@ window.fetch = async function(input, opts) {
       return _resp({ applications: data || [], total: (data || []).length });
     }
 
-    // ── Applications: update status ─────────────────────────────────────────
+    // ── Applications: admin approve / reject (/applications/admin/:id/status) ─
+    const appAdm = _path.match(/^\/applications\/admin\/([^/]+)\/status$/);
+    if (appAdm && (method === 'PATCH' || method === 'PUT')) {
+      const st = ['approved', 'rejected', 'pending', 'in_review'].includes(body.status) ? body.status : null;
+      if (!st) return _resp({ error: 'invalid status' }, 400);
+      const { data, error } = await sb.from('applications').update({ status: st }).eq('id', appAdm[1]).select().single();
+      if (error) return _resp({ error: error.message }, 400);
+      // Approving an application approves the applicant's membership (manual admin action); rejecting rejects a pending account
+      if (data && data.user_id && (st === 'approved' || st === 'rejected')) {
+        const { error: ue } = await sb.from('users').update({ status: st }).eq('id', data.user_id).in('status', st === 'approved' ? ['pending', 'vetting', 'invited', 'rejected'] : ['pending', 'vetting']);
+        if (ue) return _resp({ error: 'Application ' + st + ', but member status not updated: ' + ue.message }, 400);
+      }
+      return _resp({ success: true, application: data });
+    }
+    // ── Applications: update ────────────────────────────────────────────────
     const appMatch = route.match(/^\/applications\/([^/?]+)/);
     if (appMatch && method === 'PATCH') {
-      const { data } = await sb.from('applications').update(body).eq('id', appMatch[1]).select().single();
+      const patch = {}; ['status', 'type', 'data'].forEach(k => { if (k in body) patch[k] = body[k]; });
+      const { data, error } = await sb.from('applications').update(patch).eq('id', appMatch[1]).select().single();
+      if (error) return _resp({ error: error.message }, 400);
       return _resp({ success: true, application: data });
     }
 
@@ -832,7 +853,8 @@ window.fetch = async function(input, opts) {
     }
     if (route.startsWith('/admin/content/programs/') && method === 'DELETE') {
       const id = route.split('/admin/content/programs/')[1];
-      await sb.from('programs').delete().eq('id', id);
+      const { error } = await sb.from('programs').delete().eq('id', id);
+      if (error) return _resp({ error: error.message }, 400);
       return _resp({ success: true });
     }
 
@@ -871,12 +893,15 @@ window.fetch = async function(input, opts) {
       return _resp({ partners: data || [] });
     }
     if (route.startsWith('/admin/partners') && method === 'POST') {
-      const { data } = await sb.from('partners').insert(body).select().single();
+      const row = {}; ['name', 'type', 'tier', 'logo_url', 'website', 'description', 'published', 'category', 'sectors', 'countries', 'services'].forEach(k => { if (k in body && body[k] !== '') row[k] = body[k]; });
+      const { data, error } = await sb.from('partners').insert(row).select().single();
+      if (error) return _resp({ error: error.message }, 400);
       return _resp({ success: true, partner: data }, 201);
     }
     if (route.startsWith('/admin/partners/') && method === 'DELETE') {
       const id = route.split('/admin/partners/')[1];
-      await sb.from('partners').delete().eq('id', id);
+      const { error } = await sb.from('partners').delete().eq('id', id);
+      if (error) return _resp({ error: error.message }, 400);
       return _resp({ success: true });
     }
 
@@ -892,8 +917,10 @@ window.fetch = async function(input, opts) {
     if (route.startsWith('/admin/access-requests/') && (method === 'PATCH' || method === 'PUT')) {
       const id = route.split('/admin/access-requests/')[1];
       const { data: { user } } = await sb.auth.getUser();
-      const payload = Object.assign({}, body, { reviewed_by: user && user.id, reviewed_at: new Date().toISOString() });
-      const { data } = await sb.from('access_requests').update(payload).eq('id', id).select().single();
+      const payload = { reviewed_by: user && user.id, reviewed_at: new Date().toISOString() };
+      ['status', 'review_notes', 'expires_at'].forEach(k => { if (k in body) payload[k] = body[k]; });
+      const { data, error } = await sb.from('access_requests').update(payload).eq('id', id).select().single();
+      if (error) return _resp({ error: error.message }, 400);
       return _resp({ success: true, request: data });
     }
 
@@ -923,7 +950,9 @@ window.fetch = async function(input, opts) {
     }
     if (route.startsWith('/logs') && method === 'POST') {
       const { data: { user } } = await sb.auth.getUser();
-      await sb.from('activity_logs').insert(Object.assign({}, body, { actor_email: user && user.email }));
+      const row = {}; ['action', 'category', 'description', 'metadata'].forEach(k => { if (k in body) row[k] = body[k]; });
+      const { error } = await sb.from('activity_logs').insert(Object.assign(row, { actor_email: user && user.email }));
+      if (error) return _resp({ error: error.message }, 400);
       return _resp({ success: true });
     }
 
@@ -1027,7 +1056,8 @@ window.fetch = async function(input, opts) {
       const { data: { user } } = await sb.auth.getUser();
       const results = {};
       for (const key of Object.keys(body)) {
-        const { data } = await sb.from('site_settings').upsert({ key, value: body[key], updated_by: user && user.id, updated_at: new Date().toISOString() }, { onConflict: 'key' }).select().single();
+        const { data, error } = await sb.from('site_settings').upsert({ key, value: body[key], updated_by: user && user.id, updated_at: new Date().toISOString() }, { onConflict: 'key' }).select().single();
+        if (error) return _resp({ error: error.message }, 400);
         results[key] = data;
       }
       return _resp({ success: true, settings: results });
@@ -1051,15 +1081,18 @@ window.fetch = async function(input, opts) {
       }
       if (method === 'POST') {
         const { data: { user } } = await sb.auth.getUser();
-        const { data } = await sb.from('media').insert(Object.assign({}, body, { uploaded_by: user && user.id })).select().single();
+        const row = {}; ['file_url', 'file_name', 'file_type', 'storage_path'].forEach(k => { if (k in body) row[k] = body[k]; });
+        const { data, error } = await sb.from('media').insert(Object.assign(row, { uploaded_by: user && user.id })).select().single();
+        if (error) return _resp({ error: error.message }, 400);
         return _resp({ success: true, media: data }, 201);
       }
     }
     if (route.startsWith('/admin/content/media/') && method === 'DELETE') {
       const id = route.split('/admin/content/media/')[1];
       const { data: row } = await sb.from('media').select('storage_path').eq('id', id).single();
+      const { error } = await sb.from('media').delete().eq('id', id);
+      if (error) return _resp({ error: error.message }, 400);
       if (row && row.storage_path) await sb.storage.from('media').remove([row.storage_path]);
-      await sb.from('media').delete().eq('id', id);
       return _resp({ success: true });
     }
 
@@ -1341,6 +1374,7 @@ window.fetch = async function(input, opts) {
 
     // ── 404 (return empty success so panels don't crash) ────────────────────
     console.warn('[BANAHub API] Unhandled route:', method, route);
+    if (method !== 'GET' && method !== 'HEAD') return _resp({ success: false, error: 'This action is not available (' + method + ' ' + _path + ')', _unhandled: route }, 404);
     return _resp({ success: true, data: [], total: 0, _unhandled: route }, 200);
 
   } catch(err) {

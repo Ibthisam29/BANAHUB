@@ -303,7 +303,7 @@
   #ben-in{flex:1;border:1px solid rgba(0,53,39,.2);border-radius:12px;padding:10px 12px;font:14px 'Inter',sans-serif;color:#1b1c1a;resize:none;max-height:120px;outline:none}
   #ben-in:focus{border-color:#003527;box-shadow:0 0 0 3px rgba(0,53,39,.08)}
   .ben-send{border:0;background:#003527;color:#fff;border-radius:12px;padding:0 16px;font:600 13px 'Inter',sans-serif;cursor:pointer}
-  @media (max-width:900px){#ben-toggle{bottom:calc(12px + env(safe-area-inset-bottom));padding:7px 8px 7px 10px}#ben-toggle .ben-lbl small{display:none}
+  @media (max-width:900px){#ben-toggle{left:auto;right:12px;transform:none;bottom:calc(14px + env(safe-area-inset-bottom));padding:6px;gap:0}#ben-toggle .ben-lbl,#ben-switch{display:none}#ben-toggle .ben-av{width:40px;height:40px;font-size:16px}
     #ben-panel{left:0;right:0;bottom:0;width:100%;height:calc(100dvh - 64px);transform:translateY(24px);border-radius:18px 18px 0 0}#ben-panel.open{transform:none}
     #ben-panel .ben-ft{padding-bottom:calc(12px + env(safe-area-inset-bottom))}.ben-kpis{grid-template-columns:repeat(2,1fr)}}
   body.ben-open .toast-container{bottom:84px}

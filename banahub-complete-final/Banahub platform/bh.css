@@ -77,12 +77,14 @@
 @media (max-width: 1180px) {
   .bh-menu, .bh-nav-cta { display: none; }
   .bh-burger { display: inline-flex; }
-  .bh-drawer.open { display: block; position: fixed; inset: 72px 0 0 0; background: var(--bh-cream); overflow: auto; z-index: 99; padding: 12px var(--bh-gut) 32px; border-top: 1px solid var(--bh-line); }
+  .bh-drawer.open { display: block; position: fixed; inset: 72px 0 0 0; background: var(--bh-cream); overflow: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; z-index: 1000; box-shadow: 0 18px 40px rgba(0,30,20,.18); padding: 12px var(--bh-gut) 32px; border-top: 1px solid var(--bh-line); }
   .bh-drawer a.item { display: flex; justify-content: space-between; align-items: center; padding: 16px 2px; border-bottom: 1px solid var(--bh-line); font: 600 1.02rem 'Manrope', sans-serif; color: var(--bh-ink); }
   .bh-drawer a.item.on { color: var(--bh-em-2); }
   .bh-drawer .bh-actions { margin-top: 22px; flex-direction: column; align-items: stretch; }
   .bh-drawer .bh-btn { width: 100%; }
   body.bh-locked { overflow: hidden; }
+  body.bh-locked .bh-mcta { display: none; }
+  body.bh-locked .bh-nav { z-index: 1001; }
 }
 
 /* Mobile sticky CTA */
