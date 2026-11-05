@@ -150,14 +150,21 @@
     try { const r = await sb().storage.from('decks').createSignedUrl(path, 300); if (r.error) throw new Error(r.error.message); if (w) w.location = r.data.signedUrl; else location.href = r.data.signedUrl; }
     catch (e) { if (w) w.close(); notify('Could not open deck: ' + e.message, 'error'); }
   }
-  Object.assign(window, { sxDeck: deck, sxTab: t => { X.tab = t; draw(); }, sxF: (k, v) => { X[k] = v; draw(); }, sxOpen: open, sxReview: review, sxCamp: camp, __SX: X });
+  function sxBen() {
+    if (!window.Ben || !Ben.ask) return notify('Ben is still loading', 'warn');
+    const k = $('sx-kind').value, id = $('sx-id').value, name = ($('sx-h') || {}).textContent || '';
+    Ben.ask(k === 'r'
+      ? `Assess the investor readiness of the company raise "${name}" (deal_room_id ${id}). Read the deck and check the data room. Give the score, what's in place, what's missing, red flags, the investor types to target, and a 30/60/90-day plan. Suggest the review note I should send the founder.`
+      : `Assess the fund / LP readiness of the investor profile "${name}" (investor_id ${id}). Read their deck if uploaded. Give the strengths, gaps, what's missing for LP diligence, and next steps. Suggest the review note I should send them.`);
+  }
+  Object.assign(window, { sxBen, sxDeck: deck, sxTab: t => { X.tab = t; draw(); }, sxF: (k, v) => { X[k] = v; draw(); }, sxOpen: open, sxReview: review, sxCamp: camp, __SX: X });
 
   const MODAL = `<div id="modal-sx" class="modal-overlay" style="display:none;z-index:1050" onclick="if(event.target===this)closeModal('modal-sx')"><div class="modal modal-lg" style="max-width:860px">
     <div class="modal-header"><div><div class="modal-title" id="sx-h">Submission</div><div class="modal-sub" id="sx-sub"></div></div><button class="modal-close" onclick="closeModal('modal-sx')">✕</button></div>
     <div class="modal-body"><input type="hidden" id="sx-kind"/><input type="hidden" id="sx-id"/><div id="sx-body"></div>
       <div class="f-group" style="margin-top:14px"><label class="f-label" for="sx-note">Note to the member (shown in their dashboard)</label><textarea id="sx-note" class="f-input" rows="2" placeholder="e.g. Please add your latest revenue figure and deck link"></textarea></div>
       <div id="sx-links" style="display:flex;gap:6px;margin-top:8px"></div></div>
-    <div class="modal-footer" style="flex-wrap:wrap"><button class="btn btn-danger" onclick="sxReview('declined')">Decline</button><button class="btn btn-ghost" onclick="sxReview('needs_info')">Ask for more info</button>
+    <div class="modal-footer" style="flex-wrap:wrap"><button class="btn btn-ghost" onclick="sxBen()" title="Ben reads the profile, deck and data room and gives a readiness assessment">✦ Ask Ben to assess</button><span style="flex:1"></span><button class="btn btn-danger" onclick="sxReview('declined')">Decline</button><button class="btn btn-ghost" onclick="sxReview('needs_info')">Ask for more info</button>
       <button class="btn btn-ghost" onclick="sxReview('in_review')">Mark in review</button><button class="btn btn-primary" onclick="sxReview('accepted')">Accept</button></div></div></div>`;
   const CSS = `.sx-tabs{display:flex;gap:8px;margin:4px 0 12px;flex-wrap:wrap}.sx-tabs button{display:flex;align-items:center;gap:8px;border:1px solid var(--border);background:var(--surface,#fff);color:var(--ink);border-radius:12px;padding:10px 16px;font-weight:700;font-size:13px;cursor:pointer}
   .sx-tabs button b{background:rgba(0,53,39,.08);border-radius:999px;padding:1px 8px;font-size:12px}.sx-tabs button.on{background:#003527;color:#fff;border-color:#003527}.sx-tabs button.on b{background:rgba(255,255,255,.2)}

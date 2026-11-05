@@ -166,11 +166,18 @@
 
   const prev = window.loadPanel;
   window.loadPanel = function (p) { if (p === 'os-datarooms') { inject(); return loadRooms(); } if (p === 'os-pitch') { inject(); return loadPitch(); } return prev && prev(p); };
-  Object.assign(window, { ag2Room: roomModal, ag2Find: find, ag2Grant: grant, ag2Revoke: revoke, ag2Open: openFile, ag2Limits: limits, ag2Q: v => { X.q = v; drawRooms(); }, ag2SavePitch: savePitch, ag2Session: session, __AG2: X });
+  function ag2Ben() {
+    if (!window.Ben || !Ben.ask) return notify('Ben is still loading', 'warn');
+    const r = X.room;
+    if (r && $('ag2-grant-wrap') !== null) {}
+    if (r && $('ag2-who')) Ben.ask(`Review the data room "${r.title}" (${r.deal_room_id ? 'deal_room_id ' + r.deal_room_id : 'investor_id ' + r.investor_id}): list what's there against a standard investor due-diligence checklist, what's missing, the quality of the key documents (read the most important ones), and what the owner should add next.`);
+    else Ben.ask('Review the last pitch practice session shown and suggest how this member should improve.');
+  }
+  Object.assign(window, { ag2Ben, ag2Room: roomModal, ag2Find: find, ag2Grant: grant, ag2Revoke: revoke, ag2Open: openFile, ag2Limits: limits, ag2Q: v => { X.q = v; drawRooms(); }, ag2SavePitch: savePitch, ag2Session: session, __AG2: X });
 
   const MODAL = `<div id="modal-ag2" class="modal-overlay" style="display:none;z-index:1050" onclick="if(event.target===this)closeModal('modal-ag2')"><div class="modal modal-lg" style="max-width:900px">
     <div class="modal-header"><div><div class="modal-title" id="ag2-h"></div><div class="modal-sub" id="ag2-sub"></div></div><button class="modal-close" onclick="closeModal('modal-ag2')">✕</button></div>
-    <div class="modal-body" id="ag2-body"></div><div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('modal-ag2')">Close</button></div></div></div>`;
+    <div class="modal-body" id="ag2-body"></div><div class="modal-footer"><button class="btn btn-ghost" id="ag2-ben" onclick="ag2Ben()">✦ Ask Ben to review</button><span style="flex:1"></span><button class="btn btn-ghost" onclick="closeModal('modal-ag2')">Close</button></div></div></div>`;
   const CSS = `.ag2-kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:14px}.ag2-kpi{padding:12px 14px!important}.ag2-kpi b{display:block;font-size:22px;color:#003527}.ag2-kpi span{font-size:12px;color:var(--ink)}
   .ag2-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;color:var(--ink)}.ag2-m{font-size:12px;color:var(--white-dim)}
   .ag2-set{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:10px}.ag2-set label{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--ink)}.ag2-set label:first-child{flex-direction:row;align-items:center}

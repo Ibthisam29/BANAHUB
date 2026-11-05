@@ -21,7 +21,7 @@
   const fmtD = s => s ? new Date(s + (s.length === 10 ? 'T00:00:00' : '')).toLocaleDateString('en-SG', { weekday: 'short', day: 'numeric', month: 'short' }) : 'no date';
   const short = n => { n = Number(n) || 0; const a = Math.abs(n); return a >= 1e6 ? (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M' : a >= 1e3 ? Math.round(n / 1e3) + 'k' : String(Math.round(n)); };
 
-  const B = { open: false, busy: false, ai: null, msgs: [], snap: null, snapAt: 0, lastTask: null };
+  const B = { files: [], pending: {}, replies: {}, open: false, busy: false, ai: null, msgs: [], snap: null, snapAt: 0, lastTask: null };
 
   /* ---------- navigation map (read from the live sidebar) ---------- */
   const ALIAS = { home: 'dashboard', overview: 'dashboard', members: 'users', member: 'users', people: 'users', invoices: 'payments', invoice: 'payments', billing: 'payments', stripe: 'payments', submissions: 'os-submissions', 'capital raise': 'os-submissions', raises: 'os-fundraisers', fundraising: 'os-fundraisers', pipeline: 'os-deals', deals: 'os-deals', tasks: 'os-tasks', todo: 'os-tasks', todos: 'os-tasks', reminders: 'os-tasks', security: 'activity', logins: 'activity', log: 'activity', prices: 'pricing', plans: 'pricing', matches: 'os-matching', matching: 'os-matching', revenue: 'os-revenue', crm: 'crm', leads: 'enquiries', enquiry: 'enquiries', inquiries: 'enquiries', partner: 'partners', 'data room': 'os-datarooms', 'data rooms': 'os-datarooms', dataroom: 'os-datarooms', pitch: 'os-pitch', 'pitch practice': 'os-pitch' };
@@ -94,7 +94,30 @@
   }
 
   /* ---------- rendering ---------- */
-  const md = s => esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/`(.+?)`/g, '<code>$1</code>').replace(/^[-•] (.*)$/gm, '<li>$1</li>').replace(/(<li>.*<\/li>\n?)+/g, m => `<ul>${m}</ul>`).replace(/\n/g, '<br>').replace(/<\/ul><br>/g, '</ul>').replace(/<br><ul>/g, '<ul>');
+  const inl = s => esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, '$1<i>$2</i>').replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+  function md(src) {
+    const L = String(src || '').replace(/\r/g, '').split('\n'), out = []; let list = null, para = [];
+    const flushP = () => { if (para.length) { out.push(`<p>${para.map(inl).join('<br>')}</p>`); para = []; } };
+    const flushL = () => { if (list) { out.push(`<${list.t}>${list.items.map(i => `<li>${inl(i)}</li>`).join('')}</${list.t}>`); list = null; } };
+    for (let i = 0; i < L.length; i++) {
+      const l = L[i];
+      if (/^\s*\|.*\|\s*$/.test(l) && i + 1 < L.length && /^\s*\|?\s*:?-{2,}/.test(L[i + 1])) {
+        flushP(); flushL(); const cells = r => r.trim().replace(/^\||\|$/g, '').split('|').map(c => c.trim());
+        const head = cells(l); i += 1; const rows = [];
+        while (i + 1 < L.length && /^\s*\|.*\|\s*$/.test(L[i + 1])) { i++; rows.push(cells(L[i])); }
+        out.push(`<div class="ben-tw"><table><thead><tr>${head.map(c => `<th>${inl(c)}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${r.map(c => `<td>${inl(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`); continue;
+      }
+      let m;
+      if ((m = l.match(/^(#{1,4})\s+(.*)$/))) { flushP(); flushL(); out.push(`<div class="ben-h${Math.min(3, m[1].length)}">${inl(m[2])}</div>`); continue; }
+      if (/^\s*(---|\*\*\*)\s*$/.test(l)) { flushP(); flushL(); out.push('<hr>'); continue; }
+      if ((m = l.match(/^\s*[-•*]\s+(.*)$/))) { flushP(); if (!list || list.t !== 'ul') { flushL(); list = { t: 'ul', items: [] }; } list.items.push(m[1]); continue; }
+      if ((m = l.match(/^\s*\d+[.)]\s+(.*)$/))) { flushP(); if (!list || list.t !== 'ol') { flushL(); list = { t: 'ol', items: [] }; } list.items.push(m[1]); continue; }
+      if (!l.trim()) { flushP(); flushL(); continue; }
+      flushL(); para.push(l);
+    }
+    flushP(); flushL(); return out.join('');
+  }
   const btn = (label, js, cls) => `<button type="button" class="ben-act${cls ? ' ' + cls : ''}" onclick="${esc(js)}">${esc(label)}</button>`;
   function say(html, who) {
     const L = $('ben-log'); if (!L) return;
@@ -198,31 +221,77 @@
       <li><a href="#" onclick="Ben.run('what should I do next?');return false">what should I do next?</a> — recommendations</li>
       <li><i>remind me to call Hopp Capital tomorrow 3pm</i></li>
       <li><i>schedule investor update email on friday</i> (+ calendar file)</li>
-      <li><a href="#" onclick="Ben.run('my tasks');return false">my tasks</a> · <i>open payments</i> · <i>find PayLah</i> · <i>create invoice</i></li></ul>
+      <li><a href="#" onclick="Ben.run('my tasks');return false">my tasks</a> · <i>open payments</i> · <i>find PayLah</i> · <i>create invoice</i></li>
+      <li>📎 attach a deck / proposal / financial model → <i>review this pitch, what's missing?</i></li>
+      <li><i>assess investor readiness of PayLah</i> · <i>market analysis: B2B payments in Indonesia</i></li>
+      <li><i>write an article on preparing for a Series A in Singapore</i> (saved as a draft)</li>
+      <li><i>approve the pending members who look legitimate</i> (you confirm each one)</li></ul>
       ${B.ai ? '<span class="ben-dim">AI mode is on — ask me anything in plain English.</span>' : '<span class="ben-dim">Built-in mode. Add <code>ANTHROPIC_API_KEY</code> to the <code>ben</code> function secrets to unlock free-form AI.</span>'}`);
   }
 
+  function pageContext() {
+    const parts = [], cur = (typeof window.currentPanel !== 'undefined' && window.currentPanel) || (document.querySelector('.panel.active') || {}).id;
+    if (cur) parts.push('panel ' + String(cur).replace(/^panel-/, ''));
+    const vis = id => { const e = $(id); return e && getComputedStyle(e).display !== 'none'; };
+    if (vis('modal-sx') && $('sx-id')) parts.push(`open submission: ${$('sx-kind').value === 'r' ? 'raise deal_room_id' : 'investor_id'}=${$('sx-id').value} (${($('sx-h') || {}).textContent || ''})`);
+    if (vis('modal-ag2') && window.__AG2 && __AG2.room) parts.push(`open data room: ${__AG2.room.deal_room_id ? 'deal_room_id=' + __AG2.room.deal_room_id : 'investor_id=' + __AG2.room.investor_id} (${__AG2.room.title})`);
+    if (vis('modal-user') && window._uModal) parts.push('open member: ' + (window._uModal.id || window._uModal));
+    return parts.join('; ');
+  }
+  const progress = ['Reading the platform…', 'Checking records…', 'Reading documents…', 'Researching…', 'Drafting…', 'Almost there…'];
   async function ai(text) {
-    const S = await snapshot();
-    const { data, error } = await sb().functions.invoke('ben', { body: { message: text, history: B.msgs.slice(-12), snapshot: S, panels: panels(), today: today() } });
-    if (error || !data) throw new Error((data && data.error) || (error && error.message) || 'no response');
+    const S = await snapshot(), files = B.files.splice(0); drawFiles();
+    let k = 0; const tick = setInterval(() => { const t = $('ben-typing-t'); if (t) t.textContent = progress[Math.min(progress.length - 1, k++)]; }, 6000);
+    let data, error;
+    try { ({ data, error } = await sb().functions.invoke('ben', { body: { message: text, history: B.msgs.slice(-12), snapshot: S, panels: panels(), context: pageContext(), today: today(), attachments: files.map(f => ({ name: f.name, mime: f.mime, data: f.data })) } })); }
+    finally { clearInterval(tick); const t = $('ben-typing-t'); if (t) t.textContent = ''; }
+    if (error) { let m = error.message; try { m = (await error.context.json()).error || m; } catch (e) { } throw new Error(m); }
+    if (!data) throw new Error('no response');
     if (data.ai === false) { B.ai = false; setMode(); return false; }
     if (data.error) throw new Error(data.error);
     B.ai = true; setMode();
-    B.msgs.push({ role: 'user', content: text }, { role: 'assistant', content: data.reply || '' });
-    let html = md(data.reply || ''), row = '';
-    (data.actions || []).forEach(a => {
-      if (a.type === 'nav' && $('panel-' + a.panel)) { const p = panels().find(x => x.id === a.panel); row += btn('Open ' + (p ? p.label : a.panel), `Ben.go('${a.panel}')`); }
-      if (a.type === 'search' && a.q) row += btn('Search “' + a.q + '”', `Ben.run(${JSON.stringify('find ' + a.q)})`, 'ghost');
-      if (a.type === 'task' && a.title) { const id = 'bp' + Math.random().toString(36).slice(2, 8); B[id] = a; row += btn(`+ Task: ${a.title.slice(0, 40)}${a.due ? ' · ' + fmtD(a.due) : ''}`, `Ben.addProposed('${id}')`); }
-    });
-    say(html + (row ? `<div class="ben-row">${row}</div>` : ''));
+    B.msgs.push({ role: 'user', content: text + (files.length ? `\n[attached: ${files.map(f => f.name).join(', ')}]` : '') }, { role: 'assistant', content: (data.reply || '').slice(0, 6000) });
+    const id = 'br' + Math.random().toString(36).slice(2, 8); B.replies[id] = data.reply || '';
+    let html = `<div class="ben-md">${md(data.reply || '')}</div>`, row = '';
+    (data.created || []).forEach(c => { html += `<div class="ben-done">✓ ${c.type === 'task' ? `Task created: <b>${esc(c.title)}</b>${c.due_date ? ' · ' + fmtD(c.due_date) : ''}` : `Draft article saved: <b>${esc(c.title)}</b> (unpublished)`}</div>`; });
+    (data.proposals || []).forEach(p => { const pid = 'bx' + Math.random().toString(36).slice(2, 8); B.pending[pid] = p; row += `<button type="button" class="ben-act ben-confirm" id="${pid}" onclick="Ben.confirm('${pid}')">✔ ${esc(p.summary || p.kind)}</button>`; });
+    (data.navs || []).forEach(n => { if ($('panel-' + n.panel)) { const p = panels().find(x => x.id === n.panel); row += btn(n.label || ('Open ' + (p ? p.label : n.panel)), `Ben.go('${n.panel}')`, 'ghost'); } });
+    if ((data.sources || []).length) html += `<details class="ben-src"><summary>Sources (${data.sources.length})</summary><ol>${data.sources.map(s => `<li><a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.title || s.url)}</a></li>`).join('')}</ol></details>`;
+    row += btn('Copy', `Ben.copy('${id}')`, 'ghost') + btn('Save as task', `Ben.quickTask(${JSON.stringify(text.slice(0, 120))})`, 'ghost');
+    say(html + `<div class="ben-row">${row}</div>`);
     return true;
   }
+  async function confirmAction(pid) {
+    const p = B.pending[pid], b = $(pid); if (!p || !b || b.disabled) return;
+    b.disabled = true; b.textContent = 'Working…';
+    try {
+      const { data, error } = await sb().functions.invoke('ben', { body: { execute: { kind: p.kind, params: p.params } } });
+      if (error) { let m = error.message; try { m = (await error.context.json()).error || m; } catch (e) { } throw new Error(m); }
+      if (!data || data.error) throw new Error((data && data.error) || 'failed');
+      b.textContent = '✓ Done — ' + (data.label || p.summary); b.classList.add('ok'); delete B.pending[pid]; B.snapAt = 0;
+      if (window.toast) window.toast('Ben: ' + (data.label || 'done'), 'success');
+    } catch (e) { b.disabled = false; b.textContent = '✔ ' + (p.summary || p.kind); say(`Couldn't do that: ${esc(e.message)}`); }
+  }
+  function copyReply(id) { const t = B.replies[id] || ''; try { navigator.clipboard.writeText(t); if (window.toast) window.toast('Copied', 'success'); } catch (e) { } }
+  /* attachments */
+  const OK_EXT = ['pdf', 'docx', 'xlsx', 'xls', 'csv', 'txt', 'md', 'png', 'jpg', 'jpeg', 'webp'];
+  function addFiles(list) {
+    for (const f of [...(list || [])]) {
+      const ext = (f.name.split('.').pop() || '').toLowerCase();
+      if (!OK_EXT.includes(ext)) { say(`Can't read .${esc(ext)} files — use PDF, Word (.docx), Excel, CSV, text or images.`); continue; }
+      if (f.size > 15 * 1048576) { say(`${esc(f.name)} is over 15 MB — export a smaller PDF.`); continue; }
+      if (B.files.length >= 3) { say('Up to 3 files per message.'); break; }
+      const r = new FileReader(); r.onload = () => { B.files.push({ name: f.name, mime: f.type || '', data: String(r.result).split(',')[1] || '', size: f.size }); drawFiles(); }; r.readAsDataURL(f);
+    }
+  }
+  function drawFiles() { const e = $('ben-files'); if (!e) return; e.innerHTML = B.files.map((f, i) => `<span class="ben-file">📎 ${esc(f.name)} <button type="button" aria-label="Remove" onclick="Ben.unfile(${i})">×</button></span>`).join(''); e.style.display = B.files.length ? 'flex' : 'none'; }
+  async function ask(text) { toggle(true); await new Promise(r => setTimeout(r, 200)); return run(text); }
 
   async function run(raw) {
-    const text = String(raw || '').trim(); if (!text || B.busy) return;
-    say(esc(text), 'me'); B.busy = true; typing(true);
+    let text = String(raw || '').trim(); if (B.busy) return;
+    if (!text && B.files.length) text = 'Review the attached file(s): summarise, assess and tell me what is missing and the next steps.';
+    if (!text) return;
+    say(esc(text) + (B.files.length ? `<div class="ben-dim" style="color:#cfe3d8">📎 ${B.files.map(f => esc(f.name)).join(', ')}</div>` : ''), 'me'); B.busy = true; typing(true);
     const t = text.toLowerCase().replace(/[?!.]+$/, '');
     try {
       let m;
@@ -231,8 +300,9 @@
       else if (/^(brief|briefing|brief me|daily brief|morning brief|status|summary|overview|dashboard summary|what'?s (up|new|happening))\b/.test(t)) await brief();
       else if (/^(my )?(tasks|to-?dos|reminders|agenda)$|^what'?s (due|on my plate)|^show (my )?(tasks|reminders|agenda)/.test(t)) await listTasks();
       else if (/^(remind|reminder|add (a )?(task|to-?do|reminder)|create (a )?(task|to-?do|reminder)|new (task|to-?do)|to-?do\b|task\b|follow up)/.test(t)) await taskFrom(text, false);
-      else if (/^(schedule|plan|book|set up)\b/.test(t)) await taskFrom(text, true);
+      else if ((B.ai ? /^(schedule|book)\b/ : /^(schedule|plan|book|set up)\b/).test(t)) await taskFrom(text, true);
       else if ((m = t.match(/^(?:open|go to|goto|take me to|navigate to|show me|show|view)\s+(.+)$/)) && findPanel(m[1])) { const p = findPanel(m[1]); go(p.id); say(`Opened <b>${esc(p.label)}</b>.`); }
+      else if (B.ai && (B.files.length || t.split(' ').length > 3 || /\b(write|draft|article|blog|analy[sz]|assess|review|deck|pitch|proposal|readiness|market|research|compare|summari[sz]e|recommend|strategy|plan|explain|why|how)\b/.test(t))) { if (!(await ai(text))) help(); }
       else if ((m = t.match(/^(?:find|search( for)?|look ?up|who is|lookup)\s+(.+)$/))) await search(text.slice(text.replace(/[?!.]+$/, '').length - m[m.length - 1].length, text.replace(/[?!.]+$/, '').length));
       else if ((m = t.match(/^(?:create|new|add|make|draft|send)\s+(?:an?\s+|new\s+)?(.+)$/)) && CREATE.some(c => c[0].test(m[1])) && !(B.ai && m[1].split(' ').length > 3)) { const c = CREATE.find(c => c[0].test(m[1])); go(c[1]); say(`Opened <b>${esc((panels().find(p => p.id === c[1]) || {}).label || c[1])}</b>. ${esc(c[2])}`); }
       else if (/\b(recommend|suggest|what should i|priorit|needs? (my )?attention|next steps?|focus)\b/.test(t) && !(B.ai && t.split(' ').length > 8)) await recommend();
@@ -274,7 +344,7 @@
   #ben-switch{width:38px;height:22px;border-radius:999px;background:rgba(255,255,255,.25);position:relative;transition:background .2s;flex:none}
   #ben-switch::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .2s}
   #ben-toggle.on #ben-switch{background:#e9c349}#ben-toggle.on #ben-switch::after{left:19px}
-  #ben-panel{position:fixed;left:50%;bottom:72px;transform:translate(-50%,16px);width:min(560px,calc(100vw - 24px));height:min(640px,calc(100dvh - 100px));z-index:160;background:#fff;border:1px solid rgba(0,53,39,.14);border-radius:18px;box-shadow:0 24px 60px rgba(0,30,20,.25);display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .18s,transform .18s;font:14px/1.5 'Inter',system-ui,sans-serif;color:#1b1c1a}
+  #ben-panel{position:fixed;left:50%;bottom:72px;transform:translate(-50%,16px);width:min(560px,calc(100vw - 24px));height:min(640px,calc(100dvh - 100px));z-index:1100;background:#fff;border:1px solid rgba(0,53,39,.14);border-radius:18px;box-shadow:0 24px 60px rgba(0,30,20,.25);display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .18s,transform .18s;font:14px/1.5 'Inter',system-ui,sans-serif;color:#1b1c1a}
   #ben-panel.open{opacity:1;pointer-events:auto;transform:translate(-50%,0)}
   .ben-hd{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid rgba(0,53,39,.1)}
   .ben-hd b{font-size:15px}.ben-hd span.s{font-size:12px;color:#4a524d}
@@ -307,23 +377,39 @@
     #ben-panel{left:0;right:0;bottom:0;width:100%;height:calc(100dvh - 64px);transform:translateY(24px);border-radius:18px 18px 0 0}#ben-panel.open{transform:none}
     #ben-panel .ben-ft{padding-bottom:calc(12px + env(safe-area-inset-bottom))}.ben-kpis{grid-template-columns:repeat(2,1fr)}}
   body.ben-open .toast-container{bottom:84px}
+  #ben-panel.wide{width:min(980px,calc(100vw - 24px));height:min(860px,calc(100dvh - 90px))}#ben-panel.drop{outline:3px dashed #0a5c40;outline-offset:-6px}
+  .ben-md p{margin:0 0 8px}.ben-md p:last-child{margin-bottom:0}.ben-md hr{border:0;border-top:1px solid rgba(0,53,39,.12);margin:10px 0}
+  .ben-h1,.ben-h2{font-weight:800;font-size:15px;color:#003527;margin:10px 0 4px}.ben-h3{font-weight:700;font-size:13.5px;color:#0d1b14;margin:8px 0 3px}
+  .ben-tw{overflow-x:auto;margin:6px 0}.ben-tw table{border-collapse:collapse;font-size:12.5px;min-width:100%}.ben-tw th,.ben-tw td{border:1px solid rgba(0,53,39,.14);padding:5px 8px;text-align:left;vertical-align:top}.ben-tw th{background:#eaf1ec;color:#0d1b14}
+  .ben-done{margin-top:8px;font-size:12.5px;color:#0a5c40;background:#e9f4ed;border-radius:8px;padding:6px 9px}
+  .ben-confirm{background:#735c00!important;border-color:#735c00!important}.ben-confirm.ok{background:#0a5c40!important;border-color:#0a5c40!important;cursor:default}
+  .ben-src{margin-top:8px;font-size:12px}.ben-src summary{cursor:pointer;color:#0a5c40;font-weight:600}.ben-src ol{padding-left:18px;margin:4px 0}
+  .ben-files{flex-wrap:wrap;gap:6px;padding:8px 12px 0}.ben-file{display:inline-flex;align-items:center;gap:4px;background:#eef3ef;border-radius:999px;padding:3px 4px 3px 10px;font-size:12px;color:#1b1c1a}.ben-file button{border:0;background:none;cursor:pointer;font-size:15px;color:#4a524d}
+  .ben-clip{display:grid;place-items:center;width:40px;border:1px solid rgba(0,53,39,.2);border-radius:12px;cursor:pointer;font-size:17px;flex:none}.ben-clip:hover{background:#f1f5f1}
   .panel.active{padding-bottom:76px}`;
-  const CHIPS = [['☀️ Brief me', 'brief me'], ['🎯 What next?', 'what should I do next?'], ['✅ My tasks', 'my tasks'], ['⏰ Remind me…', 'remind me to '], ['📅 Schedule…', 'schedule '], ['🔎 Find…', 'find '], ['🧾 New invoice', 'create invoice'], ['❓ Help', 'help']];
+  const CHIPS = [['☀️ Brief me', 'brief me'], ['🎯 What next?', 'what should I do next? Review pending members, submissions, enquiries and tasks and recommend priorities.'], ['📄 Review a deck', '@attach'], ['🧭 Investor readiness…', 'Assess the investor readiness of '], ['📊 Market analysis…', 'Market analysis: '], ['✍️ Write article…', 'Write an article about '], ['✅ My tasks', 'my tasks'], ['⏰ Remind me…', 'remind me to '], ['🔎 Find…', 'find '], ['❓ Help', 'help']];
 
   function mount() {
     if ($('ben-toggle') || !document.body) return;
     const st = document.createElement('style'); st.textContent = CSS; document.head.appendChild(st);
     document.body.insertAdjacentHTML('beforeend', `
       <div id="ben-panel" role="dialog" aria-label="Ben assistant"><div class="ben-hd"><div class="ben-av" style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#e9c349,#b8902a);display:grid;place-items:center;font-weight:800;color:#003527">B</div>
-        <div><b>Ben</b><br><span class="s">Chief of staff · navigate, manage, create, schedule, recommend</span></div><span id="ben-mode" class="ben-mode">…</span><button class="ben-x" aria-label="Close Ben" onclick="Ben.toggle(false)">×</button></div>
-        <div id="ben-log" aria-live="polite"></div><div id="ben-typing"><i></i><i></i><i></i></div>
+        <div><b>Ben</b><br><span class="s">Chief of staff · decks, readiness, markets, articles, actions</span></div><span id="ben-mode" class="ben-mode">…</span><button class="ben-x" id="ben-expand" title="Expand" aria-label="Expand Ben">⤢</button><button class="ben-x" aria-label="Close Ben" onclick="Ben.toggle(false)">×</button></div>
+        <div id="ben-log" aria-live="polite"></div><div id="ben-typing"><i></i><i></i><i></i><span id="ben-typing-t" class="ben-dim" style="margin-left:6px"></span></div>
         <div class="ben-chips">${CHIPS.map(c => `<button type="button" data-c="${esc(c[1])}">${c[0]}</button>`).join('')}</div>
-        <form class="ben-ft" id="ben-form"><textarea id="ben-in" rows="1" placeholder="Tell Ben what to do…  e.g. remind me to call Hopp tomorrow 3pm" aria-label="Command Ben"></textarea><button class="ben-send" type="submit">Send</button></form></div>
+        <div id="ben-files" class="ben-files" style="display:none"></div>
+        <form class="ben-ft" id="ben-form"><label class="ben-clip" title="Attach a deck, proposal, model or document" aria-label="Attach files"><span aria-hidden="true">📎</span><input type="file" id="ben-file" multiple hidden accept=".pdf,.docx,.xlsx,.xls,.csv,.txt,.md,.png,.jpg,.jpeg,.webp"/></label><textarea id="ben-in" rows="1" placeholder="Ask Ben anything, or attach a deck…" aria-label="Command Ben"></textarea><button class="ben-send" type="submit">Send</button></form></div>
       <button id="ben-toggle" type="button" aria-expanded="false" aria-controls="ben-panel" title="Ben — Ctrl/⌘ + J"><span class="ben-av">B</span><span class="ben-lbl">Ben<small>Command &amp; recommendations</small></span><span id="ben-switch" role="switch" aria-checked="false"></span></button>`);
     $('ben-toggle').onclick = () => toggle();
     $('ben-form').onsubmit = e => { e.preventDefault(); const v = $('ben-in').value; $('ben-in').value = ''; run(v); };
     $('ben-in').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('ben-form').requestSubmit(); } if (e.key === 'Escape') toggle(false); });
-    document.querySelectorAll('.ben-chips button').forEach(b => b.onclick = () => { const c = b.dataset.c; if (/ $/.test(c)) { $('ben-in').value = c; $('ben-in').focus(); } else run(c); });
+    document.querySelectorAll('.ben-chips button').forEach(b => b.onclick = () => { const c = b.dataset.c; if (c === '@attach') { $('ben-file').click(); $('ben-in').placeholder = 'Optional: what should Ben focus on?'; return; } if (/ $/.test(c)) { $('ben-in').value = c; $('ben-in').focus(); } else run(c); });
+    $('ben-file').onchange = e => { addFiles(e.target.files); e.target.value = ''; $('ben-in').focus(); };
+    const panel = $('ben-panel');
+    ['dragenter', 'dragover'].forEach(ev => panel.addEventListener(ev, e => { if (e.dataTransfer && [...e.dataTransfer.types].includes('Files')) { e.preventDefault(); panel.classList.add('drop'); } }));
+    ['dragleave', 'drop'].forEach(ev => panel.addEventListener(ev, e => { panel.classList.remove('drop'); if (ev === 'drop' && e.dataTransfer && e.dataTransfer.files.length) { e.preventDefault(); addFiles(e.dataTransfer.files); } }));
+    $('ben-in').addEventListener('input', () => { const i = $('ben-in'); i.style.height = 'auto'; i.style.height = Math.min(140, i.scrollHeight) + 'px'; });
+    $('ben-expand').onclick = () => panel.classList.toggle('wide');
     document.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && (e.key === 'j' || e.key === 'J')) { e.preventDefault(); toggle(); } });
     new MutationObserver(() => document.body.classList.toggle('ben-open', B.open)).observe($('ben-panel'), { attributes: true, attributeFilter: ['class'] });
     setMode();
@@ -331,7 +417,7 @@
     if (store.get('ben-open') === '1') setTimeout(() => toggle(true), 600);
   }
 
-  window.Ben = { toggle, run, go: id => { go(id); }, done, undo, ics, quickTask, addProposed, snapshot, parseWhen, __B: B };
+  window.Ben = { toggle, run, ask, go: id => { go(id); }, done, undo, ics, quickTask, addProposed, snapshot, parseWhen, confirm: confirmAction, copy: copyReply, unfile: i => { B.files.splice(i, 1); drawFiles(); }, md, __B: B };
   // Only for signed-in admins: wait for the Admin OS bootstrap (window.__OS.sb + uid)
   let tries = 0;
   (function wait() { if (OS().sb && OS().uid) { mount(); return; } if (++tries < 120) setTimeout(wait, 500); })();
