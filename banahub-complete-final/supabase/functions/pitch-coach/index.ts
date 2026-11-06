@@ -10,7 +10,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.45.4";
 
 const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
 const SITE_URL = (Deno.env.get("SITE_URL") || "https://banahub.com").replace(/\/$/, "");
-const KEY = Deno.env.get("ANTHROPIC_API_KEY") ?? "";
+const KEY = (Deno.env.get("ANTHROPIC_API_KEY") ?? "").trim();
 const MODEL = Deno.env.get("PITCH_MODEL") || Deno.env.get("BEN_MODEL") || "claude-sonnet-5-5";
 const ORIGINS = [SITE_URL, "https://banahub.com", "https://www.banahub.com"];
 const cors = (req: Request) => {
@@ -53,7 +53,7 @@ async function ai(system: string, messages: { role: "user" | "assistant"; conten
     body: JSON.stringify({ model: MODEL, max_tokens: max, system, messages }),
   });
   const j = await r.json();
-  if (!r.ok) { console.error("anthropic", r.status, JSON.stringify(j).slice(0, 400)); throw new HttpError(502, "The practice agent is unavailable — try again shortly"); }
+  if (!r.ok) { console.error("anthropic", r.status, JSON.stringify(j).slice(0, 400)); throw new HttpError(503, r.status === 401 || r.status === 403 ? "Pitch Practice is temporarily unavailable — BANAHUB has been notified" : "The practice agent is busy — try again in a minute"); }
   return (j.content || []).filter((c: any) => c.type === "text").map((c: any) => c.text).join("").trim();
 }
 
@@ -119,10 +119,13 @@ Deno.serve(async (req) => {
     const monthStart = new Date(); monthStart.setUTCDate(1); monthStart.setUTCHours(0, 0, 0, 0);
     const used = async () => (await db.from("pitch_sessions").select("id", { count: "exact", head: true }).eq("user_id", uid).gte("created_at", monthStart.toISOString())).count || 0;
     const action = String(b.action || "");
+    // Per-agent switch managed in Admin OS → Agents (live | maintenance | coming_soon | off)
+    const { data: ag } = await db.from("site_settings").select("value").eq("key", "agents").maybeSingle();
+    const agentState = (m: string) => { const a = (ag?.value || {})[m === "lp" ? "pitch_lp" : "pitch_founder"] || {}; return { status: String(a.status || "live"), message: String(a.message || "") }; };
 
     if (action === "status") {
       const personas = (m: "founder" | "lp") => Object.entries(PERSONAS[m]).map(([k, p]) => ({ key: k, label: p.label, level: p.level, locked: !paid && cfg.paid_only_personas.includes(k) }));
-      return out({ ai: !!KEY, enabled: cfg.enabled !== false, approved: isAdmin || u.status === "approved", paid, cap, used: await used(), personas: { founder: personas("founder"), lp: personas("lp") } });
+      return out({ agents: { founder: agentState("founder"), lp: agentState("lp") }, ai: !!KEY, enabled: cfg.enabled !== false, approved: isAdmin || u.status === "approved", paid, cap, used: await used(), personas: { founder: personas("founder"), lp: personas("lp") } });
     }
     if (cfg.enabled === false && !isAdmin) throw new HttpError(403, "Pitch Practice is paused — check back soon");
     if (!isAdmin && u.status !== "approved") throw new HttpError(403, "Pitch Practice opens once your membership is approved");
@@ -131,6 +134,8 @@ Deno.serve(async (req) => {
       const mode = b.mode === "lp" ? "lp" : "founder";
       const persona = String(b.persona || "");
       if (!PERSONAS[mode][persona]) throw new HttpError(400, "Choose who you want to pitch to");
+      const st = agentState(mode);
+      if (st.status !== "live" && !isAdmin) throw new HttpError(403, st.message || (st.status === "maintenance" ? "Pitch Practice is under maintenance — back shortly" : "Pitch Practice is coming soon"));
       if (!paid && cfg.paid_only_personas.includes(persona)) throw new HttpError(402, `${PERSONAS[mode][persona].label} practice is part of the paid membership`);
       const n = await used();
       if (n >= cap) throw new HttpError(402, paid ? `You've used all ${cap} practice sessions this month` : `Free plan includes ${cap} practice session${cap === 1 ? "" : "s"} a month — upgrade for more`);
@@ -152,6 +157,7 @@ Deno.serve(async (req) => {
 
     if (action === "turn") {
       if (s.status !== "active") throw new HttpError(409, "This session has ended");
+      if (agentState(s.mode).status === "maintenance" && !isAdmin) throw new HttpError(503, agentState(s.mode).message || "Pitch Practice is under maintenance — your session is saved, try again shortly");
       const text = clip(b.text, 4000).trim();
       if (!text) throw new HttpError(400, "Say something first");
       if (s.turns >= cfg.max_turns) throw new HttpError(409, "Session length reached — end it to get your score");

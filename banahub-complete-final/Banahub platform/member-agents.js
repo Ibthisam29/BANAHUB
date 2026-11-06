@@ -60,20 +60,26 @@
     if (A.sid) return; const root = $('ag-root'); root.innerHTML = '<div class="ag-load">Loading…</div>';
     try {
       const sb = await sbc(); const { data: { user } } = await sb.auth.getUser(); if (!user) { root.innerHTML = '<div class="glass-card sect">Please sign in.</div>'; return; }
-      const [st, me, raises, inv, hist] = await Promise.all([
+      const [st, me, raises, inv, hist, siteAg] = await Promise.all([
         call('status'),
         sb.from('users').select('id,full_name,role,member_category,status').eq('id', user.id).maybeSingle().then(r => r.data),
         sb.from('deal_rooms').select('id,company_name,stage,deck_path,deck_name').eq('submitted_by', user.id).order('created_at', { ascending: false }).then(r => r.data || [], () => []),
         sb.from('investors').select('id,organization,deck_path,deck_name').eq('user_id', user.id).maybeSingle().then(r => r.data, () => null),
         sb.from('pitch_sessions').select('id,mode,persona,difficulty,status,score,summary,turns,created_at').eq('user_id', user.id).order('created_at', { ascending: false }).limit(30).then(r => r.data || [], () => []),
+        sb.from('site_settings').select('value').eq('key', 'agents').maybeSingle().then(r => (r.data && r.data.value) || {}, () => ({})),
       ]);
-      Object.assign(A, { st, me: me || {}, raises, inv, history: hist });
-      if (!A.mode) A.mode = inv || /investor|fund|office|LP|PE|VC/i.test((me || {}).member_category || '') || (me || {}).role === 'investor' ? 'lp' : 'founder';
+      Object.assign(A, { st, me: me || {}, raises, inv, history: hist, site: siteAg || {} });
+      const live = m => agState(m).status !== 'off';
+      if (A.mode && !live(A.mode)) A.mode = null;
+      if (!A.mode) A.mode = !live('founder') ? 'lp' : !live('lp') ? 'founder' : inv || /investor|fund|office|LP|PE|VC/i.test((me || {}).member_category || '') || (me || {}).role === 'investor' ? 'lp' : 'founder';
       home();
     } catch (e) { root.innerHTML = `<div class="glass-card sect" style="color:#ba1a1a">${esc(e.message)}</div>`; }
   }
 
   const personas = () => (A.st && A.st.personas && A.st.personas[A.mode]) || [];
+  const AG_KEY = { founder: 'pitch_founder', lp: 'pitch_lp' };
+  function agState(m) { const k = AG_KEY[m] || m, a = ((A.st && A.st.agents && A.st.agents[m]) || (A.site || {})[k] || {}); return { status: a.status || 'live', message: a.message || '' }; }
+  const STATUS_TXT = { coming_soon: 'Coming soon', maintenance: 'Under maintenance', off: 'Unavailable' };
   const plabel = (mode, key) => (((A.st && A.st.personas && A.st.personas[mode]) || []).find(p => p.key === key) || {}).label || key;
   function home() {
     const st = A.st || {}, P = personas();
@@ -81,13 +87,14 @@
     const left = Math.max(0, (st.cap || 0) - (st.used || 0));
     const last = A.history.find(h => h.mode === A.mode && h.score && h.score.overall != null);
     const deck = A.mode === 'lp' ? A.inv && A.inv.deck_path && A.inv : A.raises.find(r => r.deck_path);
-    const blocked = !st.approved ? 'Pitch Practice opens once BANAHUB approves your membership.' : !st.enabled ? 'Pitch Practice is paused — check back soon.' : !st.ai ? 'Pitch Practice is being switched on by BANAHUB — check back shortly.' : left <= 0 ? (st.paid ? `You've used all ${st.cap} sessions this month.` : `Free plan includes ${st.cap} session${st.cap === 1 ? '' : 's'} a month — upgrade your membership for ${'more'}.`) : '';
+    const ags = agState(A.mode), agBlocked = ags.status !== 'live';
+    const blocked = agBlocked ? (ags.message || (ags.status === 'maintenance' ? 'Pitch Practice is under maintenance — back shortly.' : 'Pitch Practice is coming soon — we\'ll let you know when it opens.')) : !st.approved ? 'Pitch Practice opens once BANAHUB approves your membership.' : !st.enabled ? 'Pitch Practice is paused — check back soon.' : !st.ai ? 'Pitch Practice is being switched on by BANAHUB — check back shortly.' : left <= 0 ? (st.paid ? `You've used all ${st.cap} sessions this month.` : `Free plan includes ${st.cap} session${st.cap === 1 ? '' : 's'} a month — upgrade your membership for ${'more'}.`) : '';
     $('ag-root').innerHTML = `
       <div class="ag-hero"><div><div class="ag-eye">Agents</div><h2>Practise with an AI investor before the real meeting</h2><p>Pitch out loud, get grilled like a real ${A.mode === 'lp' ? 'LP' : 'investor'} meeting, then receive a score and coaching. Private to you.</p></div>
         <div class="ag-plan"><b>${st.paid ? 'Member' : 'Free plan'}</b><span>${st.used || 0} / ${st.cap || 0} sessions this month</span>${st.paid ? '' : '<a href="#" onclick="switchTab(\'memberships\',null,\'top-memberships\');return false">Upgrade →</a>'}</div></div>
       <div class="glass-card ag-feat">
-        <div class="ag-feat-hd"><span class="material-symbols-outlined">mic</span><h3>${A.mode === 'lp' ? 'Practice your LP pitch' : 'Practice your investor pitch'}</h3><span class="ag-new">New</span>
-          <div class="ag-seg" role="tablist"><button type="button" class="${A.mode === 'founder' ? 'on' : ''}" onclick="agMode('founder')">Company → investors</button><button type="button" class="${A.mode === 'lp' ? 'on' : ''}" onclick="agMode('lp')">Fund → LPs</button></div></div>
+        <div class="ag-feat-hd"><span class="material-symbols-outlined">mic</span><h3>${A.mode === 'lp' ? 'Practice your LP pitch' : 'Practice your investor pitch'}</h3><span class="ag-new ${agBlocked ? 'ag-soon' : ''}">${agBlocked ? STATUS_TXT[ags.status] || 'Coming soon' : 'New'}</span>
+          <div class="ag-seg" role="tablist">${agState('founder').status !== 'off' ? `<button type="button" class="${A.mode === 'founder' ? 'on' : ''}" onclick="agMode('founder')">Company → investors</button>` : ''}${agState('lp').status !== 'off' ? `<button type="button" class="${A.mode === 'lp' ? 'on' : ''}" onclick="agMode('lp')">Fund → LPs</button>` : ''}</div></div>
         <p class="ag-d">${A.mode === 'lp' ? 'Rehearse your fund pitch with a realistic prospective LP, then get a score and coaching.' : 'Rehearse your raise with a realistic investor, then get a score and coaching.'}</p>
         <div class="ag-lab">Who do you want to pitch?</div>
         <div class="ag-personas">${P.map(p => `<label class="ag-p ${p.locked ? 'locked' : ''} ${A.persona === p.key ? 'on' : ''}"><input type="radio" name="ag-p" value="${p.key}" ${A.persona === p.key ? 'checked' : ''} ${p.locked ? 'disabled' : ''} onchange="agPersona('${p.key}')"/><span class="ag-av">${AV[p.key] || '🧑‍💼'}</span><span><b>${esc(p.label)}</b><i style="color:${LEVEL[p.level][1]};background:${LEVEL[p.level][2]}">${LEVEL[p.level][0]}</i>${p.locked ? '<em>🔒 Member</em>' : ''}</span></label>`).join('')}</div>
@@ -96,22 +103,22 @@
           ${A.mode === 'founder' && A.raises.length > 1 ? `<label>Raise <select id="ag-raise" class="f-in">${A.raises.map(r => `<option value="${r.id}">${esc(r.company_name)} · ${esc(r.stage || '')}</option>`).join('')}</select></label>` : ''}
           <label class="ag-chk"><input type="checkbox" id="ag-deck" ${deck ? 'checked' : 'disabled'}/> ${deck ? `Use my deck (${esc(deck.deck_name || 'uploaded')})` : 'No deck uploaded — <a href="#" onclick="switchTab(\'submit\',null,\'top-submit\');return false">add one</a>'}</label>
           <label class="ag-chk"><input type="checkbox" id="ag-voice" ${A.voiceOn ? 'checked' : ''} ${VOICE.ttsSupported ? '' : 'disabled'}/> Investor speaks out loud</label></div>
-        ${blocked ? `<div class="ag-block">${esc(blocked)}</div>` : ''}
-        <div class="ag-cta"><button type="button" class="btn-p ag-call" onclick="agStart()" ${blocked || !A.persona ? 'disabled' : ''}><span class="material-symbols-outlined">call</span> Call ${esc(plabel(A.mode, A.persona) || '')}</button>
+        ${blocked ? `<div class="ag-block ${agBlocked ? 'ag-block-soon' : ''}">${agBlocked ? '<b>' + esc(STATUS_TXT[ags.status] || 'Coming soon') + '</b> · ' : ''}${esc(blocked)}</div>` : ''}
+        <div class="ag-cta"><button type="button" class="btn-p ag-call" onclick="agStart()" ${blocked || !A.persona ? 'disabled' : ''}><span class="material-symbols-outlined">${agBlocked ? 'schedule' : 'call'}</span> ${agBlocked ? esc(STATUS_TXT[ags.status] || 'Coming soon') : 'Call ' + esc(plabel(A.mode, A.persona) || '')}</button>
           <span class="ag-sub">${last ? `Last time: <b>${last.score.overall}/10</b> with ${esc(plabel(last.mode, last.persona))} · <a href="#" onclick="agHistory();return false">See progress</a>` : VOICE.sttSupported ? 'Uses your microphone · works best in Chrome, Edge or Safari' : 'Voice input isn\'t supported in this browser — you can type your answers'}</span></div>
       </div>
       <div class="ag-sec">More agents</div>
       <div class="ag-grid">
-        ${card('Practice your investor pitch', 'Rehearse your raise with VCs, angels, family offices and corporates.', 'Fundraising', "agMode('founder')")}
-        ${card('Practice your LP pitch', 'Rehearse your fund pitch with HNWs, family offices and institutional LPs.', 'Fundraising', "agMode('lp')")}
+        ${agState('founder').status !== 'off' ? card('Practice your investor pitch', 'Rehearse your raise with VCs, angels, family offices and corporates.', agState('founder').status === 'live' ? 'Fundraising' : STATUS_TXT[agState('founder').status], "agMode('founder')") : ''}
+        ${agState('lp').status !== 'off' ? card('Practice your LP pitch', 'Rehearse your fund pitch with HNWs, family offices and institutional LPs.', agState('lp').status === 'live' ? 'Fundraising' : STATUS_TXT[agState('lp').status], "agMode('lp')") : ''}
         ${card('Data Room', 'Organise diligence files, share with approved investors, see who viewed what.', 'Deals', "switchTab('dataroom',null,'top-dataroom')")}
         ${card('My Capital Raise', 'Enter your raise or investor mandate — free.', 'Fundraising', "switchTab('submit',null,'top-submit')")}
-        ${card('Deal memo writer', 'Draft an investment memo from your data room.', 'Coming soon', '')}
-        ${card('LP / investor objection advisor', 'Get advice on how to respond to tough objections.', 'Coming soon', '')}
+        ${agState('deal_memo').status !== 'off' ? card('Deal memo writer', 'Draft an investment memo from your data room.', STATUS_TXT[agState('deal_memo').status] || 'Coming soon', '') : ''}
+        ${agState('objection_advisor').status !== 'off' ? card('LP / investor objection advisor', 'Get advice on how to respond to tough objections.', STATUS_TXT[agState('objection_advisor').status] || 'Coming soon', '') : ''}
       </div>
       ${A.history.length ? `<div class="ag-sec">Recent sessions</div><div class="glass-card ag-hist">${histRows(A.history.slice(0, 6))}</div>` : ''}`;
   }
-  const card = (t, d, tag, js) => `<button type="button" class="ag-card" ${js ? `onclick="${js};window.scrollTo({top:0,behavior:'smooth'})"` : 'disabled'}><b>${esc(t)}</b><span>${esc(d)}</span><i class="${tag === 'Coming soon' ? 'soon' : ''}">${esc(tag)}</i></button>`;
+  const card = (t, d, tag, js) => `<button type="button" class="ag-card" ${js ? `onclick="${js};window.scrollTo({top:0,behavior:'smooth'})"` : 'disabled'}><b>${esc(t)}</b><span>${esc(d)}</span><i class="${/Coming soon|maintenance|Unavailable/.test(tag) ? 'soon' : ''}">${esc(tag)}</i></button>`;
   const histRows = rows => rows.map(h => `<button type="button" class="ag-hrow" onclick="agView('${h.id}')"><span class="ag-av">${AV[h.persona] || '🧑‍💼'}</span><span class="ag-hm"><b>${esc(plabel(h.mode, h.persona))}</b><em>${h.mode === 'lp' ? 'LP pitch' : 'Investor pitch'} · ${new Date(h.created_at).toLocaleDateString('en-SG', { day: 'numeric', month: 'short' })} · ${h.turns || 0} exchanges</em></span><span class="ag-hs ${h.score && h.score.overall >= 7 ? 'good' : h.score && h.score.overall >= 5 ? 'mid' : ''}">${h.score && h.score.overall != null ? h.score.overall + '/10' : h.status === 'active' ? 'Unfinished' : '—'}</span></button>`).join('');
 
   /* ---------- deck text (owner reads own deck from private bucket) ---------- */
@@ -246,7 +253,7 @@
   .ag-sec{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#3a433e;margin:22px 0 8px}
   .ag-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
   .ag-card{text-align:left;border:1px solid rgba(0,53,39,.12);background:#fff;border-radius:12px;padding:14px;cursor:pointer;display:flex;flex-direction:column;gap:5px;font:inherit;color:#1b1c1a}.ag-card:hover:not(:disabled){border-color:#003527}
-  .ag-card b{font-size:14.5px;color:#0d1b14}.ag-card span{font-size:13px;color:#3a433e}.ag-card i{font-style:normal;align-self:flex-start;font-size:11px;font-weight:600;color:#1d3d6b;background:#e6eef9;border-radius:6px;padding:2px 7px;margin-top:4px}.ag-card i.soon{color:#5a5a5a;background:#eee}.ag-card:disabled{cursor:default;opacity:.75}
+  .ag-card b{font-size:14.5px;color:#0d1b14}.ag-card span{font-size:13px;color:#3a433e}.ag-card i{font-style:normal;align-self:flex-start;font-size:11px;font-weight:600;color:#1d3d6b;background:#e6eef9;border-radius:6px;padding:2px 7px;margin-top:4px}.ag-card i.soon{color:#5a5a5a;background:#eee}.ag-new.ag-soon{color:#5a4a00;background:#f1e6bf}.ag-block-soon{background:#eef3ef!important;color:#0d1b14!important}.ag-card:disabled{cursor:default;opacity:.75}
   .ag-hist{padding:6px!important;display:flex;flex-direction:column}.ag-hrow{display:flex;align-items:center;gap:10px;border:0;background:none;padding:8px;border-radius:10px;cursor:pointer;text-align:left;font:inherit;color:#1b1c1a}.ag-hrow:hover{background:#f3f6f3}
   .ag-hm{flex:1;min-width:0}.ag-hm b{display:block;font-size:13.5px}.ag-hm em{font-style:normal;font-size:12px;color:#3a433e}.ag-hs{font-weight:700;color:#8c1d18}.ag-hs.mid{color:#7a5000}.ag-hs.good{color:#0a5c40}
   .ag-call-wrap{padding:0!important;display:flex;flex-direction:column;height:min(78vh,760px);overflow:hidden}

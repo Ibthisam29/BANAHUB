@@ -413,11 +413,22 @@
     document.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && (e.key === 'j' || e.key === 'J')) { e.preventDefault(); toggle(); } });
     new MutationObserver(() => document.body.classList.toggle('ben-open', B.open)).observe($('ben-panel'), { attributes: true, attributeFilter: ['class'] });
     setMode();
-    sb().functions.invoke('ben', { body: { probe: true } }).then(r => { B.ai = !!(r && r.data && r.data.ai); B.aiReason = (r && r.data && r.data.reason) || (r && r.error && r.error.message) || ''; setMode(); }).catch(e => { B.ai = false; B.aiReason = e.message; setMode(); });
+    refresh();
     if (store.get('ben-open') === '1') setTimeout(() => toggle(true), 600);
   }
 
-  window.Ben = { toggle, run, ask, go: id => { go(id); }, done, undo, ics, quickTask, addProposed, snapshot, parseWhen, confirm: confirmAction, copy: copyReply, unfile: i => { B.files.splice(i, 1); drawFiles(); }, md, __B: B };
+  // AI health + Agent Control switch (site_settings.agents.ben): live → AI; maintenance / coming_soon → built-in only; off → hide Ben
+  async function refresh() {
+    try {
+      const ag = await sb().from('site_settings').select('value').eq('key', 'agents').maybeSingle().then(r => ((r.data && r.data.value) || {}).ben || {}, () => ({}));
+      const t = $('ben-toggle'); if (t) t.style.display = ag.status === 'off' ? 'none' : ''; if (ag.status === 'off') toggle(false);
+      if (ag.status && ag.status !== 'live') { B.ai = false; B.aiReason = `Ben AI is set to “${ag.status.replace('_', ' ')}” in Agent Control${ag.message ? ' — ' + ag.message : ''}`; setMode(); return; }
+      const r = await sb().functions.invoke('ben', { body: { probe: true } });
+      B.ai = !!(r && r.data && r.data.ai); B.aiReason = (r && r.data && r.data.reason) || (r && r.error && r.error.message) || '';
+    } catch (e) { B.ai = false; B.aiReason = e.message; }
+    setMode();
+  }
+  window.Ben = { refresh, toggle, run, ask, go: id => { go(id); }, done, undo, ics, quickTask, addProposed, snapshot, parseWhen, confirm: confirmAction, copy: copyReply, unfile: i => { B.files.splice(i, 1); drawFiles(); }, md, __B: B };
   // Only for signed-in admins: wait for the Admin OS bootstrap (window.__OS.sb + uid)
   let tries = 0;
   (function wait() { if (OS().sb && OS().uid) { mount(); return; } if (++tries < 120) setTimeout(wait, 500); })();

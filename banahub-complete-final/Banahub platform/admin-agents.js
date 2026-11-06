@@ -19,12 +19,12 @@
     if ($('panel-os-datarooms')) return true;
     const g = $('os-cap-nav-group'); if (!g) return false;
     const after = g.querySelector('[data-os-nav="os-submissions"]') || g.querySelector('.nav-item:last-child'); if (!after) return false;
-    after.insertAdjacentHTML('afterend', '<button class="nav-item" onclick="nav(\'os-datarooms\')" data-os-nav="os-datarooms"><span class="nav-icon material-symbols-outlined">folder_shared</span>Data Rooms</button><button class="nav-item" onclick="nav(\'os-pitch\')" data-os-nav="os-pitch"><span class="nav-icon material-symbols-outlined">mic</span>Pitch Practice</button>');
+    after.insertAdjacentHTML('afterend', '<button class="nav-item" onclick="nav(\'os-agentctl\')" data-os-nav="os-agentctl"><span class="nav-icon material-symbols-outlined">smart_toy</span>Agent Control</button><button class="nav-item" onclick="nav(\'os-datarooms\')" data-os-nav="os-datarooms"><span class="nav-icon material-symbols-outlined">folder_shared</span>Data Rooms</button><button class="nav-item" onclick="nav(\'os-pitch\')" data-os-nav="os-pitch"><span class="nav-icon material-symbols-outlined">mic</span>Pitch Practice</button>');
     const host = $('panel-dashboard').parentNode;
-    host.insertAdjacentHTML('beforeend', '<div id="panel-os-datarooms" class="panel"></div><div id="panel-os-pitch" class="panel"></div>');
+    host.insertAdjacentHTML('beforeend', '<div id="panel-os-agentctl" class="panel"></div><div id="panel-os-datarooms" class="panel"></div><div id="panel-os-pitch" class="panel"></div>');
     document.body.insertAdjacentHTML('beforeend', MODAL);
     const st = document.createElement('style'); st.textContent = CSS; document.head.appendChild(st);
-    if (typeof panelMeta !== 'undefined') { panelMeta['os-datarooms'] = ['Data Rooms', 'Member data rooms — grant investor access, see files and views']; panelMeta['os-pitch'] = ['Pitch Practice', 'AI pitch agents — plan limits, personas and sessions']; }
+    if (typeof panelMeta !== 'undefined') { panelMeta['os-datarooms'] = ['Data Rooms', 'Member data rooms — grant investor access, see files and views']; panelMeta['os-pitch'] = ['Pitch Practice', 'AI pitch agents — plan limits, personas and sessions']; panelMeta['os-agentctl'] = ['Agent Control', 'Switch each AI agent live, into maintenance, coming soon or off']; }
     return true;
   }
 
@@ -164,8 +164,53 @@
     } catch (e) { notify(e.message, 'error'); }
   }
 
+  /* ---------------- Agent control ---------------- */
+  const AGENTS = [
+    ['ben', 'Ben — chief of staff', 'Admin OS', 'AI assistant for you: briefs, deck review, readiness, market analysis, articles, actions.', 'smart_toy'],
+    ['pitch_founder', 'Practice your investor pitch', 'Members · companies', 'Voice role-play with an AI investor, then a scorecard.', 'mic'],
+    ['pitch_lp', 'Practice your LP pitch', 'Members · fund managers', 'Voice role-play with an AI LP, then a scorecard.', 'record_voice_over'],
+    ['deal_memo', 'Deal memo writer', 'Members', 'Drafts an investment memo from a data room.', 'description'],
+    ['objection_advisor', 'Objection advisor', 'Members', 'Coaching on how to answer tough investor / LP objections.', 'forum'],
+    ['dataroom_ai', 'Ask this data room', 'Investors with access', 'Q&A over the files an investor can see.', 'folder_shared'],
+  ];
+  const ST = { live: ['Live', '#0a5c40', '#e3f1e8'], maintenance: ['Maintenance', '#7a5000', '#fff4d6'], coming_soon: ['Coming soon', '#1d3d6b', '#e6eef9'], off: ['Off', '#5a5a5a', '#eeeeee'] };
+  async function loadCtl() {
+    const P = $('panel-os-agentctl'); P.innerHTML = '<div class="os-empty">Loading…</div>';
+    try {
+      X.ag = await q(sb().from('site_settings').select('value,updated_at').eq('key', 'agents').maybeSingle()).then(r => r || {});
+      const health = window.Ben && Ben.__B ? Ben.__B : {};
+      P.innerHTML = `
+        <div class="card" style="padding:14px;margin-bottom:14px"><div class="ag2-row"><span class="material-symbols-outlined" style="color:${health.ai ? '#0a5c40' : '#a3261d'}">${health.ai ? 'check_circle' : 'error'}</span><b>AI engine</b>
+          <span class="ag2-m">${health.ai ? 'Connected — Anthropic key accepted' : esc(health.aiReason || 'Not connected — check ANTHROPIC_API_KEY in Supabase → Edge Functions → Secrets')}</span><span style="flex:1"></span><button class="btn btn-ghost btn-sm" onclick="ag2Recheck()">Re-check</button></div>
+          <div class="ag2-m" style="margin-top:6px">Live = available · Maintenance = visible but paused (sessions saved) · Coming soon = visible, can't start · Off = hidden from members. Changes apply immediately and are enforced on the server.</div></div>
+        <div class="card" style="padding:0;overflow-x:auto"><table class="data-table"><thead><tr><th>Agent</th><th>Who sees it</th><th>Status</th><th>Message shown to users (optional)</th><th></th></tr></thead><tbody>
+        ${AGENTS.map(([k, n, who, d, ic]) => { const a = (X.ag.value || {})[k] || { status: 'live' }; const s0 = ST[a.status] || ST.live; return `<tr>
+          <td><div class="ag2-row" style="flex-wrap:nowrap"><span class="material-symbols-outlined" style="color:#003527">${ic}</span><div><b>${esc(n)}</b><div class="ag2-m">${esc(d)}</div></div></div></td>
+          <td class="ag2-m">${esc(who)}</td>
+          <td><select class="f-input ag2-st" data-k="${k}" style="min-width:150px" onchange="this.style.color=({live:'#0a5c40',maintenance:'#7a5000',coming_soon:'#1d3d6b',off:'#5a5a5a'})[this.value]">${Object.entries(ST).map(([v, l]) => `<option value="${v}" ${a.status === v ? 'selected' : ''}>${l[0]}</option>`).join('')}</select>
+            <div><span class="ag2-pill" style="color:${s0[1]};background:${s0[2]}">${s0[0]}</span></div></td>
+          <td><input class="f-input ag2-msg" data-k="${k}" maxlength="160" placeholder="e.g. Launching 1 December" value="${esc(a.message || '')}"/></td>
+          <td><button class="btn btn-primary btn-sm" onclick="ag2SaveAgent('${k}')">Save</button></td></tr>`; }).join('')}
+        </tbody></table></div>
+        <div class="ag2-m" style="margin-top:10px">Last change: ${X.ag.updated_at ? new Date(X.ag.updated_at).toLocaleString('en-SG') : '—'} · Plan limits for Pitch Practice live in <a href="#" onclick="nav('os-pitch');return false">Pitch Practice</a>.</div>`;
+    } catch (e) { P.innerHTML = `<div class="card os-empty">${esc(e.message)}</div>`; }
+  }
+  async function saveAgent(k) {
+    const st = document.querySelector(`.ag2-st[data-k="${k}"]`).value, msg = document.querySelector(`.ag2-msg[data-k="${k}"]`).value.trim().slice(0, 160);
+    try {
+      const cur = await q(sb().from('site_settings').select('value').eq('key', 'agents').maybeSingle()).then(r => (r && r.value) || {});
+      cur[k] = { status: st, message: msg, updated_at: new Date().toISOString() };
+      await q(sb().from('site_settings').upsert({ key: 'agents', value: cur, updated_at: new Date().toISOString(), updated_by: OS().uid || null }));
+      try { await sb().from('activity_logs').insert({ action: 'admin.agent_status', category: 'admin', description: `${k} → ${st}` }); } catch (e) { }
+      notify(`${(AGENTS.find(a => a[0] === k) || [0, k])[1]} → ${ST[st][0]}`);
+      if (k === 'ben' && window.Ben && Ben.refresh) Ben.refresh();
+      loadCtl();
+    } catch (e) { notify(e.message, 'error'); }
+  }
+  async function recheck() { if (window.Ben && Ben.refresh) await Ben.refresh(); setTimeout(loadCtl, 400); }
+
   const prev = window.loadPanel;
-  window.loadPanel = function (p) { if (p === 'os-datarooms') { inject(); return loadRooms(); } if (p === 'os-pitch') { inject(); return loadPitch(); } return prev && prev(p); };
+  window.loadPanel = function (p) { if (p === 'os-agentctl') { inject(); return loadCtl(); } if (p === 'os-datarooms') { inject(); return loadRooms(); } if (p === 'os-pitch') { inject(); return loadPitch(); } return prev && prev(p); };
   function ag2Ben() {
     if (!window.Ben || !Ben.ask) return notify('Ben is still loading', 'warn');
     const r = X.room;
@@ -173,12 +218,13 @@
     if (r && $('ag2-who')) Ben.ask(`Review the data room "${r.title}" (${r.deal_room_id ? 'deal_room_id ' + r.deal_room_id : 'investor_id ' + r.investor_id}): list what's there against a standard investor due-diligence checklist, what's missing, the quality of the key documents (read the most important ones), and what the owner should add next.`);
     else Ben.ask('Review the last pitch practice session shown and suggest how this member should improve.');
   }
-  Object.assign(window, { ag2Ben, ag2Room: roomModal, ag2Find: find, ag2Grant: grant, ag2Revoke: revoke, ag2Open: openFile, ag2Limits: limits, ag2Q: v => { X.q = v; drawRooms(); }, ag2SavePitch: savePitch, ag2Session: session, __AG2: X });
+  Object.assign(window, { ag2SaveAgent: saveAgent, ag2Recheck: recheck, ag2Ben, ag2Room: roomModal, ag2Find: find, ag2Grant: grant, ag2Revoke: revoke, ag2Open: openFile, ag2Limits: limits, ag2Q: v => { X.q = v; drawRooms(); }, ag2SavePitch: savePitch, ag2Session: session, __AG2: X });
 
   const MODAL = `<div id="modal-ag2" class="modal-overlay" style="display:none;z-index:1050" onclick="if(event.target===this)closeModal('modal-ag2')"><div class="modal modal-lg" style="max-width:900px">
     <div class="modal-header"><div><div class="modal-title" id="ag2-h"></div><div class="modal-sub" id="ag2-sub"></div></div><button class="modal-close" onclick="closeModal('modal-ag2')">✕</button></div>
     <div class="modal-body" id="ag2-body"></div><div class="modal-footer"><button class="btn btn-ghost" id="ag2-ben" onclick="ag2Ben()">✦ Ask Ben to review</button><span style="flex:1"></span><button class="btn btn-ghost" onclick="closeModal('modal-ag2')">Close</button></div></div></div>`;
   const CSS = `.ag2-kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:14px}.ag2-kpi{padding:12px 14px!important}.ag2-kpi b{display:block;font-size:22px;color:#003527}.ag2-kpi span{font-size:12px;color:var(--ink)}
+  .ag2-pill{display:inline-block;margin-top:4px;font-size:11px;font-weight:700;border-radius:999px;padding:2px 8px}
   .ag2-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;color:var(--ink)}.ag2-m{font-size:12px;color:var(--white-dim)}
   .ag2-set{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:10px}.ag2-set label{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--ink)}.ag2-set label:first-child{flex-direction:row;align-items:center}
   .ag2-chips{display:flex;flex-wrap:wrap;gap:6px}.ag2-chips label{border:1px solid var(--border-2);border-radius:999px;padding:4px 10px;font-size:12.5px;cursor:pointer;color:var(--ink)}.ag2-chips label.on{background:#003527;color:#fff;border-color:#003527}.ag2-chips input{display:none}
