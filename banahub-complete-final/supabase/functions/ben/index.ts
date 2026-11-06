@@ -263,6 +263,11 @@ Deno.serve(async (req) => {
     if (!u || u.role !== "admin" || u.blocked) throw new HttpError(403, "Admins only");
     const sb = createClient(URL_, ANON, { global: { headers: { Authorization: authz } }, auth: { persistSession: false } });
     const b = await req.json().catch(() => ({}));
+    // Agent Control kill switch: when Ben is not "live", never call Anthropic (no API usage / charges)
+    const { data: agRow } = await db.from("site_settings").select("value").eq("key", "agents").maybeSingle();
+    const benState = (agRow?.value || {}).ben || {};
+    const aiAllowed = !benState.status || benState.status === "live";
+    if (!aiAllowed && !b.execute) return out({ ai: false, reason: `Ben AI is switched to "${String(benState.status).replace("_", " ")}" in Agent Control — no Anthropic API calls are made` });
     if (b.probe) {
       if (!KEY) { console.log("ben probe: ANTHROPIC_API_KEY not set"); return out({ ai: false, reason: "ANTHROPIC_API_KEY is not set in Supabase Edge Function secrets" }); }
       if (!keyCheck || Date.now() - keyCheck.at > 600000) {

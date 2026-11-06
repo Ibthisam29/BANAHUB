@@ -135,7 +135,7 @@ Deno.serve(async (req) => {
       const persona = String(b.persona || "");
       if (!PERSONAS[mode][persona]) throw new HttpError(400, "Choose who you want to pitch to");
       const st = agentState(mode);
-      if (st.status !== "live" && !isAdmin) throw new HttpError(403, st.message || (st.status === "maintenance" ? "Pitch Practice is under maintenance — back shortly" : "Pitch Practice is coming soon"));
+      if (st.status !== "live") throw new HttpError(403, st.message || (st.status === "maintenance" ? "Pitch Practice is under maintenance — back shortly" : "Pitch Practice is coming soon"));
       if (!paid && cfg.paid_only_personas.includes(persona)) throw new HttpError(402, `${PERSONAS[mode][persona].label} practice is part of the paid membership`);
       const n = await used();
       if (n >= cap) throw new HttpError(402, paid ? `You've used all ${cap} practice sessions this month` : `Free plan includes ${cap} practice session${cap === 1 ? "" : "s"} a month — upgrade for more`);
@@ -155,6 +155,7 @@ Deno.serve(async (req) => {
     if (!s) throw new HttpError(404, "Session not found");
     s.max_turns = cfg.max_turns;
 
+    if ((action === "turn" || action === "end") && agentState(s.mode).status !== "live" && !s.score) throw new HttpError(503, agentState(s.mode).message || "Pitch Practice is paused — your session is saved");
     if (action === "turn") {
       if (s.status !== "active") throw new HttpError(409, "This session has ended");
       if (agentState(s.mode).status === "maintenance" && !isAdmin) throw new HttpError(503, agentState(s.mode).message || "Pitch Practice is under maintenance — your session is saved, try again shortly");
