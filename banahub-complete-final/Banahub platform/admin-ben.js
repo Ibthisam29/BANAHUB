@@ -24,7 +24,7 @@
   const B = { files: [], pending: {}, replies: {}, open: false, busy: false, ai: null, msgs: [], snap: null, snapAt: 0, lastTask: null };
 
   /* ---------- navigation map (read from the live sidebar) ---------- */
-  const ALIAS = { home: 'dashboard', overview: 'dashboard', members: 'users', member: 'users', people: 'users', invoices: 'payments', invoice: 'payments', billing: 'payments', stripe: 'payments', submissions: 'os-submissions', 'capital raise': 'os-submissions', raises: 'os-fundraisers', fundraising: 'os-fundraisers', pipeline: 'os-deals', deals: 'os-deals', tasks: 'os-tasks', todo: 'os-tasks', todos: 'os-tasks', reminders: 'os-tasks', security: 'activity', logins: 'activity', log: 'activity', prices: 'pricing', plans: 'pricing', matches: 'os-matching', matching: 'os-matching', revenue: 'os-revenue', crm: 'crm', leads: 'enquiries', enquiry: 'enquiries', inquiries: 'enquiries', partner: 'partners', 'data room': 'os-datarooms', 'data rooms': 'os-datarooms', dataroom: 'os-datarooms', pitch: 'os-pitch', 'pitch practice': 'os-pitch' };
+  const ALIAS = { home: 'dashboard', overview: 'dashboard', members: 'users', member: 'users', people: 'users', invoices: 'payments', invoice: 'payments', billing: 'payments', stripe: 'payments', submissions: 'os-submissions', 'capital raise': 'os-submissions', raises: 'os-fundraisers', fundraising: 'os-fundraisers', pipeline: 'os-deals', deals: 'os-deals', tasks: 'os-tasks', todo: 'os-tasks', todos: 'os-tasks', reminders: 'os-tasks', security: 'activity', logins: 'activity', log: 'activity', prices: 'pricing', plans: 'pricing', matches: 'os-matching', matching: 'os-matching', revenue: 'os-revenue', crm: 'crm', leads: 'enquiries', enquiry: 'enquiries', inquiries: 'enquiries', partner: 'partners', 'data room': 'os-datarooms', 'data rooms': 'os-datarooms', dataroom: 'os-datarooms', pitch: 'os-pitch', 'pitch practice': 'os-pitch', fundmatch: 'users', users: 'users', email: 'emails', emails: 'emails', campaigns: 'emails', newsletter: 'emails', 'agent control': 'os-agentctl', agents: 'os-agentctl' };
   function panels() {
     const seen = {}, out = [];
     document.querySelectorAll('.nav-item[onclick*="nav("]').forEach(b => {
@@ -84,7 +84,7 @@
     if (S.open_enquiries.high_priority || S.open_enquiries.older_than_2_days) r.push({ p: 1, t: `Reply to enquiries — ${S.open_enquiries.high_priority} high priority, ${S.open_enquiries.older_than_2_days} waiting > 2 days`, a: [['Open enquiries', 'enquiries']] });
     if (S.capital_campaigns.paid_not_started) r.push({ p: 1, t: `**${S.capital_campaigns.paid_not_started} paid campaign(s)** not started yet — kick off`, a: [['Submissions', 'os-submissions']] });
     if (S.member_submissions.new) r.push({ p: 2, t: `Review **${S.member_submissions.new} new member submission(s)** (${S.member_submissions.raises} raises, ${S.member_submissions.investor_profiles} investor profiles open)`, a: [['Review', 'os-submissions']] });
-    if (S.pending_members.count) r.push({ p: 2, t: `Approve or decline **${S.pending_members.count} pending member(s)** — approval is manual`, a: [['Members', 'users']] });
+    if (S.pending_members.count) r.push({ p: 2, t: `Approve or decline **${S.pending_members.count} pending member(s)** — approval is manual`, a: [['FundMatch members', 'users']] });
     if (S.invoices.overdue) r.push({ p: 2, t: `Chase **${S.invoices.overdue} overdue invoice(s)** — ${S.invoices.overdue_amount.join(', ')}`, a: [['Payments', 'payments']] });
     if (S.capital_campaigns.awaiting_payment) r.push({ p: 3, t: `${S.capital_campaigns.awaiting_payment} campaign checkout(s) awaiting payment — follow up`, a: [['Submissions', 'os-submissions']] });
     if (S.my_tasks.due_today) r.push({ p: 3, t: `${S.my_tasks.due_today} task(s) due today`, a: [['Tasks', 'os-tasks']] });
@@ -387,7 +387,7 @@
   .ben-files{flex-wrap:wrap;gap:6px;padding:8px 12px 0}.ben-file{display:inline-flex;align-items:center;gap:4px;background:#eef3ef;border-radius:999px;padding:3px 4px 3px 10px;font-size:12px;color:#1b1c1a}.ben-file button{border:0;background:none;cursor:pointer;font-size:15px;color:#4a524d}
   .ben-clip{display:grid;place-items:center;width:40px;border:1px solid rgba(0,53,39,.2);border-radius:12px;cursor:pointer;font-size:17px;flex:none}.ben-clip:hover{background:#f1f5f1}
   .panel.active{padding-bottom:76px}`;
-  const CHIPS = [['☀️ Brief me', 'brief me'], ['🎯 What next?', 'what should I do next? Review pending members, submissions, enquiries and tasks and recommend priorities.'], ['📄 Review a deck', '@attach'], ['🧭 Investor readiness…', 'Assess the investor readiness of '], ['📊 Market analysis…', 'Market analysis: '], ['✍️ Write article…', 'Write an article about '], ['✅ My tasks', 'my tasks'], ['⏰ Remind me…', 'remind me to '], ['🔎 Find…', 'find '], ['❓ Help', 'help']];
+  const CHIPS = [['☀️ Brief me', 'brief me'], ['🎯 What next?', 'what should I do next? Review pending members, submissions, enquiries and tasks and recommend priorities.'], ['📄 Review a deck', '@attach'], ['🧭 Investor readiness…', 'Assess the investor readiness of '], ['📊 Market analysis…', 'Market analysis: '], ['✍️ Write article…', 'Write an article about '], ['✉️ Email campaign', '@email'], ['✅ My tasks', 'my tasks'], ['⏰ Remind me…', 'remind me to '], ['🔎 Find…', 'find '], ['❓ Help', 'help']];
 
   function mount() {
     if ($('ben-toggle') || !document.body) return;
@@ -403,7 +403,7 @@
     $('ben-toggle').onclick = () => toggle();
     $('ben-form').onsubmit = e => { e.preventDefault(); const v = $('ben-in').value; $('ben-in').value = ''; run(v); };
     $('ben-in').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('ben-form').requestSubmit(); } if (e.key === 'Escape') toggle(false); });
-    document.querySelectorAll('.ben-chips button').forEach(b => b.onclick = () => { const c = b.dataset.c; if (c === '@attach') { $('ben-file').click(); $('ben-in').placeholder = 'Optional: what should Ben focus on?'; return; } if (/ $/.test(c)) { $('ben-in').value = c; $('ben-in').focus(); } else run(c); });
+    document.querySelectorAll('.ben-chips button').forEach(b => b.onclick = () => { const c = b.dataset.c; if (c === '@email') { go('emails'); setTimeout(() => window.emNew && window.emNew(), 900); return; } if (c === '@attach') { $('ben-file').click(); $('ben-in').placeholder = 'Optional: what should Ben focus on?'; return; } if (/ $/.test(c)) { $('ben-in').value = c; $('ben-in').focus(); } else run(c); });
     $('ben-file').onchange = e => { addFiles(e.target.files); e.target.value = ''; $('ben-in').focus(); };
     const panel = $('ben-panel');
     ['dragenter', 'dragover'].forEach(ev => panel.addEventListener(ev, e => { if (e.dataTransfer && [...e.dataTransfer.types].includes('Files')) { e.preventDefault(); panel.classList.add('drop'); } }));

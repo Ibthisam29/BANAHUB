@@ -596,12 +596,15 @@ body::before {
         <button class="nav-item" onclick="nav('programs')">
           <span class="nav-icon material-symbols-outlined">hub</span>Programs
         </button>
+        <button class="nav-item" onclick="nav('emails')">
+          <span class="nav-icon material-symbols-outlined">campaign</span>Email Campaigns
+        </button>
       </div>
 
       <div class="nav-group">
         <div class="nav-label">Members</div>
         <button class="nav-item" onclick="nav('users')">
-          <span class="nav-icon material-symbols-outlined">group</span>Users
+          <span class="nav-icon material-symbols-outlined">group</span>FundMatch by BANAHUB
           <span class="nav-badge-count" id="nb-users">0</span>
         </button>
         <button class="nav-item" onclick="nav('memberships')">
@@ -922,7 +925,7 @@ body::before {
     <!-- ════ USERS ═══════════════════════════════════════════ -->
     <div id="panel-users" class="panel">
       <div class="page-header">
-        <div><div class="page-title">Members &amp; Approvals</div><div class="page-sub">Every sign-up (email, Google, LinkedIn) lands here as pending — approve to unlock the member portal</div></div>
+        <div><div class="page-title">FundMatch by BANAHUB</div><div class="page-sub">Members — companies, investors, fund managers. Every sign-up (email, Google, LinkedIn) lands here as pending; approve to unlock the member portal</div></div>
         <button class="btn btn-ghost" onclick="exportMembers()"><span class="material-symbols-outlined" style="font-size:15px">download</span>Export</button>
       </div>
       <div class="settings-tabs" style="margin-bottom:12px" id="u-tabs"></div>
@@ -2179,7 +2182,7 @@ const panelMeta = {
   events:        ['Events',           'Summits, roundtables, and forums'],
   media:         ['Media Library',    'Upload and manage all media assets'],
   programs:      ['Programs',         'Cohorts, acceleration, and summits'],
-  users:         ['Members & Approvals', 'Approve sign-ups, manage member accounts'],
+  users:         ['FundMatch by BANAHUB', 'Members — approve sign-ups, categories, profiles'],
   applications:  ['Applications',     'Membership application review'],
   kyc:           ['KYC Documents',    'Identity verification uploads'],
   businesses:    ['Businesses',       'Company portfolio management'],
@@ -3463,7 +3466,8 @@ document.addEventListener('keydown', e => {
 <script src="admin-submissions.js?v=1.4.0"></script>
 <script src="file-viewer.js?v=1.0.0"></script>
 <script src="admin-agents.js?v=1.2.0"></script>
+<script src="admin-email.js?v=1.0.0"></script>
 <script src="admin-match.js?v=1.2.0"></script>
-<script src="admin-ben.js?v=2.1.0"></script>
+<script src="admin-ben.js?v=2.2.0"></script>
 </body>
 </html>

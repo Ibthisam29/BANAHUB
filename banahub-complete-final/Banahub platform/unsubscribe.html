@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="robots" content="noindex"/>
+<title>Unsubscribe — BANAHUB</title>
+<link rel="icon" href="favicon.ico"/><link rel="stylesheet" href="./output.css"/><link rel="stylesheet" href="./site.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+  .un-card{max-width:520px;margin:0 auto;background:#fff;border-radius:16px;padding:32px;box-shadow:0 12px 40px rgba(0,30,20,.08);text-align:center}
+  .un-card h1{font-size:28px;margin:0 0 10px;color:#0d1b14}.un-card p{color:#2b322e;margin:0 0 18px;line-height:1.6}
+  .un-btn{display:inline-block;border:0;border-radius:10px;background:#003527;color:#fff;padding:12px 22px;font:600 15px Manrope,sans-serif;cursor:pointer}
+  .un-btn[disabled]{opacity:.6;cursor:default}.un-email{font-weight:700;word-break:break-all}
+</style>
+</head>
+<body class="ivory-texture">
+<div id="site-nav"></div>
+<section class="section"><div class="container">
+  <div class="un-card" id="un">
+    <h1 class="font-display">Unsubscribe</h1>
+    <p>Stop BANAHUB emails to <span class="un-email" id="un-email">—</span>?</p>
+    <button class="un-btn" id="un-go" type="button">Unsubscribe me</button>
+    <p id="un-msg" style="margin-top:16px;font-size:14px"></p>
+  </div>
+</div></section>
+<div id="site-footer"></div>
+<script src="config.js?v=5.2.0"></script><script src="nav.js?v=4.2.1"></script>
+<script>
+(function () {
+  const q = new URLSearchParams(location.search), email = (q.get('e') || '').trim(), tok = (q.get('t') || '').trim();
+  const $ = id => document.getElementById(id);
+  $('un-email').textContent = email || 'this address';
+  if (!email || !/^[0-9a-f]{64}$/.test(tok)) { $('un-go').disabled = true; $('un-msg').textContent = 'This unsubscribe link is incomplete. Reply to any BANAHUB email with "unsubscribe" and we will remove you.'; return; }
+  $('un-go').onclick = async () => {
+    $('un-go').disabled = true; $('un-msg').textContent = 'Working…';
+    try {
+      const sb = await window.getBanaSupabaseClient();
+      const { data, error } = await sb.rpc('email_unsubscribe', { p_email: email, p_token: tok });
+      if (error) throw error;
+      if (data) { $('un').innerHTML = '<h1 class="font-display">You’re unsubscribed</h1><p>BANAHUB won’t send marketing emails to <span class="un-email"></span> again. Account and security emails may still be sent if you are a member.</p><a class="un-btn" href="/">Back to BANAHUB</a>'; $('un').querySelector('.un-email').textContent = email; }
+      else { $('un-go').disabled = false; $('un-msg').textContent = 'That link is not valid. Reply to any BANAHUB email with "unsubscribe" and we will remove you.'; }
+    } catch (e) { $('un-go').disabled = false; $('un-msg').textContent = 'Something went wrong — please try again, or reply "unsubscribe" to any BANAHUB email.'; }
+  };
+})();
+</script>
+</body>
+</html>
