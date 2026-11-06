@@ -19,7 +19,8 @@ const URL_ = Deno.env.get("SUPABASE_URL")!;
 const ANON = Deno.env.get("SUPABASE_ANON_KEY")!;
 const db = createClient(URL_, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
 const SITE_URL = (Deno.env.get("SITE_URL") || "https://banahub.com").replace(/\/$/, "");
-const KEY = Deno.env.get("ANTHROPIC_API_KEY") ?? "";
+const KEY = (Deno.env.get("ANTHROPIC_API_KEY") ?? "").trim();
+let keyCheck: { at: number; ok: boolean; msg: string } | null = null;
 const MODEL = Deno.env.get("BEN_MODEL") || "claude-sonnet-5-5";
 const WEB = (Deno.env.get("BEN_WEB_SEARCH") ?? "on") !== "off";
 const ORIGINS = [SITE_URL, "https://banahub.com", "https://www.banahub.com"];
@@ -262,7 +263,15 @@ Deno.serve(async (req) => {
     if (!u || u.role !== "admin" || u.blocked) throw new HttpError(403, "Admins only");
     const sb = createClient(URL_, ANON, { global: { headers: { Authorization: authz } }, auth: { persistSession: false } });
     const b = await req.json().catch(() => ({}));
-    if (b.probe) return out({ ai: !!KEY, model: KEY ? MODEL : null, web: WEB });
+    if (b.probe) {
+      if (!KEY) { console.log("ben probe: ANTHROPIC_API_KEY not set"); return out({ ai: false, reason: "ANTHROPIC_API_KEY is not set in Supabase Edge Function secrets" }); }
+      if (!keyCheck || Date.now() - keyCheck.at > 600000) {
+        try { await claude({ model: MODEL, max_tokens: 5, messages: [{ role: "user", content: "ping" }] }); keyCheck = { at: Date.now(), ok: true, msg: "" }; }
+        catch (e: any) { keyCheck = { at: Date.now(), ok: false, msg: `${e.status || ""} ${clip(e.message, 160)}` }; }
+        console.log(`ben probe: key ${KEY.trim().startsWith("sk-ant-") ? "format ok" : "unexpected format"}; model ${MODEL}; anthropic ${keyCheck.ok ? "OK" : "FAILED " + keyCheck.msg}`);
+      }
+      return out({ ai: keyCheck.ok, model: MODEL, web: WEB, reason: keyCheck.ok ? null : "Anthropic rejected the request: " + keyCheck.msg });
+    }
     if (b.execute) return out(await execute(String(b.execute.kind), b.execute.params || {}, sb, u.id));
     if (!KEY) return out({ ai: false });
 

@@ -226,7 +226,7 @@
       <li><i>assess investor readiness of PayLah</i> · <i>market analysis: B2B payments in Indonesia</i></li>
       <li><i>write an article on preparing for a Series A in Singapore</i> (saved as a draft)</li>
       <li><i>approve the pending members who look legitimate</i> (you confirm each one)</li></ul>
-      ${B.ai ? '<span class="ben-dim">AI mode is on — ask me anything in plain English.</span>' : '<span class="ben-dim">Built-in mode. Add <code>ANTHROPIC_API_KEY</code> to the <code>ben</code> function secrets to unlock free-form AI.</span>'}`);
+      ${B.ai ? '<span class="ben-dim">AI mode is on — ask me anything in plain English.</span>' : `<span class="ben-dim">Built-in mode — AI is off: ${esc(B.aiReason || 'add ANTHROPIC_API_KEY to Supabase Edge Function secrets')}</span>`}`);
   }
 
   function pageContext() {
@@ -329,7 +329,7 @@
   function addProposed(id) { const a = B[id]; if (!a) return; delete B[id]; return createTask(a.title, a.due, a.priority, a.notes, false); }
 
   /* ---------- shell ---------- */
-  function setMode() { const d = $('ben-mode'); if (d) { d.textContent = B.ai ? 'AI' : B.ai === false ? 'Built-in' : '…'; d.className = 'ben-mode' + (B.ai ? ' on' : ''); } }
+  function setMode() { const d = $('ben-mode'); if (d) { d.textContent = B.ai ? 'AI' : B.ai === false ? 'Built-in' : '…'; d.className = 'ben-mode' + (B.ai ? ' on' : ''); d.title = B.ai ? 'AI mode on' : (B.aiReason || 'AI not enabled'); } }
   function toggle(force) {
     B.open = typeof force === 'boolean' ? force : !B.open;
     $('ben-panel').classList.toggle('open', B.open); $('ben-toggle').classList.toggle('on', B.open);
@@ -413,7 +413,7 @@
     document.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && (e.key === 'j' || e.key === 'J')) { e.preventDefault(); toggle(); } });
     new MutationObserver(() => document.body.classList.toggle('ben-open', B.open)).observe($('ben-panel'), { attributes: true, attributeFilter: ['class'] });
     setMode();
-    sb().functions.invoke('ben', { body: { probe: true } }).then(r => { B.ai = !!(r && r.data && r.data.ai); setMode(); }).catch(() => { B.ai = false; setMode(); });
+    sb().functions.invoke('ben', { body: { probe: true } }).then(r => { B.ai = !!(r && r.data && r.data.ai); B.aiReason = (r && r.data && r.data.reason) || (r && r.error && r.error.message) || ''; setMode(); }).catch(e => { B.ai = false; B.aiReason = e.message; setMode(); });
     if (store.get('ben-open') === '1') setTimeout(() => toggle(true), 600);
   }
 
