@@ -8,6 +8,22 @@
   "trailingSlash": false,
   "rewrites": [
     {
+      "source": "/sitemap.xml",
+      "destination": "/api/sitemap"
+    },
+    {
+      "source": "/llms-full.txt",
+      "destination": "/api/llms-full"
+    },
+    {
+      "source": "/insights/:slug",
+      "destination": "/api/article?slug=:slug"
+    },
+    {
+      "source": "/events/:slug",
+      "destination": "/api/event?slug=:slug"
+    },
+    {
       "source": "/",
       "destination": "/index.html"
     },
@@ -78,10 +94,6 @@
     {
       "source": "/disclosures",
       "destination": "/disclosures.html"
-    },
-    {
-      "source": "/events/:slug",
-      "destination": "/event.html?slug=:slug"
     }
   ],
   "redirects": [
@@ -236,6 +248,19 @@
         {
           "key": "Cache-Control",
           "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/(robots.txt|llms.txt)",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/plain; charset=utf-8"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
         }
       ]
     }

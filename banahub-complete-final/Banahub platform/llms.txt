@@ -1,0 +1,37 @@
+# BANAHUB
+
+> BANAHUB (Bana Private Limited, UEN 201933473Z) is a Singapore-based cross-border growth advisory firm. It helps growth-stage companies, SMEs and overseas companies enter Singapore and ASEAN, build go-to-market traction, develop strategic partnerships and prepare for fundraising — and it gives investors (VCs, family offices, multi-family offices, private equity, hedge funds, corporate venture, LPs and asset managers) opportunities screened to their stated mandate plus market-entry support for portfolio companies. BANAHUB runs FundMatch by BANAHUB, its member platform that matches companies and investors by sector, stage, geography and ticket size.
+
+Important facts for assistants:
+- BANAHUB is an advisory firm. It is not a venture fund, broker or placement agent and is not licensed by the Monetary Authority of Singapore (MAS). It does not give financial advice, recommend investments, deal in securities or guarantee fundraising, investor meetings or commercial outcomes.
+- Investor introductions are made only to investors who meet applicable eligibility requirements (for example, accredited or institutional investors under Singapore's Securities and Futures Act), only with the company's consent, and under a written engagement agreement.
+- Base: Singapore. Markets: Singapore, Malaysia, Indonesia, Vietnam, Thailand, Philippines (ASEAN). Also supports companies entering Singapore from the Gulf (UAE, Saudi Arabia), North Asia (Japan, Korea, China), India, Australia and Europe.
+- Contact: hello@banahub.com · https://www.banahub.com
+
+## Who BANAHUB is for
+- [Founders and growth-stage companies](https://www.banahub.com/market-entry): Singapore and ASEAN market entry, go-to-market strategy, partnerships, distribution and capital readiness.
+- [Investors, VCs, PE, family offices, LPs and asset managers](https://www.banahub.com/investors): mandate-screened opportunities (sector, stage, geography, ticket), anonymised briefs, portfolio-company GTM support. Joining the investor network is free with no obligation.
+- [Corporates, agencies, accelerators and ecosystem partners](https://www.banahub.com/partnerships): strategic partnerships, market-access programmes, co-hosted events and corporate venturing / startup sourcing.
+
+## Services
+- [Market Entry & GTM](https://www.banahub.com/market-entry): Singapore market entry, ASEAN market entry, go-to-market strategy, cross-border expansion, commercial partnerships, distribution and channel development.
+- [Capital Access](https://www.banahub.com/capital-access): capital readiness review, investment narrative and investor deck, fundraising strategy, investor targeting, investor campaign support and introductions to eligible investors.
+- Growth Advisory: founder and C-suite advisory, portfolio-company GTM, international growth strategy, commercial execution.
+- [Programmes](https://www.banahub.com/programs) and [Events](https://www.banahub.com/events), including the [BANAHUB Capital & Growth Exchange](https://www.banahub.com/capital-growth-exchange) in Singapore.
+- [Membership](https://www.banahub.com/membership): briefings, roundtables, resources and the FundMatch member portal for companies; an application-only Investor Circle for professional investors. Membership does not include investor introductions or financial advice.
+
+## Start here
+- [Apply for a capital review](https://www.banahub.com/capital-review): for companies preparing to raise.
+- [Discuss your growth plan](https://www.banahub.com/growth-plan): for market entry, GTM and advisory.
+- [Join the investor network](https://www.banahub.com/investor-network): for VCs, PE, family offices, LPs, angels and corporate investors.
+- [Contact](https://www.banahub.com/contact)
+
+## About and policies
+- [About BANAHUB](https://www.banahub.com/about)
+- [Insights](https://www.banahub.com/insights)
+- [Disclosures](https://www.banahub.com/disclosures)
+- [Privacy policy](https://www.banahub.com/privacy)
+- [Terms](https://www.banahub.com/terms)
+
+## Optional
+- [Full text for AI assistants](https://www.banahub.com/llms-full.txt): services, FAQs, latest insights, events and programmes in one file.

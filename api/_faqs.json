@@ -1,0 +1,32 @@
+{
+  "index": {
+    "title": "Common questions about BANAHUB",
+    "items": [
+      ["What is BANAHUB?", "BANAHUB (Bana Private Limited, UEN 201933473Z) is a Singapore-based cross-border growth advisory firm. It helps growth-stage companies, SMEs and overseas companies enter Singapore and ASEAN, build go-to-market traction, develop strategic partnerships and prepare for fundraising. For investors, it shares opportunities screened to each investor's stated mandate and supports portfolio companies expanding into the region."],
+      ["Who does BANAHUB work with?", "Founders, startups, scale-ups and SMEs; venture capital funds, corporate venture teams and angels; private equity and hedge funds; family offices and multi-family offices; LPs, fund of funds and institutional investors; and corporates, government agencies, trade bodies, accelerators and universities looking for partnerships in Singapore and ASEAN."],
+      ["How does BANAHUB help companies enter Singapore and ASEAN?", "Through structured market-entry work: Singapore and ASEAN market assessment, entry model options, go-to-market strategy, cross-border operating models, commercial partnerships, and distributor and channel development. Engagements follow four stages — diagnose, decide, build, scale — with agreed deliverables, timelines and fees set before work begins."],
+      ["How does BANAHUB help founders raise capital?", "Readiness first, then investor conversations. BANAHUB runs a capital review, then helps with the investment narrative and deck, fundraising strategy, investor targeting by stage, sector, geography and ticket size, and investor campaign support. Where mandates align, it introduces the company to eligible investors. It does not guarantee that any company will raise capital."],
+      ["What is FundMatch by BANAHUB?", "FundMatch by BANAHUB is BANAHUB's member platform. Approved companies and investors keep their profiles there — sector, stage, geography, ticket size and pitch decks — so BANAHUB can match companies to investors whose stated mandate fits. Every membership is reviewed manually, and membership does not guarantee introductions or investment."],
+      ["Which markets does BANAHUB cover?", "BANAHUB works from Singapore across Malaysia, Indonesia, Vietnam, Thailand and the Philippines. It also supports companies entering Singapore and ASEAN from the Gulf (including the UAE and Saudi Arabia), North Asia, India, Australia and Europe."],
+      ["Is BANAHUB a licensed financial adviser, broker or fund?", "No. BANAHUB is an advisory firm. It is not a venture fund, broker or placement agent and is not licensed by the Monetary Authority of Singapore. It does not give financial advice, recommend investments, deal in securities or arrange offers of securities, and it does not guarantee investment or commercial outcomes."],
+      ["How do I get started with BANAHUB?", "Companies preparing to raise can apply for a capital review; companies planning market entry can submit a growth plan; investors can join the investor network for free; and organisations can propose a partnership. BANAHUB replies within two business days."]
+    ]
+  },
+  "investors": {
+    "append": true,
+    "items": [
+      ["Do you work with family offices and multi-family offices?", "Yes. Single-family and multi-family offices allocating to private markets can share each family's mandate — sectors, stages, regions and ticket size — and receive only direct opportunities that fit it, with full materials shared only with the company's consent."],
+      ["Do you work with private equity firms and hedge funds?", "Yes. For private equity, growth, crossover and hedge fund investors, BANAHUB shares growth-stage and pre-IPO opportunities that fit the stated mandate, gives commercial and market-entry input on targets in Singapore and ASEAN, and supports portfolio companies with go-to-market and partnership work."],
+      ["Can LPs, fund of funds and asset managers join the investor network?", "Yes. LPs and institutional investors (such as pensions, endowments, sovereign funds and insurers), fund of funds and asset managers can join for free and share their mandate. The same eligibility checks apply, and BANAHUB does not provide investment advice or recommendations."],
+      ["What kind of opportunities do you share?", "Companies that have completed a BANAHUB capital review and fit your stated sector, stage, geography and ticket size. You first receive a short anonymised brief; the company's full materials are shared only with its consent, and diligence, terms and decisions stay between you and the company."]
+    ]
+  },
+  "partnerships": {
+    "title": "Partnership questions",
+    "items": [
+      ["What kinds of organisations partner with BANAHUB?", "Corporates, government and investment agencies, trade and industry bodies, accelerators, universities, professional service firms and event organisers that want to move companies across borders into or out of Singapore and ASEAN."],
+      ["What does a BANAHUB market-access programme include?", "A structured programme for a cohort of companies entering Singapore or ASEAN: selection, diagnostics, workshops, partner meetings and progress reporting to the sponsoring organisation, under a written agreement covering deliverables, commercial terms, branding and data handling."],
+      ["How quickly does BANAHUB respond to partnership proposals?", "Within two business days, with an initial view on fit, format and next steps."]
+    ]
+  }
+}

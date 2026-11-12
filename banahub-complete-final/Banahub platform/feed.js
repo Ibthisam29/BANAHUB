@@ -4,7 +4,7 @@
   'use strict';
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var fmt = function (d, o) { try { return new Date(d).toLocaleDateString('en-SG', o); } catch (e) { return ''; } };
-  function eventHref(e) { return (e.page_url && /^\/[a-z0-9\-\/]*$/i.test(e.page_url)) ? e.page_url : 'event.html?id=' + encodeURIComponent(e.id); }
+  function eventHref(e) { return (e.page_url && /^\/[a-z0-9\-\/]*$/i.test(e.page_url)) ? e.page_url : '/events/' + encodeURIComponent(e.slug || e.id); }
   function artKey(a) { return a.slug || a.id; }
   function plain(html) { var d = document.createElement('div'); d.innerHTML = String(html || '').replace(/<(script|style)[\s\S]*?<\/\1>/gi, ''); return (d.textContent || '').replace(/\s+/g, ' ').trim(); }
   function dateBlock(d) { return '<div class="bh-date" aria-hidden="true"><div class="m">' + esc(fmt(d, { month: 'short' }).toUpperCase()) + '</div><div class="d">' + esc(new Date(d).getDate()) + '</div></div>'; }
@@ -19,7 +19,7 @@
   function articleItem(a) {
     var d = a.publish_date || a.created_at;
     var x = (a.meta_description || plain(a.body)).slice(0, 200);
-    return '<a class="bh-item" href="insights.html?article=' + encodeURIComponent(artKey(a)) + '">' + dateBlock(d) +
+    return '<a class="bh-item" href="/insights/' + encodeURIComponent(artKey(a)) + '">' + dateBlock(d) +
       '<div><div class="meta" style="margin:0 0 4px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:.7rem;color:var(--bh-gold-ink)">' + esc(a.category || 'Insight') + '</div><h3 class="bh-h3">' + esc(a.title) + '</h3>' +
       '<div class="meta">' + [fmt(d, { day: 'numeric', month: 'long', year: 'numeric' }), a.author_name].filter(Boolean).map(esc).join(' · ') + '</div>' + (x ? '<p class="x">' + esc(x) + (x.length >= 200 ? '…' : '') + '</p>' : '') + '</div>' +
       '<span class="bh-link">Read <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></span></a>';
@@ -74,7 +74,9 @@
 
   async function insights() {
     var list = document.getElementById('feed-list'); if (!list) return;
-    var d = await load(), q = new URLSearchParams(location.search), key = q.get('article');
+    var d = await load(), q = new URLSearchParams(location.search), key = q.get('article') || (location.pathname.match(/^\/insights\/([^\/?#]+)/) || [])[1];
+    if (key) key = decodeURIComponent(key);
+    var ssr = document.querySelector('#article-view[data-ssr]'); if (ssr && key) return;
     if (key) {
       var a = d.articles.find(function (x) { return String(artKey(x)) === key || String(x.id) === key; });
       var view = document.getElementById('article-view');

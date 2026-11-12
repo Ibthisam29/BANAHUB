@@ -4,14 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description"
-    content="BANAHUB events: roundtables, briefings and programmes on market entry, go-to-market and capital readiness in Singapore and ASEAN." />
-  <meta property="og:title" content="Events | BANAHUB" />
-  <meta property="og:description" content="Capital and Growth Exchange forums, summits, and roundtables." />
-  <meta property="og:url" content="https://www.banahub.com/events.html" />
-  <meta property="og:type" content="website" />
-  <link rel="canonical" href="https://www.banahub.com/events"/>
-  <title>Events | BANAHUB</title>
+  <title>Events — Investor &amp; Founder Sessions in Singapore | BANAHUB</title>
 
   <link rel="icon" type="image/x-icon" href="favicon.ico" />
   <link rel="icon" type="image/png" sizes="512x512" href="logo-icon-512.png" />
@@ -33,6 +26,17 @@
     .ev-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,53,39,.12); }
     .skyline-mark { background: linear-gradient(135deg, #003527 0%, #262e42 100%); }
   </style>
+<!--seo:start-->
+<meta name="description" content="Roundtables, briefings, investor sessions and the BANAHUB Capital &amp; Growth Exchange for founders, investors and partners in Singapore and ASEAN."/>
+<link rel="canonical" href="https://www.banahub.com/events"/>
+<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1"/>
+<meta property="og:type" content="website"/><meta property="og:site_name" content="BANAHUB"/><meta property="og:locale" content="en_SG"/>
+<meta property="og:title" content="Events — Investor &amp; Founder Sessions in Singapore | BANAHUB"/><meta property="og:description" content="Roundtables, briefings, investor sessions and the BANAHUB Capital &amp; Growth Exchange for founders, investors and partners in Singapore and ASEAN."/><meta property="og:url" content="https://www.banahub.com/events"/>
+<meta property="og:image" content="https://www.banahub.com/og-image.png"/><meta property="og:image:width" content="1200"/><meta property="og:image:height" content="630"/><meta property="og:image:alt" content="BANAHUB — cross-border growth and capital advisory, Singapore and ASEAN"/>
+<meta name="twitter:card" content="summary_large_image"/><meta name="twitter:title" content="Events — Investor &amp; Founder Sessions in Singapore | BANAHUB"/><meta name="twitter:description" content="Roundtables, briefings, investor sessions and the BANAHUB Capital &amp; Growth Exchange for founders, investors and partners in Singapore and ASEAN."/><meta name="twitter:image" content="https://www.banahub.com/og-image.png"/>
+<link rel="alternate" type="text/plain" title="BANAHUB for AI assistants" href="/llms.txt"/>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Organization", "@id": "https://www.banahub.com/#organization", "name": "BANAHUB", "url": "https://www.banahub.com/"}, {"@type": "WebPage", "@id": "https://www.banahub.com/events#webpage", "url": "https://www.banahub.com/events", "name": "Events — Investor & Founder Sessions in Singapore | BANAHUB", "description": "Roundtables, briefings, investor sessions and the BANAHUB Capital & Growth Exchange for founders, investors and partners in Singapore and ASEAN.", "isPartOf": {"@id": "https://www.banahub.com/#website"}, "about": {"@id": "https://www.banahub.com/#organization"}, "inLanguage": "en-SG", "primaryImageOfPage": "https://www.banahub.com/og-image.png"}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.banahub.com/"}, {"@type": "ListItem", "position": 2, "name": "Events", "item": "https://www.banahub.com/events"}]}]}</script>
+<!--seo:end-->
 </head>
 
 <body class="bg-background text-on-surface antialiased">
@@ -76,7 +80,7 @@
   <!-- FOOTER (same as index.html) -->
   <div id="site-footer"></div>
 
-  <script src="config.js?v=5.2.0"></script>
+  <script src="config.js?v=5.3.0"></script>
   <script src="nav.js?v=4.2.1"></script>
   <script src="api.js"></script>
   <script>
@@ -93,7 +97,7 @@
       return null; // direct video file or unrecognized — handled separately
     }
 
-    function eventUrl(e) { return (e.page_url && /^\/[a-z0-9\-\/]*$/i.test(e.page_url)) ? e.page_url : ('event.html?id=' + encodeURIComponent(e.id)); }
+    function eventUrl(e) { return (e.page_url && /^\/[a-z0-9\-\/]*$/i.test(e.page_url)) ? e.page_url : ('/events/' + encodeURIComponent(e.slug || e.id)); }
 
     function renderFeatured(e) {
       const wrap = document.getElementById('featured-wrap');

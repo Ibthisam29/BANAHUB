@@ -806,7 +806,13 @@ window.fetch = async function(input, opts) {
     }
     if (route.startsWith('/admin/content/articles') && method === 'POST') {
       const { data: { user } } = await sb.auth.getUser();
-      const { data } = await sb.from('articles').insert(Object.assign({}, body, { author_id: user && user.id })).select().single();
+      // SEO: every article gets a readable URL — /insights/<slug>
+      const slugify = t => String(t || '').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 80);
+      if (!body.slug && body.title) body.slug = slugify(body.title);
+      let ins = await sb.from('articles').insert(Object.assign({}, body, { author_id: user && user.id })).select().single();
+      if (ins.error && /duplicate|unique/i.test(ins.error.message || '') && body.slug) ins = await sb.from('articles').insert(Object.assign({}, body, { slug: body.slug + '-' + Math.random().toString(36).slice(2, 6), author_id: user && user.id })).select().single();
+      if (ins.error) return _resp({ error: ins.error.message }, 400);
+      const data = ins.data;
       return _resp({ success: true, article: data }, 201);
     }
 
