@@ -43,6 +43,7 @@ async function template(req, file) {
 // Replace <title>, description, canonical, OG/Twitter in a static page's <head>
 function setHead(html, { title, description, url, image, type = 'website', extra = '' }) {
   const d = esc(description), t = esc(title), img = image || `${SITE}/og-image.png`;
+  html = html.replace(/<!--seo:start-->[\s\S]*?<!--seo:end-->\n?/, '').replace(/<meta\s+name="robots"[^>]*>/gi, '');
   html = html.replace(/<title>[\s\S]*?<\/title>/i, `<title>${t}</title>`);
   html = html.replace(/<meta\s+name="description"[\s\S]*?\/?>/i, '');
   html = html.replace(/<link\s+rel="canonical"[^>]*>/gi, '').replace(/<meta\s+(property|name)="(og|twitter):[^"]+"[^>]*>/gi, '');

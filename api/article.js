@@ -10,7 +10,7 @@ module.exports = async (req, res) => {
     let html = await L.template(req, 'insights.html');
     if (!a) {
       res.statusCode = 404;
-      html = L.setHead(html, { title: 'Article not found | BANAHUB', description: 'This article is not available.', url: `${L.SITE}/insights` }).replace('<head>', '<head>\n<meta name="robots" content="noindex"/>');
+      html = L.setHead(html, { title: 'Article not found | BANAHUB', description: 'This article is not available.', url: `${L.SITE}/insights` }).replace(/<meta name="robots"[^>]*>/g, '').replace('<head>', '<head>\n<meta name="robots" content="noindex"/>');
       res.setHeader('Content-Type', 'text/html; charset=utf-8');
       return res.end(html);
     }

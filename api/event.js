@@ -31,7 +31,7 @@ module.exports = async (req, res) => {
         `<div class="space-y-3">${String(e.description || '').split(/\n\s*\n/).slice(0, 12).map((p) => `<p>${L.esc(p)}</p>`).join('')}</div></div>`;
       html = html.replace(/(<div id="ev-loading"[^>]*>)Loading event…(<\/div>)/, `$1${summary}$2`);
     } else if (key) {
-      html = html.replace('<head>', '<head>\n<meta name="robots" content="noindex"/>');
+      html = html.replace(/<meta name="robots"[^>]*>/g, '').replace('<head>', '<head>\n<meta name="robots" content="noindex"/>');
     }
   } catch (err) {
     if (!html) { res.statusCode = 302; res.setHeader('Location', `/event?slug=${encodeURIComponent(key)}`); return res.end(); }
