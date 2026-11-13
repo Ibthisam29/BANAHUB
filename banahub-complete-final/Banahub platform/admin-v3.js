@@ -381,9 +381,13 @@ function invMatch(i, skip) {
 }
 function invFiltered(skip) {
   const q = ($('inv-search').value || '').toLowerCase(), st = $('inv-status').value, ss = ($('inv-secsrc') || {}).value || '';
-  return inv.all.filter(i => (!ss || (i._f || (i._f = invFacetValues(i))).src === ss) &&
+  const gap = ($('inv-gap') || {}).value || '';
+  const G = { email: i => !i.email, contact: i => !i.email && !i.phone && !i.linkedin_url, stage: i => !arr(i.preferred_stages).length, ticket: i => i.check_min == null && i.check_max == null && !i.check_size,
+    sector: i => !arr(i.focus_sectors).length && !arr(i.focus_industries).length, geo: i => !i.geography && !arr(i.invest_geographies).length, linkedin: i => !i.linkedin_url, type: i => !i.investor_type || i.type_needs_review };
+  const rv = i => st === '__review' ? i.review_status === 'ben_review' : st === '__rejected' ? i.review_status === 'rejected' : (i.review_status !== 'rejected' && (!st || i.status === st));
+  return inv.all.filter(i => rv(i) && (!gap || !G[gap] || G[gap](i)) && (!ss || (i._f || (i._f = invFacetValues(i))).src === ss) &&
     (!q || [i.full_name, i.organization, i.email, i.phone, i.notes, i.investor_type, i.geography, i.website, arr(i.focus_sectors).join(' '), arr(i.focus_industries).join(' '), arr(i.preferred_stages).join(' ')].join(' ').toLowerCase().includes(q)) &&
-    (!st || i.status === st) && invMatch(i, skip));
+    invMatch(i, skip));
 }
 function invToggle(facet, values, on) {
   const set = inv.f[facet]; values = [].concat(values);
@@ -1637,7 +1641,7 @@ function buildImportRows() {
     if (extras.length) { o.notes = [o.notes, ...extras].filter(Boolean).join('\n'); stats.extra++; }
     const { row, changed } = isInv ? arrangeInvestor(o) : arrangeCompany(o);
     if (changed.length) stats.cleaned++;
-    row.source = 'import:' + String(imp.file || '').slice(0, 60);
+    row.source = (imp.pasted ? 'paste:' : 'import:') + String(imp.file || '').slice(0, 60);
     return row;
   }).filter(o => isInv ? (o.full_name || o.organization || o.email) : (o.company_name || o.email));
   // merge duplicates inside the file (same email, or same name + organisation)
@@ -1695,7 +1699,8 @@ async function runImport() {
   let ins = 0, upd = 0; const errs = [];
   for (let i = 0; i < imp.rows.length; i += 300) {
     btn.textContent = `Importing ${Math.min(i + 300, imp.rows.length)}/${imp.rows.length}…`;
-    const r = await api('/api/admin/network/import', 'POST', { type: imp.type, rows: imp.rows.slice(i, i + 300) }).catch(e => ({ errors: [e.message] }));
+    const review = imp.type === 'investor' && !!($('imp-review') && $('imp-review').checked);
+    const r = await api('/api/admin/network/import', 'POST', { type: imp.type, rows: imp.rows.slice(i, i + 300), review, via: imp.pasted ? 'paste' : 'import' }).catch(e => ({ errors: [e.message] }));
     ins += r.imported || 0; upd += r.updated || 0; (r.errors || []).forEach(e => errs.push(e));
   }
   btn.textContent = 'Import';
@@ -1714,6 +1719,7 @@ function invSorted(rows) {
   if (s === 'type') list.sort((a, b) => t(a) - t(b) || by('organization')(a, b) || by('full_name')(a, b));
   else if (s === 'org') list.sort((a, b) => by('organization')(a, b) || by('full_name')(a, b));
   else if (s === 'name') list.sort(by('full_name'));
+  else if (s === 'fit') list.sort((a, b) => ((b._fit || {}).score || 0) - ((a._fit || {}).score || 0));
   else if (s === 'ticket') list.sort((a, b) => (b.check_max || b.check_min || 0) - (a.check_max || a.check_min || 0));
   else list.sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || '')));
   return list;
@@ -1722,11 +1728,11 @@ function renderInvestors() {
   renderInvFacets();
   const rows = invSorted(invFiltered()), start = inv.page * inv.per, page = rows.slice(start, start + inv.per);
   $('inv-count').textContent = `${rows.length} investor${rows.length === 1 ? '' : 's'}${rows.length !== inv.all.length ? ` (of ${inv.all.length})` : ''}`;
-  const grouped = (inv.sort || 'type') === 'type';
+  const grouped = (inv.sort || 'type') === 'type' && !inv.fit;
   let lastType = null;
   const rowHtml = i => {
     const head = grouped && invGroup(i) !== lastType
-      ? `<tr><td colspan="9" style="background:var(--surface);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--emerald);padding:8px 12px">${esc((lastType = invGroup(i)))} · ${rows.filter(x => invGroup(x) === lastType).length}</td></tr>` : '';
+      ? `<tr><td colspan="${inv.fit ? 10 : 9}" style="background:var(--surface);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--emerald);padding:8px 12px">${esc((lastType = invGroup(i)))} · ${rows.filter(x => invGroup(x) === lastType).length}</td></tr>` : '';
     return head + `<tr>
       <td><div style="font-weight:600;color:var(--ink)">${esc(i.full_name || '—')}</div><div style="font-size:12px;color:var(--white-muted)">${esc(i.organization || '')}</div></td>
       <td style="font-size:12px">${esc(i.investor_type ? invGroup(i) : '—')}${i.investor_subtype ? `<div style="font-size:11px;color:var(--white-muted)">${esc(i.investor_subtype)}</div>` : ''}${i.type_needs_review ? '<div style="font-size:10px;font-weight:700;color:#7a5c00">Confirm category</div>' : ''}</td>
@@ -1740,12 +1746,16 @@ function renderInvestors() {
         ${i.website ? `<a href="${esc(i.website)}" target="_blank" rel="noopener noreferrer" style="color:var(--emerald)" title="Website"><span class="material-symbols-outlined" style="font-size:16px">language</span></a>` : ''}${!i.email && !i.phone && !i.linkedin_url && !i.website ? '—' : ''}</div>
         ${i.notes ? `<div style="font-size:11px;color:var(--white-muted);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(i.notes)}">${esc(String(i.notes).split('\n')[0])}</div>` : ''}</td>
 
-      <td><span class="pill pill-${i.status === 'approved' ? 'live' : i.status === 'pending' ? 'pending' : 'draft'}">${esc(i.status || 'directory')}</span></td>
-      <td style="white-space:nowrap"><button class="btn btn-ghost btn-sm" onclick="openInvestorModal('${esc(i.id)}')">Edit</button>
+      ${inv.fit ? `<td style="white-space:nowrap"><b style="color:${(i._fit || {}).score >= 70 ? 'var(--emerald)' : (i._fit || {}).score >= 50 ? '#7a5c00' : 'var(--white-muted)'}">${(i._fit || {}).score ?? '—'}</b><div style="font-size:10.5px;color:var(--white-muted);max-width:160px;white-space:normal">${esc(((i._fit || {}).reasons || []).slice(0, 2).join(' · '))}</div></td>` : ''}
+      <td>${i.review_status === 'ben_review' ? `<span class="pill pill-pending" title="${esc((i.added_via || 'research') + (i.confidence ? ' · confidence ' + i.confidence : ''))}">Review</span>${i.confidence ? `<div style="font-size:10.5px;color:var(--white-muted)">${esc(i.confidence)} confidence</div>` : ''}${arr(i.source_urls).length ? `<div style="font-size:10.5px">${arr(i.source_urls).slice(0, 2).map((u, k) => `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer" style="color:var(--emerald)">source ${k + 1}</a>`).join(' · ')}</div>` : ''}
+        <div style="display:flex;gap:4px;margin-top:4px"><button class="btn btn-primary btn-sm" onclick="INTEL.approve(['${esc(i.id)}'])">Approve</button><button class="btn btn-ghost btn-sm" onclick="INTEL.reject(['${esc(i.id)}'])">Reject</button></div>`
+        : i.review_status === 'rejected' ? `<span class="pill pill-rejected">Rejected</span> <button class="btn btn-ghost btn-sm" onclick="INTEL.approve(['${esc(i.id)}'])">Restore</button>`
+        : `<span class="pill pill-${i.status === 'approved' ? 'live' : i.status === 'pending' ? 'pending' : 'draft'}">${esc(i.status || 'directory')}</span>`}</td>
+      <td style="white-space:nowrap"><button class="btn btn-ghost btn-sm" onclick="openInvestorModal('${esc(i.id)}')">Edit</button><button class="btn btn-ghost btn-sm" title="Documents" onclick="INTEL.docs('${esc(i.id)}')"><span class="material-symbols-outlined" style="font-size:15px">folder_open</span>${i._docs ? `<small>${i._docs}</small>` : ''}</button>
         <button class="btn btn-danger btn-sm" onclick="deleteInvestor('${esc(i.id)}')">✕</button></td></tr>`;
   };
   $('investors-table').innerHTML = rows.length ? `<div style="overflow-x:auto"><table class="data-table"><thead><tr>
-      <th>Investor</th><th>Type</th><th>Industry &amp; sectors</th><th>Stages</th><th>Geography</th><th>Ticket</th><th>Contact</th><th>Status</th><th></th></tr></thead><tbody>
+      <th>Investor</th><th>Type</th><th>Industry &amp; sectors</th><th>Stages</th><th>Geography</th><th>Ticket</th><th>Contact</th>${inv.fit ? '<th>Fit</th>' : ''}<th>Status</th><th></th></tr></thead><tbody>
     ${page.map(rowHtml).join('')}</tbody></table></div>
     ${rows.length > inv.per ? `<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;font-size:12px;color:var(--white-muted)">
       <span>Showing ${start + 1}–${Math.min(start + inv.per, rows.length)}</span>

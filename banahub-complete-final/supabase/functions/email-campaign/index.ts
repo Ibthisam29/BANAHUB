@@ -58,7 +58,7 @@ async function buildAudience(a: any): Promise<{ list: Recipient[]; bySource: Rec
     (data || []).forEach((s: any) => add({ email: s.email, name: s.name || "", company: "", source: "subscribers", unsolicited: false }));
   }
   if (sources.includes("investors")) {
-    const { data } = await db.from("investors").select("email,full_name,organization,investor_type,user_id").not("email", "is", null).limit(20000);
+    const { data } = await db.from("investors").select("email,full_name,organization,investor_type,user_id").not("email", "is", null).not("active", "is", false).limit(20000);
     (data || []).filter((i: any) => inList(i.investor_type, a.investor_types)).forEach((i: any) => add({ email: i.email, name: i.full_name || "", company: i.organization || "", source: "investors", unsolicited: !i.user_id }));
   }
   if (sources.includes("crm")) {

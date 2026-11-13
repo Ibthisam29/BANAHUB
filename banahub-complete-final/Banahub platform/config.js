@@ -445,7 +445,9 @@ window.fetch = async function(input, opts) {
     if (_path === '/admin/network/import' && method === 'POST') {
       const table = body.type === 'company' ? 'companies' : 'investors';
       const defStatus = table === 'investors' ? 'directory' : 'approved';
-      const rows = (body.rows || []).map(r => Object.assign({ status: defStatus }, _clean(r)));
+      // review mode (pasted lists / research): new rows wait in the review queue; existing records only get blanks filled
+      const review = !!body.review && table === 'investors';
+      const rows = (body.rows || []).map(r => Object.assign({ status: defStatus }, _clean(r), review ? { review_status: 'ben_review', active: false, added_via: body.via || 'paste' } : {}));
       const emails = rows.map(r => (r.email || '').toLowerCase()).filter(Boolean);
       const existing = {};
       for (let i = 0; i < emails.length; i += 200) {
@@ -460,7 +462,14 @@ window.fetch = async function(input, opts) {
         if (error) errors.push(error.message); else inserted += (data || []).length;
       }
       for (const [id, r] of updates) {
-        const { status, ...rest } = r;
+        let { status, ...rest } = r;
+        if (review) {
+          const { data: cur } = await sb.from(table).select('*').eq('id', id).single();
+          delete rest.review_status; delete rest.active; delete rest.added_via;
+          rest = Object.fromEntries(Object.entries(rest).filter(([k, v]) => k === 'notes' || cur == null || cur[k] == null || cur[k] === '' || (Array.isArray(cur[k]) && !cur[k].length)));
+          if (rest.notes && cur && cur.notes) rest.notes = cur.notes.includes(rest.notes) ? cur.notes : cur.notes + '\n' + rest.notes;
+          if (!Object.keys(rest).length) { updated++; continue; }
+        }
         const { error } = await sb.from(table).update(rest).eq('id', id);
         if (error) errors.push(error.message); else updated++;
       }
