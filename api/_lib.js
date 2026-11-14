@@ -8,7 +8,7 @@ const INDEXNOW_KEY = '5bb8a884a0a27c839c0bf4572bf2f6b5';
 // Public, indexable pages (keep in sync with robots.txt / llms.txt)
 const PAGES = [
   ['/', 1.0, 'weekly'], ['/market-entry', 0.9, 'monthly'], ['/capital-access', 0.9, 'monthly'], ['/investors', 0.9, 'monthly'],
-  ['/capital-review', 0.9, 'monthly'], ['/growth-plan', 0.9, 'monthly'], ['/investor-network', 0.8, 'monthly'],
+  ['/capital-review', 0.9, 'monthly'], ['/readiness', 0.9, 'monthly'], ['/growth-plan', 0.9, 'monthly'], ['/investor-network', 0.8, 'monthly'],
   ['/partnerships', 0.8, 'monthly'], ['/membership', 0.8, 'monthly'], ['/insights', 0.8, 'weekly'], ['/events', 0.8, 'weekly'],
   ['/programs', 0.7, 'weekly'], ['/capital-growth-exchange', 0.7, 'weekly'], ['/about', 0.7, 'monthly'], ['/contact', 0.6, 'monthly'],
   ['/register', 0.5, 'monthly'], ['/disclosures', 0.3, 'yearly'], ['/privacy', 0.3, 'yearly'], ['/terms', 0.3, 'yearly'],

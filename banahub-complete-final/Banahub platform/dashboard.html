@@ -290,6 +290,17 @@ body.is-pending [data-members-only]{display:none!important}
       </div>
     </div>
 
+    <!-- Referral (growth) -->
+    <div id="ref-card" class="glass-card" style="display:none;margin-bottom:20px;padding:16px 18px;border-radius:14px">
+      <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:space-between">
+        <div style="min-width:220px;flex:1"><p style="font-size:13.5px;font-weight:700;color:#1b1c1a;margin-bottom:2px">Invite founders and investors you trust</p>
+          <p style="font-size:12.5px;color:rgba(27,28,26,0.75)">Share your personal link. Everyone who joins through it is credited to you — the BANAHUB team reviews every application.</p></div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><input id="ref-link" readonly style="min-width:260px;height:40px;border-radius:10px;border:1px solid rgba(0,53,39,.2);padding:0 12px;font:500 13px Manrope,sans-serif;background:#fff"/>
+          <button type="button" id="ref-copy" style="height:40px;border-radius:10px;border:0;background:#003527;color:#fff;font:700 13px Manrope,sans-serif;padding:0 16px;cursor:pointer">Copy link</button>
+          <a id="ref-li" target="_blank" rel="noopener" style="height:40px;display:inline-flex;align-items:center;border-radius:10px;border:1px solid rgba(0,53,39,.25);color:#003527;font:700 13px Manrope,sans-serif;padding:0 14px;text-decoration:none">Share on LinkedIn</a></div>
+      </div>
+    </div>
+
     <!-- Stats grid -->
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;margin-bottom:24px">
       <div class="glass-card stat-card">
@@ -476,7 +487,7 @@ body.is-pending [data-members-only]{display:none!important}
 
 </div><!-- end main-wrap -->
 
-<script src="config.js?v=5.4.0"></script>
+<script src="config.js?v=5.5.0"></script>
 <script src="api.js"></script>
 <script>
 function esc(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
@@ -846,5 +857,18 @@ async function verifyLinkedIn(btn){
 <script src="member-submit.js?v=1.4.0"></script>
 <script src="file-viewer.js?v=1.0.0"></script>
 <script src="member-dataroom.js?v=1.0.0"></script>
+<script>
+(async function refCard() {
+  try {
+    const sb = await window.getBanaSupabaseClient(); const { data: { user } } = await sb.auth.getUser(); if (!user) return;
+    const code = user.id.replace(/-/g, '').slice(0, 8);
+    const link = 'https://www.banahub.com/?ref=' + code + '&utm_source=member&utm_medium=referral';
+    document.getElementById('ref-link').value = link;
+    document.getElementById('ref-li').href = 'https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(link);
+    document.getElementById('ref-copy').onclick = async () => { try { await navigator.clipboard.writeText(link); document.getElementById('ref-copy').textContent = 'Copied ✓'; } catch (e) { document.getElementById('ref-link').select(); } };
+    document.getElementById('ref-card').style.display = '';
+  } catch (e) { }
+})();
+</script>
 </body>
 </html>

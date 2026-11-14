@@ -20,7 +20,7 @@ module.exports = async (req, res) => {
     const O = await L.org();
     const ld = L.jsonld({
       '@context': 'https://schema.org', '@type': 'Article', headline: L.clip(a.title, 110), description: desc, url, mainEntityOfPage: url,
-      datePublished: date, dateModified: mod, articleSection: a.category || 'Insights', keywords: (a.tags || []).join(', ') || undefined,
+      datePublished: date, dateModified: mod, articleSection: a.category || 'Insights', keywords: (Array.isArray(a.tags) ? a.tags.join(', ') : a.tags) || undefined,
       wordCount: text.split(' ').length, inLanguage: 'en-SG', image: `${L.SITE}/og-image.png`,
       author: a.author_name ? { '@type': 'Person', name: a.author_name } : O, publisher: O,
     }) + L.jsonld(L.crumbs([['Home', L.SITE + '/'], ['Insights', L.SITE + '/insights'], [a.title, url]]));

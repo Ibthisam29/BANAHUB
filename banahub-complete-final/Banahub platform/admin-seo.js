@@ -15,7 +15,7 @@
   const SITE = 'https://www.banahub.com';
 
   const PAGES = [['/', 'Home'], ['/market-entry', 'Market Entry & GTM'], ['/capital-access', 'Capital Access'], ['/investors', 'Investors'],
-    ['/capital-review', 'Capital Review'], ['/growth-plan', 'Growth Plan'], ['/investor-network', 'Investor Network'], ['/partnerships', 'Partnerships'],
+    ['/capital-review', 'Capital Review'], ['/readiness', 'Readiness check'], ['/growth-plan', 'Growth Plan'], ['/investor-network', 'Investor Network'], ['/partnerships', 'Partnerships'],
     ['/membership', 'Membership'], ['/insights', 'Insights'], ['/events', 'Events'], ['/programs', 'Programmes'],
     ['/capital-growth-exchange', 'Capital & Growth Exchange'], ['/about', 'About'], ['/contact', 'Contact'], ['/register', 'Apply'],
     ['/disclosures', 'Disclosures'], ['/privacy', 'Privacy'], ['/terms', 'Terms']];

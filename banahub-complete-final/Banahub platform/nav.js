@@ -67,7 +67,7 @@
         '<div class="bh-foot-top">' +
           '<div><div class="brand">BANAHUB</div><p style="margin-top:12px;max-width:340px">Singapore-based cross-border growth, market access and capital advisory for growth-stage companies, investors and ecosystem partners.</p>' +
           '<p style="margin-top:14px">Bana Private Limited<br/>UEN 201933473Z · Singapore<br/><a href="mailto:hello@banahub.com">hello@banahub.com</a></p></div>' +
-          '<div><h4>Companies</h4><ul><li><a href="/market-entry.html">Market Entry &amp; GTM</a></li><li><a href="/capital-access.html">Capital Access</a></li><li><a href="/growth-plan.html">Discuss Your Growth Plan</a></li><li><a href="/capital-review.html">Apply for Capital Review</a></li></ul></div>' +
+          '<div><h4>Companies</h4><ul><li><a href="/market-entry.html">Market Entry &amp; GTM</a></li><li><a href="/capital-access.html">Capital Access</a></li><li><a href="/growth-plan.html">Discuss Your Growth Plan</a></li><li><a href="/capital-review.html">Apply for Capital Review</a></li><li><a href="/readiness">Free Readiness Check</a></li></ul></div>' +
           '<div><h4>Investors</h4><ul><li><a href="/investors.html">For Investors</a></li><li><a href="/investor-network.html">Join Investor Network</a></li><li><a href="/growth-plan.html?focus=portfolio">Portfolio Advisory</a></li></ul></div>' +
           '<div><h4>Partners</h4><ul><li><a href="/partnerships.html">Strategic Partnerships</a></li><li><a href="/partnerships.html#partner-form">Propose a Collaboration</a></li><li><a href="/programs.html">Programmes</a></li><li><a href="/insights.html#events">Events</a></li></ul></div>' +
           '<div><h4>Company</h4><ul><li><a href="/about.html">About</a></li><li><a href="/insights.html">Insights</a></li><li><a href="/contact.html">Contact</a></li><li><a href="/membership.html">Membership</a></li><li><a href="/login.html">Member sign in</a></li></ul></div>' +
@@ -75,5 +75,10 @@
         '<div class="bh-foot-legal"><p>BANAHUB provides advisory services only. Bana Private Limited is not licensed by the Monetary Authority of Singapore as a financial adviser, capital markets services licensee or exempt financial institution, and does not provide financial advice, make investment recommendations, deal in securities or arrange the offer of securities. Nothing on this website is an offer or solicitation to buy or sell any security. Investor introductions are made only to parties who meet applicable eligibility requirements, and do not guarantee any investment, meeting or commercial outcome. Any success fee is payable only where contractually agreed and permitted by law. See <a href="/disclosures.html">Disclosures</a>.</p>' +
         '<div class="bh-foot-bottom"><span>© ' + new Date().getFullYear() + ' Bana Private Limited. All rights reserved.</span><span><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><a href="/disclosures.html">Disclosures</a></span></div></div>' +
       '</div></footer>';
+  }
+
+  // growth layer: attribution, founding banner, newsletter, lead capture
+  if (!document.getElementById('bh-growth-js') && !/^\/(admin|dashboard)/.test(location.pathname)) {
+    var g = document.createElement('script'); g.id = 'bh-growth-js'; g.src = '/growth.js?v=1.0.0'; g.defer = true; document.body.appendChild(g);
   }
 })();

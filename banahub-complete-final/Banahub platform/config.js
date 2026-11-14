@@ -569,6 +569,8 @@ window.fetch = async function(input, opts) {
         options: { data: { full_name: body.full_name || '' }, emailRedirectTo: location.origin + '/dashboard' },
       });
       if (error) return _resp({ success: false, detail: error.message, error: error.message }, 400);
+      // growth attribution (UTM / referral first touch) — best effort, never blocks sign-up
+      try { if (window.BHGrowth) window.BHGrowth.capture('signup', { email: body.email, name: body.full_name || '', company: body.company_name || body.organization || '', role: String(body.member_type || body.account_type || body.role || '').slice(0, 60) }); } catch (e) { }
       // The pending users row is created by the on_auth_user_created DB trigger.
       // Here we only fill in profile fields the member is allowed to edit.
       if (data && data.session && data.user) {

@@ -21,6 +21,7 @@ Important facts for assistants:
 - [Membership](https://www.banahub.com/membership): briefings, roundtables, resources and the FundMatch member portal for companies; an application-only Investor Circle for professional investors. Membership does not include investor introductions or financial advice.
 
 ## Start here
+- [Free investor-readiness check](https://www.banahub.com/readiness): 12 questions, instant score and gap list for founders.
 - [Apply for a capital review](https://www.banahub.com/capital-review): for companies preparing to raise.
 - [Discuss your growth plan](https://www.banahub.com/growth-plan): for market entry, GTM and advisory.
 - [Join the investor network](https://www.banahub.com/investor-network): for VCs, PE, family offices, LPs, angels and corporate investors.
