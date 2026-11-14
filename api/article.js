@@ -22,7 +22,7 @@ module.exports = async (req, res) => {
       '@context': 'https://schema.org', '@type': 'Article', headline: L.clip(a.title, 110), description: desc, url, mainEntityOfPage: url,
       datePublished: date, dateModified: mod, articleSection: a.category || 'Insights', keywords: (Array.isArray(a.tags) ? a.tags.join(', ') : a.tags) || undefined,
       wordCount: text.split(' ').length, inLanguage: 'en-SG', image: `${L.SITE}/og-image.png`,
-      author: a.author_name ? { '@type': 'Person', name: a.author_name } : O, publisher: O,
+      author: a.author_name && !/^banahub$/i.test(a.author_name) ? { '@type': 'Person', name: a.author_name } : O, publisher: O,
     }) + L.jsonld(L.crumbs([['Home', L.SITE + '/'], ['Insights', L.SITE + '/insights'], [a.title, url]]));
     html = L.setHead(html, { title: `${a.title} | BANAHUB Insights`, description: desc, url, type: 'article',
       extra: `<meta property="article:published_time" content="${L.esc(date)}"/><meta property="article:modified_time" content="${L.esc(mod)}"/>\n${ld}\n` });
