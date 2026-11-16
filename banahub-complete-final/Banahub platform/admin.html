@@ -511,6 +511,14 @@ body::before {
 .ev-grid .f-input, .ev-grid .f-grid > * { min-width: 0; max-width: 100%; box-sizing: border-box; }
 </style>
 <meta name="robots" content="noindex,nofollow"/>
+<style>
+.inv-cats{display:flex;gap:6px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:thin}
+.inv-cats button{flex:none;border:1px solid var(--border);background:var(--bg-3,#fff);color:var(--ink,#1b1c1a);border-radius:999px;padding:7px 12px;font:600 12.5px inherit;cursor:pointer;white-space:nowrap}
+.inv-cats button small{color:var(--white-muted);font-weight:700;margin-left:4px}.inv-cats button.on{background:var(--emerald,#0a5c40);border-color:transparent;color:#fff}.inv-cats button.on small{color:rgba(255,255,255,.8)}
+.inv-q{display:inline-block;font:800 10px/1 inherit;border-radius:5px;padding:3px 5px;vertical-align:1px;margin-left:4px}.inv-q-A{background:#e5f4e4;color:#1d6b2a}.inv-q-B{background:#fff4d6;color:#7a5c00}.inv-q-C{background:#f0efec;color:#6b6b6b}
+.inv-team-btn{border:0;background:none;color:var(--emerald,#0a5c40);font:700 11.5px inherit;cursor:pointer;padding:0 0 0 4px}.inv-team{margin-top:6px;font-size:11.5px;line-height:1.6;color:var(--ink,#1b1c1a);max-width:320px}
+.inv-cat{border:0;background:none;padding:0;font:600 12px inherit;color:var(--ink,#1b1c1a);cursor:pointer;text-align:left;text-decoration:underline dotted;text-underline-offset:3px}
+</style>
 </head>
 <body>
 
@@ -1005,9 +1013,10 @@ body::before {
         <button type="button" id="inv-refine-btn" class="btn btn-ghost active" onclick="invToggleFacets()"><span class="material-symbols-outlined" style="font-size:15px">tune</span>Refine <span id="inv-refine-n"></span></button>
         <select id="inv-status" class="f-input f-select" style="width:140px" onchange="inv.page=0;renderInvestors()"><option value="">All statuses</option><option value="directory">Directory</option><option value="approved">Approved</option><option value="pending">Pending</option></select>
         <select id="inv-secsrc" class="f-input f-select" style="width:170px" onchange="inv.page=0;renderInvestors()" title="Where the sector data came from"><option value="">All sector data</option><option value="stated">Stated (import / form)</option><option value="manual">Edited by admin</option><option value="inferred">Inferred — to verify</option><option value="missing">No sector yet</option></select>
-        <select id="inv-sort" class="f-input f-select" style="width:170px" onchange="inv.sort=this.value;inv.page=0;renderInvestors()"><option value="type">Group by type</option><option value="org">Organisation A–Z</option><option value="name">Name A–Z</option><option value="ticket">Largest ticket</option><option value="recent">Recently added</option></select>
+        <select id="inv-sort" class="f-input f-select" style="width:170px" onchange="inv.sort=this.value;inv.page=0;renderInvestors()"><option value="type">Group by category</option><option value="org">Organisation A–Z</option><option value="name">Name A–Z</option><option value="ticket">Largest ticket</option><option value="recent">Recently added</option></select>
         <span id="inv-count" style="font-size:12px;color:var(--white-muted);margin-left:auto"></span>
       </div>
+      <div id="inv-cats" class="inv-cats" role="tablist" aria-label="Investor categories"></div>
       <div id="inv-facets" class="fc-panel"></div>
       <div id="inv-active" class="fc-active"></div>
       <div class="card" style="overflow:auto"><div id="investors-table"></div></div>
@@ -1982,7 +1991,7 @@ Sitemap: https://www.banahub.com/sitemap.xml</textarea></div>
 ════════════════════════════════════════════════════════════ -->
 <script src="config.js?v=5.5.0"></script>
 <script src="api.js"></script>
-<script src="admin-v3.js?v=3.10.0"></script>
+<script src="admin-v3.js?v=3.11.0"></script>
 <script>
 
 // ── State ────────────────────────────────────────────────────
@@ -3468,7 +3477,7 @@ document.addEventListener('keydown', e => {
 <script src="admin-agents.js?v=1.2.0"></script>
 <script src="admin-email.js?v=1.0.0"></script>
 <script src="admin-seo.js?v=1.0.0"></script>
-<script src="admin-intel.js?v=1.0.1"></script>
+<script src="admin-intel.js?v=1.1.0"></script>
 <script src="admin-growth.js?v=1.0.0"></script>
 <script src="admin-match.js?v=1.2.0"></script>
 <script src="admin-ben.js?v=2.2.0"></script>

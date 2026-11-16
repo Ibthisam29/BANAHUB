@@ -314,7 +314,29 @@
     return r;
   };
 
-  window.INTEL = {
+  /* ───────────── Category override (locks it against auto-classification) ───────────── */
+  function setCat(id) {
+    const i = inv.all.find(x => x.id === id); if (!i) return;
+    let m = $('modal-intel-cat');
+    if (!m) {
+      document.body.insertAdjacentHTML('beforeend', `<div id="modal-intel-cat" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeModal('modal-intel-cat')"><div class="modal" style="max-width:440px">
+        <div class="modal-header"><div><div class="modal-title">Investor category</div><div class="modal-sub" id="ic-sub"></div></div><button class="modal-close" onclick="closeModal('modal-intel-cat')">✕</button></div>
+        <div class="modal-body" style="display:flex;flex-direction:column;gap:12px"><select id="ic-cat" class="f-input f-select">${INV_CATS.map(c => `<option>${esc(c)}</option>`).join('')}<option value="__auto">Automatic (from type, subtype and source)</option></select>
+        <p style="font-size:12px;color:var(--white-muted);margin:0">A category you choose is locked and never changed by imports or automatic classification.</p></div>
+        <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('modal-intel-cat')">Cancel</button><button class="btn btn-primary" id="ic-save">Save</button></div></div></div>`);
+      m = $('modal-intel-cat');
+    }
+    $('ic-sub').textContent = i.organization || i.full_name || '';
+    $('ic-cat').value = i.category_locked ? invCat(i) : '__auto';
+    $('ic-save').onclick = async () => {
+      const v = $('ic-cat').value, patch = v === '__auto' ? { category_locked: false, category: null } : { category: v, category_locked: true, type_needs_review: false };
+      try { const r = await q(sb().from('investors').update(patch).eq('id', id).select('category,category_locked,type_needs_review').single()); Object.assign(i, r); delete i._f; closeModal('modal-intel-cat'); notify('Category saved'); refreshBar(); renderInvestors(); log('admin.investor_category', `${i.organization || id} → ${r.category}`); }
+      catch (e) { notify(e.message, 'error'); }
+    };
+    m.style.display = 'flex';
+  }
+
+  window.INTEL = { setCat,
     paste: () => { openImportModal('investor'); setTimeout(() => { $('imp-paste') && $('imp-paste').focus(); }, 50); },
     arrange: arrangePaste, parse: pasteToTable, approve: ids => setReview(ids, true), reject: ids => setReview(ids, false), reviewVisible, queue: showQueue,
     openMatch, fillFrom, applyMatch, clearMatch, exportFit, docs: openDocs, upload: uploadDocs, view, download, delDoc,

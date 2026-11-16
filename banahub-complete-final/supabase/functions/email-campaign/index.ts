@@ -58,8 +58,12 @@ async function buildAudience(a: any): Promise<{ list: Recipient[]; bySource: Rec
     (data || []).forEach((s: any) => add({ email: s.email, name: s.name || "", company: "", source: "subscribers", unsolicited: false }));
   }
   if (sources.includes("investors")) {
-    const { data } = await db.from("investors").select("email,full_name,organization,investor_type,user_id").not("email", "is", null).not("active", "is", false).limit(20000);
-    (data || []).filter((i: any) => inList(i.investor_type, a.investor_types)).forEach((i: any) => add({ email: i.email, name: i.full_name || "", company: i.organization || "", source: "investors", unsolicited: !i.user_id }));
+    const { data } = await db.from("investors").select("email,full_name,organization,investor_type,category,user_id,team").not("active", "is", false).limit(20000);
+    (data || []).filter((i: any) => inList(i.investor_type, a.investor_types) || inList(i.category, a.investor_types)).forEach((i: any) => {
+      if (i.email) add({ email: i.email, name: i.full_name || "", company: i.organization || "", source: "investors", unsolicited: !i.user_id });
+      // every person on the firm card (merged team members) is a recipient too
+      (Array.isArray(i.team) ? i.team : []).forEach((p: any) => { if (p && p.email) add({ email: p.email, name: p.name || "", company: i.organization || "", source: "investors", unsolicited: !i.user_id }); });
+    });
   }
   if (sources.includes("crm")) {
     const { data } = await db.from("crm_contacts").select("email,name,company,contact_type").not("email", "is", null).limit(20000);

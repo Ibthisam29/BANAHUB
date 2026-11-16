@@ -342,37 +342,50 @@ async function loadInvestors() {
   if (d && d.error) { $('investors-table').innerHTML = emptyRow('Could not load investors: ' + esc(d.error) + '<br/>Run SQL migration 08 if columns are missing.'); return; }
   inv.all = (d && d.investors) || []; inv.page = 0;
   inv.all.forEach(i => { i._f = invFacetValues(i); });
-  if (!inv.f) inv.f = { type: new Set(), stage: new Set(), sector: new Set(), geo: new Set() };
+  if (!inv.f) inv.f = { type: new Set(), stage: new Set(), sector: new Set(), geo: new Set(), sgroup: new Set(), quality: new Set() };
   renderInvestors();
 }
 // ── Directory taxonomy: funding category, stage, industry → sector, region ──
 const INV_FACETS = {
-  type: { label: 'Funding category', icon: 'account_balance', groups: [
-    ['Venture', ['VC', 'Angel']],
-    ['Families & private wealth', ['Family Office', 'Multi-Family Office']],
-    ['Private markets', ['Private Equity', 'Hedge Fund']],
-    ['Institutional', ['Fund of Funds', 'LP']],
-    ['Other', ['Other']]] },
+  type: { label: 'Investor category', icon: 'account_balance', groups: [
+    ['Venture', ['Venture Capital', 'Corporate VC', 'Angels & Syndicates']],
+    ['Families & private wealth', ['Single-Family Office', 'Multi-Family Office', 'Asset & Wealth Manager']],
+    ['Private markets', ['Private Equity & Growth', 'Hedge Fund']],
+    ['Institutional', ['Fund of Funds', 'LP & Institutional']],
+    ['To classify', ['Other / To classify']]] },
   stage: { label: 'Investment stage', icon: 'stairs', groups: [
     ['Early stage', ['Pre-seed', 'Seed', 'Series A']],
     ['Growth stage', ['Series B', 'Series C+', 'Growth']],
     ['Late & special situations', ['Pre-IPO', 'Buyout', 'Debt']]] },
   sector: { label: 'Industry & sector', icon: 'category', groups: (window.__taxonomy ? [...new Set(window.__taxonomy.map(r => r.industry))].map(ind => [ind, window.__taxonomy.filter(r => r.industry === ind).map(r => r.sector)]) : []) },
-  geo: { label: 'Region', icon: 'public', groups: [
-    ['Southeast Asia', ['Singapore', 'Malaysia', 'Indonesia', 'Vietnam', 'Thailand', 'Philippines', 'Southeast Asia']],
-    ['Middle East', ['UAE', 'Saudi Arabia', 'Qatar', 'Middle East / GCC']],
-    ['North Asia', ['Hong Kong', 'China', 'Japan', 'South Korea']],
-    ['South Asia & Oceania', ['India', 'Australia / NZ']],
-    ['Americas & Europe', ['United States', 'United Kingdom', 'Europe', 'Latin America']],
-    ['Global', ['Global', 'Asia Pacific', 'Africa']]] },
+  geo: { label: 'HQ region', icon: 'public', groups: [
+    ['Asia', ['Singapore', 'Southeast Asia', 'Greater China', 'Japan & Korea', 'South Asia']],
+    ['Middle East & Africa', ['Gulf & MENA', 'Africa']],
+    ['Europe & Americas', ['Europe', 'North America', 'Latin America', 'Oceania']],
+    ['Other', ['Global']]] },
+  sgroup: { label: 'Sector group', icon: 'hub', groups: [
+    ['Sector groups', ['Technology', 'Fintech & Financial Services', 'Healthcare', 'Climate & Energy', 'Consumer', 'Industrial & Infrastructure', 'Real Estate', 'Generalist']]] },
+  quality: { label: 'Data quality', icon: 'verified', groups: [
+    ['Completeness', ['A · contact, sector, stage & ticket', 'B · contact & sector', 'C · incomplete']]] },
 };
+const INV_CATS = ['Venture Capital', 'Corporate VC', 'Angels & Syndicates', 'Single-Family Office', 'Multi-Family Office', 'Asset & Wealth Manager', 'Private Equity & Growth', 'Hedge Fund', 'Fund of Funds', 'LP & Institutional', 'Other / To classify'];
+const INV_QUAL = { A: 'A · contact, sector, stage & ticket', B: 'B · contact & sector', C: 'C · incomplete' };
+function invCat(i) {
+  if (i.category) return i.category;
+  const t = i.investor_type ? normType(i.investor_type) : '', s = String(i.investor_subtype || '').toLowerCase();
+  if (/corporate/.test(s)) return 'Corporate VC';
+  return { 'VC': 'Venture Capital', 'Angel': 'Angels & Syndicates', 'Family Office': 'Single-Family Office', 'Multi-Family Office': 'Multi-Family Office', 'Private Equity': 'Private Equity & Growth', 'Hedge Fund': 'Hedge Fund', 'Fund of Funds': 'Fund of Funds', 'LP': 'LP & Institutional' }[t] || 'Other / To classify';
+}
+function invTeam(i) { return Array.isArray(i.team) ? i.team.filter(p => p && p.name) : []; }
 const INV_UNSPEC = 'Not specified';
 function invFacetValues(i) {
   const t = i.investor_type ? normType(i.investor_type) : null;
   const st = normStages(arr(i.preferred_stages).join(';'));
   const se = normSectors(arr(i.focus_sectors).join(';'));
   const g = (normGeo(i.geography) || '').split(', ').filter(Boolean);
-  return { type: [t || INV_UNSPEC], stage: st.length ? st : [INV_UNSPEC], sector: se.length ? se : [INV_UNSPEC], geo: g.length ? g : [INV_UNSPEC],
+  const sg = arr(i.sector_groups);
+  return { type: [invCat(i)], stage: st.length ? st : [INV_UNSPEC], sector: se.length ? se : [INV_UNSPEC],
+    geo: i.hq_region && i.hq_region !== 'Unknown' ? [i.hq_region] : [INV_UNSPEC], sgroup: sg.length ? sg : [INV_UNSPEC], quality: [INV_QUAL[i.data_quality] || INV_QUAL.C], rawGeo: g,
     industry: (arr(i.focus_industries).length ? arr(i.focus_industries) : sectorsToIndustries(se)), src: i.sector_source || (se.length ? 'stated' : 'missing') };
 }
 function invMatch(i, skip) {
@@ -386,7 +399,8 @@ function invFiltered(skip) {
     sector: i => !arr(i.focus_sectors).length && !arr(i.focus_industries).length, geo: i => !i.geography && !arr(i.invest_geographies).length, linkedin: i => !i.linkedin_url, type: i => !i.investor_type || i.type_needs_review };
   const rv = i => st === '__review' ? i.review_status === 'ben_review' : st === '__rejected' ? i.review_status === 'rejected' : (i.review_status !== 'rejected' && (!st || i.status === st));
   return inv.all.filter(i => rv(i) && (!gap || !G[gap] || G[gap](i)) && (!ss || (i._f || (i._f = invFacetValues(i))).src === ss) &&
-    (!q || [i.full_name, i.organization, i.email, i.phone, i.notes, i.investor_type, i.geography, i.website, arr(i.focus_sectors).join(' '), arr(i.focus_industries).join(' '), arr(i.preferred_stages).join(' ')].join(' ').toLowerCase().includes(q)) &&
+    (!q || [i.full_name, i.organization, i.email, i.phone, i.notes, i.investor_type, i.investor_subtype, i.category, i.hq_region, i.geography, i.website, i.hq_country,
+      invTeam(i).map(p => [p.name, p.title, p.role, p.email].join(' ')).join(' '), arr(i.sector_groups).join(' '), arr(i.focus_sectors).join(' '), arr(i.focus_industries).join(' '), arr(i.preferred_stages).join(' ')].join(' ').toLowerCase().includes(q)) &&
     invMatch(i, skip));
 }
 function invToggle(facet, values, on) {
@@ -1711,10 +1725,10 @@ async function runImport() {
 }
 
 // Directory: arranged view (grouped by type) + one-click tidy of existing data
-function invGroup(i) { return i.investor_type ? (normType(i.investor_type) || i.investor_type) : 'Unclassified'; }
+function invGroup(i) { return invCat(i); }
 function invSorted(rows) {
   const s = inv.sort || 'type', by = (k) => (a, b) => String(a[k] || '~').localeCompare(String(b[k] || '~'));
-  const t = i => { const k = INVESTOR_TYPES.indexOf(invGroup(i)); return k < 0 ? 99 : k; };
+  const t = i => { const k = INV_CATS.indexOf(invGroup(i)); return k < 0 ? 99 : k; };
   const list = rows.slice();
   if (s === 'type') list.sort((a, b) => t(a) - t(b) || by('organization')(a, b) || by('full_name')(a, b));
   else if (s === 'org') list.sort((a, b) => by('organization')(a, b) || by('full_name')(a, b));
@@ -1724,7 +1738,16 @@ function invSorted(rows) {
   else list.sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || '')));
   return list;
 }
+function renderInvCats() {
+  const box = $('inv-cats'); if (!box) return;
+  const pool = invFiltered('type'), c = {}; pool.forEach(i => { const k = invCat(i); c[k] = (c[k] || 0) + 1; });
+  const cur = inv.f && inv.f.type && inv.f.type.size === 1 ? [...inv.f.type][0] : '';
+  box.innerHTML = `<button type="button" class="${!cur ? 'on' : ''}" onclick="inv.f.type=new Set();inv.page=0;renderInvestors()">All <small>${pool.length}</small></button>` +
+    INV_CATS.filter(k => c[k]).map(k => `<button type="button" class="${cur === k ? 'on' : ''}" onclick='inv.f.type=new Set([${esc(JSON.stringify(k))}]);inv.page=0;renderInvestors()'>${esc(k)} <small>${c[k]}</small></button>`).join('');
+}
 function renderInvestors() {
+  if (inv.f && !inv.f.sgroup) { inv.f.sgroup = new Set(); inv.f.quality = new Set(); }
+  renderInvCats();
   renderInvFacets();
   const rows = invSorted(invFiltered()), start = inv.page * inv.per, page = rows.slice(start, start + inv.per);
   $('inv-count').textContent = `${rows.length} investor${rows.length === 1 ? '' : 's'}${rows.length !== inv.all.length ? ` (of ${inv.all.length})` : ''}`;
@@ -1734,11 +1757,12 @@ function renderInvestors() {
     const head = grouped && invGroup(i) !== lastType
       ? `<tr><td colspan="${inv.fit ? 10 : 9}" style="background:var(--surface);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--emerald);padding:8px 12px">${esc((lastType = invGroup(i)))} · ${rows.filter(x => invGroup(x) === lastType).length}</td></tr>` : '';
     return head + `<tr>
-      <td><div style="font-weight:600;color:var(--ink)">${esc(i.full_name || '—')}</div><div style="font-size:12px;color:var(--white-muted)">${esc(i.organization || '')}</div></td>
-      <td style="font-size:12px">${esc(i.investor_type ? invGroup(i) : '—')}${i.investor_subtype ? `<div style="font-size:11px;color:var(--white-muted)">${esc(i.investor_subtype)}</div>` : ''}${i.type_needs_review ? '<div style="font-size:10px;font-weight:700;color:#7a5c00">Confirm category</div>' : ''}</td>
+      <td><div style="font-weight:700;color:var(--ink)">${esc(i.organization || i.full_name || '—')} <span class="inv-q inv-q-${esc(i.data_quality || 'C')}" title="${esc(INV_QUAL[i.data_quality] || INV_QUAL.C)}">${esc(i.data_quality || 'C')}</span></div>
+        <div style="font-size:12px;color:var(--white-muted)">${esc(i.organization ? (i.full_name || '') : '')}${invTeam(i).length > 1 ? ` <button type="button" class="inv-team-btn" onclick="this.nextElementSibling.hidden=!this.nextElementSibling.hidden">+${invTeam(i).length - 1} ${invTeam(i).length - 1 === 1 ? 'person' : 'people'}</button><div hidden class="inv-team">${invTeam(i).map(p => `<div><b>${esc(p.name)}</b>${p.title || p.role ? ' · ' + esc(p.title || p.role) : ''}${p.email ? ` · <a href="mailto:${esc(p.email)}" style="color:var(--emerald)">${esc(p.email)}</a>` : ''}${p.linkedin ? ` · <a href="${esc(p.linkedin)}" target="_blank" rel="noopener noreferrer" style="color:var(--emerald)">LinkedIn</a>` : ''}</div>`).join('')}</div>` : ''}</div></td>
+      <td style="font-size:12px"><button type="button" class="inv-cat" title="Change category" onclick="INTEL.setCat('${esc(i.id)}')">${esc(invCat(i))}${i.category_locked ? ' 🔒' : ''}</button>${i.investor_subtype ? `<div style="font-size:11px;color:var(--white-muted)">${esc(i.investor_subtype)}</div>` : ''}${i.type_needs_review && !i.category_locked ? '<div style="font-size:10px;font-weight:700;color:#7a5c00">Confirm category</div>' : ''}</td>
       <td>${i._f.industry.length ? `<div style="font-size:12px;font-weight:700;color:var(--emerald-deep);margin-bottom:3px">${esc(i._f.industry.join(' · '))}${i._f.src === 'inferred' ? ' <span title="Inferred from the firm or its corporate parent — please verify" style="font-weight:600;font-size:10px;color:#7a5c00;background:#fff4d6;border-radius:4px;padding:1px 5px;margin-left:4px">inferred</span>' : ''}</div>` : ''}${chips(i._f.sector.filter(x => x !== INV_UNSPEC))}</td>
       <td>${chips(i._f.stage.filter(x => x !== INV_UNSPEC), 2)}</td>
-      <td style="font-size:12px">${esc(i._f.geo.filter(x => x !== INV_UNSPEC).join(', ') || '—')}</td>
+      <td style="font-size:12px"><b>${esc(i._f.geo.filter(x => x !== INV_UNSPEC).join(', ') || '—')}</b>${i.geography ? `<div style="font-size:11px;color:var(--white-muted)">${esc(i.geography)}</div>` : ''}</td>
       <td style="font-size:12px;white-space:nowrap">${esc(i.check_size || fmtTicket(i.check_min, i.check_max) || '—')}</td>
       <td style="font-size:12px;line-height:1.5">${i.email ? `<div style="white-space:nowrap"><a href="mailto:${esc(i.email)}" style="color:var(--emerald)">${esc(i.email)}</a></div>` : ''}
         ${i.phone ? `<div style="white-space:nowrap"><a href="tel:${esc(String(i.phone).replace(/[^\d+]/g, ''))}" style="color:var(--ink)">${esc(i.phone)}</a>${/^\+?\d/.test(i.phone) ? ` <a href="https://wa.me/${esc(String(i.phone).replace(/\D/g, ''))}" target="_blank" rel="noopener noreferrer" style="color:var(--emerald);font-size:11px">WhatsApp</a>` : ''}</div>` : ''}
@@ -1755,7 +1779,7 @@ function renderInvestors() {
         <button class="btn btn-danger btn-sm" onclick="deleteInvestor('${esc(i.id)}')">✕</button></td></tr>`;
   };
   $('investors-table').innerHTML = rows.length ? `<div style="overflow-x:auto"><table class="data-table"><thead><tr>
-      <th>Investor</th><th>Type</th><th>Industry &amp; sectors</th><th>Stages</th><th>Geography</th><th>Ticket</th><th>Contact</th>${inv.fit ? '<th>Fit</th>' : ''}<th>Status</th><th></th></tr></thead><tbody>
+      <th>Firm</th><th>Category</th><th>Industry &amp; sectors</th><th>Stages</th><th>HQ region</th><th>Ticket</th><th>Contact</th>${inv.fit ? '<th>Fit</th>' : ''}<th>Status</th><th></th></tr></thead><tbody>
     ${page.map(rowHtml).join('')}</tbody></table></div>
     ${rows.length > inv.per ? `<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;font-size:12px;color:var(--white-muted)">
       <span>Showing ${start + 1}–${Math.min(start + inv.per, rows.length)}</span>
