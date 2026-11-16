@@ -330,7 +330,7 @@
     $('ic-cat').value = i.category_locked ? invCat(i) : '__auto';
     $('ic-save').onclick = async () => {
       const v = $('ic-cat').value, patch = v === '__auto' ? { category_locked: false, category: null } : { category: v, category_locked: true, type_needs_review: false };
-      try { const r = await q(sb().from('investors').update(patch).eq('id', id).select('category,category_locked,type_needs_review').single()); Object.assign(i, r); delete i._f; closeModal('modal-intel-cat'); notify('Category saved'); refreshBar(); renderInvestors(); log('admin.investor_category', `${i.organization || id} → ${r.category}`); }
+      try { const r = await q(sb().from('investors').update(patch).eq('id', id).select('category,category_locked,type_needs_review').single()); Object.assign(i, r); delete i._f; delete i._s; closeModal('modal-intel-cat'); notify('Category saved'); refreshBar(); renderInvestors(); log('admin.investor_category', `${i.organization || id} → ${r.category}`); }
       catch (e) { notify(e.message, 'error'); }
     };
     m.style.display = 'flex';

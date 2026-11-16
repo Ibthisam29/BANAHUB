@@ -392,16 +392,26 @@ function invMatch(i, skip) {
   const f = inv.f || {}, v = i._f || (i._f = invFacetValues(i));
   return Object.keys(INV_FACETS).every(k => k === skip || !f[k] || !f[k].size || v[k].some(x => f[k].has(x)));
 }
+// search: every word (or "quoted phrase") must appear somewhere on the firm card — name, team, sectors, region, notes…
+function invTerms(raw) { const t = []; String(raw).toLowerCase().replace(/"([^"]+)"|(\S+)/g, (m, a, b) => { t.push((a || b).trim()); }); return t.filter(Boolean); }
+function invHay(i) {
+  return i._s || (i._s = [i.full_name, i.organization, i.email, i.firm_email, i.phone, i.notes, i.investor_type, i.investor_subtype, i.category, i.hq_region, i.geography, i.website, i.hq_country,
+    i.linkedin_url, i.check_size, i.current_mandate, i.research_notes, i.source, i.data_quality && 'quality-' + i.data_quality,
+    invTeam(i).map(p => [p.name, p.title, p.role, p.email].join(' ')).join(' '), arr(i.sector_groups).join(' '), arr(i.focus_sectors).join(' '), arr(i.focus_industries).join(' '),
+    arr(i.preferred_stages).join(' '), arr(i.invest_geographies).join(' '), arr(i.portfolio).join(' '), arr(i.instruments).join(' ')].filter(Boolean).join(' ').toLowerCase());
+}
+function invSearchHit(i, q) { if (!q.length) return true; const h = invHay(i); return q.every(t => h.includes(t)); }
+let invSearchT; function invSearchInput() { const v = $('inv-search').value; $('inv-search-x').hidden = !v; clearTimeout(invSearchT); invSearchT = setTimeout(() => { inv.page = 0; renderInvestors(); }, 120); }
+function invSearchClear() { $('inv-search').value = ''; $('inv-search-x').hidden = true; inv.page = 0; renderInvestors(); $('inv-search').focus(); }
+document.addEventListener('keydown', e => { if (e.key === '/' && !/INPUT|TEXTAREA|SELECT/.test((document.activeElement || {}).tagName || '') && $('panel-investors') && $('panel-investors').classList.contains('active')) { e.preventDefault(); $('inv-search').focus(); } });
 function invFiltered(skip) {
-  const q = ($('inv-search').value || '').toLowerCase(), st = $('inv-status').value, ss = ($('inv-secsrc') || {}).value || '';
+  const q = invTerms(($('inv-search').value || '')), st = $('inv-status').value, ss = ($('inv-secsrc') || {}).value || '';
   const gap = ($('inv-gap') || {}).value || '';
   const G = { email: i => !i.email, contact: i => !i.email && !i.phone && !i.linkedin_url, stage: i => !arr(i.preferred_stages).length, ticket: i => i.check_min == null && i.check_max == null && !i.check_size,
     sector: i => !arr(i.focus_sectors).length && !arr(i.focus_industries).length, geo: i => !i.geography && !arr(i.invest_geographies).length, linkedin: i => !i.linkedin_url, type: i => !i.investor_type || i.type_needs_review };
   const rv = i => st === '__review' ? i.review_status === 'ben_review' : st === '__rejected' ? i.review_status === 'rejected' : (i.review_status !== 'rejected' && (!st || i.status === st));
   return inv.all.filter(i => rv(i) && (!gap || !G[gap] || G[gap](i)) && (!ss || (i._f || (i._f = invFacetValues(i))).src === ss) &&
-    (!q || [i.full_name, i.organization, i.email, i.phone, i.notes, i.investor_type, i.investor_subtype, i.category, i.hq_region, i.geography, i.website, i.hq_country,
-      invTeam(i).map(p => [p.name, p.title, p.role, p.email].join(' ')).join(' '), arr(i.sector_groups).join(' '), arr(i.focus_sectors).join(' '), arr(i.focus_industries).join(' '), arr(i.preferred_stages).join(' ')].join(' ').toLowerCase().includes(q)) &&
-    invMatch(i, skip));
+    invSearchHit(i, q) && invMatch(i, skip));
 }
 function invToggle(facet, values, on) {
   const set = inv.f[facet]; values = [].concat(values);
@@ -857,7 +867,7 @@ async function enquiryToInvestor() {
     notes: [d.investor_status && 'Investor status (self-declared): ' + d.investor_status, d.deployment && 'Activity: ' + d.deployment, d.lead_follow && 'Lead/follow: ' + d.lead_follow,
       d.interests && 'Interests: ' + d.interests, d.based_in && 'Based in: ' + d.based_in, d.mandate_notes, enqRef(e) && 'Enquiry ref ' + enqRef(e)].filter(Boolean).join('\n') };
   const r = await api('/api/admin/network/import', 'POST', { type: 'investor', rows: [arrangeInvestor(row).row] }).catch(err => ({ errors: [err.message] }));
-  if (r && (r.imported || r.updated)) { toast(r.imported ? 'Added to Investor Directory (pending)' : 'Existing investor updated', 'success'); logActivity('admin.enquiry_to_investor', 'admin', `${e.email} from ${enqRef(e)}`); }
+  if (r && (r.imported || r.updated)) { toast(r.imported ? 'Added to Investors Database (pending)' : 'Existing investor updated', 'success'); logActivity('admin.enquiry_to_investor', 'admin', `${e.email} from ${enqRef(e)}`); }
   else toast('Could not add: ' + ((r && (r.error || (r.errors || [])[0])) || 'unknown error'), 'warn');
 }
 function openEnquiry(id) {

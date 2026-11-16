@@ -426,6 +426,15 @@ body::before {
 /* ── Scrollbar ── */
 * { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
 
+/* Investors database search */
+.inv-search{display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid var(--border,#d9ded8);border-radius:12px;padding:0 12px;min-height:50px;margin-bottom:12px}
+.inv-search:focus-within{border-color:var(--emerald-deep,#003527);box-shadow:0 0 0 3px rgba(0,53,39,.12)}
+.inv-search .material-symbols-outlined{color:var(--emerald-deep,#003527);font-size:22px}
+.inv-search input{flex:1;min-width:0;border:0;outline:0;background:transparent;font:500 15px Manrope,system-ui,sans-serif;color:inherit;height:48px}
+.inv-search input::-webkit-search-cancel-button{display:none}
+.inv-search button{border:0;background:#eef1ed;border-radius:8px;min-width:32px;min-height:32px;cursor:pointer;color:#4a524d}
+.inv-search kbd{font:600 11px ui-monospace,monospace;border:1px solid #d9ded8;border-radius:5px;padding:2px 7px;color:#6b726d}
+@media(max-width:700px){.inv-search kbd{display:none}.inv-search input{font-size:16px}}
 /* Investor directory facets */
 .fc-panel{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:0 0 12px}
 @media(max-width:1200px){.fc-panel{grid-template-columns:repeat(2,minmax(0,1fr))}}
@@ -630,7 +639,7 @@ body::before {
           <span class="nav-icon material-symbols-outlined">business</span>Businesses
         </button>
         <button class="nav-item" onclick="nav('investors')">
-          <span class="nav-icon material-symbols-outlined">account_balance</span>Investors
+          <span class="nav-icon material-symbols-outlined">account_balance</span>Investors Database
         </button>
         <button class="nav-item" onclick="nav('capital')">
           <span class="nav-icon material-symbols-outlined">trending_up</span>Capital Raises
@@ -1000,7 +1009,7 @@ body::before {
     <!-- ════ INVESTORS ═══════════════════════════════════════ -->
     <div id="panel-investors" class="panel">
       <div class="page-header">
-        <div><div class="page-title">Investor Directory</div><div class="page-sub">Search, filter, import and manage investor mandates</div></div>
+        <div><div class="page-title">Investors Database</div><div class="page-sub">Search, filter, import and manage investors and their mandates</div></div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           <button class="btn btn-ghost" onclick="exportInvestors()"><span class="material-symbols-outlined" style="font-size:15px">download</span>Export</button>
           <button class="btn btn-ghost" onclick="tidyInvestors()" title="Normalise types, sectors, stages, geography, tickets, emails and websites on existing records"><span class="material-symbols-outlined" style="font-size:15px">auto_fix_high</span>Tidy up</button>
@@ -1008,8 +1017,13 @@ body::before {
           <button class="btn btn-primary" onclick="openInvestorModal()"><span class="material-symbols-outlined" style="font-size:15px">add</span>Add Investor</button>
         </div>
       </div>
+      <div class="inv-search" role="search">
+        <span class="material-symbols-outlined" aria-hidden="true">search</span>
+        <input id="inv-search" type="search" autocomplete="off" aria-label="Search the investors database" placeholder="Search firms, people, emails, sectors, stages, regions, portfolio… e.g. fintech singapore series a" oninput="invSearchInput()" onkeydown="if(event.key==='Escape')invSearchClear()"/>
+        <button type="button" id="inv-search-x" hidden aria-label="Clear search" onclick="invSearchClear()">✕</button>
+        <kbd title="Press / to search">/</kbd>
+      </div>
       <div class="filter-bar" style="flex-wrap:wrap">
-        <input id="inv-search" class="f-input" placeholder="Search name, firm, email, phone, sector…" style="max-width:300px" oninput="inv.page=0;renderInvestors()"/>
         <button type="button" id="inv-refine-btn" class="btn btn-ghost active" onclick="invToggleFacets()"><span class="material-symbols-outlined" style="font-size:15px">tune</span>Refine <span id="inv-refine-n"></span></button>
         <select id="inv-status" class="f-input f-select" style="width:140px" onchange="inv.page=0;renderInvestors()"><option value="">All statuses</option><option value="directory">Directory</option><option value="approved">Approved</option><option value="pending">Pending</option></select>
         <select id="inv-secsrc" class="f-input f-select" style="width:170px" onchange="inv.page=0;renderInvestors()" title="Where the sector data came from"><option value="">All sector data</option><option value="stated">Stated (import / form)</option><option value="manual">Edited by admin</option><option value="inferred">Inferred — to verify</option><option value="missing">No sector yet</option></select>
@@ -1818,7 +1832,7 @@ Sitemap: https://www.banahub.com/sitemap.xml</textarea></div>
         <div class="f-group"><label class="f-label">Assigned to</label><input id="eq-assigned" class="f-input" placeholder="Name or email"/></div>
         <div class="f-group"><label class="f-label">Internal notes</label><textarea id="eq-notes" class="f-input" rows="6" style="resize:vertical" placeholder="Call notes, next steps… (never shown to the sender)"></textarea></div>
         <button class="btn btn-primary" onclick="osEnquiryToOpp(document.getElementById('eq-id').value)"><span class="material-symbols-outlined" style="font-size:15px">trending_up</span>Create opportunity</button>
-        <button class="btn btn-ghost" id="eq-to-inv" onclick="enquiryToInvestor()"><span class="material-symbols-outlined" style="font-size:15px">account_balance</span>Add to Investor Directory</button>
+        <button class="btn btn-ghost" id="eq-to-inv" onclick="enquiryToInvestor()"><span class="material-symbols-outlined" style="font-size:15px">account_balance</span>Add to Investors Database</button>
         <a id="eq-reply" class="btn btn-ghost" target="_blank" rel="noopener"><span class="material-symbols-outlined" style="font-size:15px">reply</span>Reply by email</a>
         <div id="eq-timeline" style="font-size:11px;color:var(--white-muted);line-height:1.7"></div>
       </div>
@@ -1991,7 +2005,7 @@ Sitemap: https://www.banahub.com/sitemap.xml</textarea></div>
 ════════════════════════════════════════════════════════════ -->
 <script src="config.js?v=5.5.0"></script>
 <script src="api.js"></script>
-<script src="admin-v3.js?v=3.11.0"></script>
+<script src="admin-v3.js?v=3.12.0"></script>
 <script>
 
 // ── State ────────────────────────────────────────────────────
@@ -2195,7 +2209,7 @@ const panelMeta = {
   applications:  ['Applications',     'Membership application review'],
   kyc:           ['KYC Documents',    'Identity verification uploads'],
   businesses:    ['Businesses',       'Company portfolio management'],
-  investors:     ['Investor Directory','Search, import and manage investor mandates'],
+  investors:     ['Investors Database','Search, filter, import and manage investors and their mandates'],
   providers:     ['Solution Providers','Provider profile management'],
   partners:      ['Partners',         'Sponsors and ecosystem partners'],
   access:        ['Access Requests',  'Investor data access approvals'],
@@ -3466,7 +3480,7 @@ document.addEventListener('keydown', e => {
 });
 
 </script>
-<script src="admin-os.js?v=1.0.0"></script>
+<script src="admin-os.js?v=1.0.1"></script>
 <script src="admin-billing.js?v=1.0.0"></script>
 <script src="admin-partners.js?v=1.0.0"></script>
 <script src="admin-payments.js?v=1.0.0"></script>
@@ -3477,7 +3491,7 @@ document.addEventListener('keydown', e => {
 <script src="admin-agents.js?v=1.2.0"></script>
 <script src="admin-email.js?v=1.0.0"></script>
 <script src="admin-seo.js?v=1.0.0"></script>
-<script src="admin-intel.js?v=1.1.0"></script>
+<script src="admin-intel.js?v=1.1.1"></script>
 <script src="admin-growth.js?v=1.0.0"></script>
 <script src="admin-match.js?v=1.2.0"></script>
 <script src="admin-ben.js?v=2.2.0"></script>

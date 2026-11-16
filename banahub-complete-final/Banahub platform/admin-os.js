@@ -505,7 +505,7 @@
 
   // ── Roles & access ────────────────────────────────────────────────────────
   const PERM_LABELS = [['opps.read_all', 'See all opportunities'], ['opps.write', 'Work opportunities'], ['opps.value', 'See deal values'], ['scores.approve', 'Approve lead scores'], ['scores.override', 'Override scores'],
-    ['companies.read_all', 'See all companies'], ['contacts.read_all', 'See all contacts'], ['tasks.read_all', 'See all tasks'], ['investors.read', 'Investor directory (non-sensitive)'], ['finance.write', 'Contracts & invoices'],
+    ['companies.read_all', 'See all companies'], ['contacts.read_all', 'See all contacts'], ['tasks.read_all', 'See all tasks'], ['investors.read', 'Investors database (non-sensitive)'], ['finance.write', 'Contracts & invoices'],
     ['campaigns.write', 'Campaigns & events'], ['ai.review', 'AI work queue'], ['referrals.create', 'Submit referrals'], ['settings.manage', 'Manage roles & settings']];
   const loadRoles = safe(async function () {
     await loadPeople();
